@@ -1,0 +1,174 @@
+/* Използва .print-overlay, .print-controls, .btn-print, .btn-close, .print-area от PrintReceipt.css */
+.monthly-report {
+  width: 190mm;
+  padding: 10mm;
+  background: #fff;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  color: #000;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.print-controls .btn-print,
+.print-controls .btn-close {
+  height: 40px;
+  padding: 0 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-title {
+  text-align: center;
+  font-size: 22pt;
+  margin: 0 0 2mm 0;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #000;
+  padding-top: 2mm;
+  padding-bottom: 2mm;
+  background-color: rgb(229, 245, 255);
+}
+
+.report-month {
+  text-align: center;
+  font-size: 18pt;
+  margin: 0 0 8mm 0;
+  font-weight: 600;
+}
+
+.report-subtitle {
+  font-size: 16pt;
+  margin: 6mm 0 3mm 0;
+  border-bottom: 1px solid #999;
+  padding-bottom: 1mm;
+  letter-spacing: 0.5px;
+}
+
+.report-section p {
+  margin: 2mm 0;
+  font-size: 14pt;
+  display: flex;
+  justify-content: space-between;
+}
+
+.report-total {
+  border-top: 1px solid #000;
+  padding-top: 2mm;
+  margin-top: 3mm;
+  font-weight: 600;
+  font-size: 16pt;
+}
+
+.report-total-unpaid {
+  font-size: 14pt;
+  margin: 4mm 0;
+}
+
+.report-date {
+  text-align: right;
+  font-size: 12pt;
+  margin-top: 10mm;
+  font-style: italic;
+}
+
+.amount {
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.month-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0.6rem 1rem;
+  background: #d1e4fa;
+  border: 2px solid #d0e5f5;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.month-picker input[type="month"] {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.month-picker input[type="month"]:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area-monthly,
+  .print-area-monthly * {
+    visibility: visible;
+  }
+
+  /* Скрий dashboard-а, за да не заема място */
+  /* .dashboard>header,
+  .dashboard>main>*:not(.print-overlay) {
+    display: none;
+  } */
+  body.printing-monthly-report .dashboard>header,
+  body.printing-monthly-report .dashboard>main>*:not(.print-overlay) {
+    display: none;
+  }
+
+  .print-overlay.monthly-report-overlay {
+    position: fixed;
+    width: 100%;
+    height: auto;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    display: block;
+  }
+
+  .print-area-monthly {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+
+  .monthly-report {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    padding: 16mm;
+    print-color-adjust: exact;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .month-picker {
+    display: none;
+  }
+
+  @page {
+    size: A4;
+    margin: 0mm;
+  }
+}

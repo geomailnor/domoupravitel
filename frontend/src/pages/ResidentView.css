@@ -1,0 +1,125 @@
+/* Стилове за ResidentView */
+
+.resident-dashboard main h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+/* В ResidentView.css */
+
+.main-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.main-header h2 {
+  margin: 0;
+}
+
+.main-header .start-month-info {
+  margin-left: auto;
+  color: #7f8c8d;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* Таблица с плащания */
+.resident-payments-table {
+  width: 100%;
+  min-width: 600px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 1rem;
+}
+
+.resident-payments-table th {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  background: #34495e;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.resident-payments-table th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.resident-payments-table th:last-child {
+  border-top-right-radius: 6px;
+}
+
+.resident-payments-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resident-payments-table tbody tr:nth-child(even) {
+  background: #f0f2f5;
+}
+
+.resident-payments-table tbody tr:hover {
+  background: #d6eaf8;
+}
+
+/* Месец */
+.resident-payments-table th:nth-child(1) {
+  width: 150px;
+}
+
+/* Сума */
+.resident-payments-table th:nth-child(2) {
+  width: 92px;
+}
+
+/* Вид */
+.resident-payments-table th:nth-child(3) {
+  width: 180px;
+}
+
+/* Статус */
+.resident-payments-table th:nth-child(4) {
+  width: 110px;
+}
+
+/* Описание */
+.resident-payments-table th:nth-child(5) {
+  width: auto;
+}
+
+.resident-payments-table td.amount-cell {
+  text-align: right;
+}
+
+.resident-payments-table td.amount-empty {
+  text-align: center;
+  color: #7f8c8d;
+}
+
+.resident-payments-table .description-cell {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.no-payments {
+  padding: 1.25rem;
+  text-align: center;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  border-radius: 5px;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 800px) {
+  .resident-payments-table th:nth-child(5) {
+    width: 110px;
+  }
+}

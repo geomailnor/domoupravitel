@@ -1,0 +1,105 @@
+.help-modal {
+  max-width: 900px;
+  min-width: 500px;
+  height: auto;
+  max-height: 90vh;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.help-content {
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  background: rgb(255, 255, 255);
+}
+
+.help-content h1 {
+  font-size: 1.8rem;
+  color: #1e3a5f;
+  border-bottom: 2px solid #2980b9;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.help-content h2 {
+  font-size: 1.4rem;
+  color: #1e3a5f;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e6ed;
+  padding-bottom: 0.3rem;
+}
+
+.help-content h3 {
+  font-size: 1.1rem;
+  color: #34495e;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.help-content p {
+  margin-bottom: 0.75rem;
+}
+
+.help-content ul,
+.help-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.help-content li {
+  margin-bottom: 0.3rem;
+}
+
+.help-content code {
+  background: #f0f2f5;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #c0392b;
+}
+
+.help-content pre {
+  background: #2c3e50;
+  color: #ecf0f1;
+  padding: 1rem;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.help-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.help-content blockquote {
+  border-left: 3px solid #2980b9;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.help-content a {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+.help-content a:hover {
+  color: #21618c;
+}
+
+.help-content hr {
+  border: none;
+  border-top: 1px solid #e0e6ed;
+  margin: 1.5rem 0;
+}
+
+.help-content strong {
+  color: #1e3a5f;
+}

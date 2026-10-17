@@ -1,0 +1,29 @@
+# Зависимости
+node_modules/
+
+# Тайни и конфигурация
+.env
+.env.local
+.env.*.local
+
+# Логове
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Операционна система
+.DS_Store
+Thumbs.db
+
+# Редактори
+.vscode/
+.idea/
+
+# Билд артефакти
+dist/
+build/
+coverage/
+
+# Временни файлове
+*.tmp
+*.bak

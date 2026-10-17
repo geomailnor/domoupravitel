@@ -1,0 +1,234 @@
+.print-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 5000;
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.print-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.btn-print,
+.btn-close {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-print {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-print:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-print:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.btn-close {
+  background: #95a5a6;
+  color: white;
+}
+
+.btn-close:hover {
+  background: #7f8c8d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+}
+
+.btn-close:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.print-area {
+  display: flex;
+  justify-content: center;
+}
+
+.receipt {
+  width: 190mm;
+  height: 92mm;
+  padding: 0 6mm;
+  border: 1px dashed #999;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  color: #000;
+  background: #fff;
+}
+
+.print-area .receipt .receipt-title {
+  text-align: center;
+  font-size: 13pt;
+  margin: 0 0 2mm 0;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #000;
+  padding-top: 2mm;
+  padding-bottom: 2mm;
+  background: #e5f5ff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.et-ap-wrapper {
+  display: flex;
+  gap: 15mm;
+}
+
+.receipt-info p,
+.receipt-details p {
+  margin: 1.5mm 0;
+  font-size: 13pt;
+}
+
+.receipt-details {
+  margin-top: 4mm;
+  padding-top: 3mm;
+  border-top: 1px solid #ccc;
+  display: flex;
+  gap: 8mm;
+}
+
+.amount-line {
+  display: inline-block;
+  width: 25mm;
+  border-bottom: 1px dashed #aaa;
+}
+
+.receipt-date {
+  margin-top: 4mm;
+  font-size: 12pt;
+}
+
+.receipt-signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8mm;
+  gap: 4mm;
+}
+
+.receipt-signatures>div {
+  flex: 1;
+}
+
+.receipt-signatures p {
+  margin: 0 0 1mm 0;
+  font-size: 12pt;
+  letter-spacing: 0.5pt;
+}
+
+.receipt-subtitle {
+  text-align: center;
+  font-size: 13pt;
+  margin: 0 0 1mm 0;
+  font-style: italic;
+}
+
+.receipt-block {
+  text-align: center;
+  font-size: 12pt;
+  margin: 0 0 2mm 0;
+  font-weight: 600;
+  border-bottom: 1px solid #000;
+  padding-bottom: 2mm;
+}
+
+.signature-line {
+  border-bottom: 1px dashed #aaa;
+  height: 8mm;
+}
+
+.line-underline {
+  display: inline-block;
+  width: 15mm;
+  border-bottom: 1px dashed #aaa;
+}
+
+.print-btn {
+  padding: 0.6rem 1.2rem;
+  background: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.print-btn:hover {
+  background: #21618c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3);
+}
+
+.print-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 5px;
+    top: 0;
+    width: 100%;
+    display: block;
+  }
+
+  .print-controls,
+  .print-overlay {
+    background: transparent;
+  }
+
+  .print-controls {
+    display: none;
+  }
+
+  .print-overlay {
+    position: static;
+    display: block;
+  }
+
+  .receipt {
+    border: 1px dashed #ccc;
+    margin: 0;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    size: A4;
+    margin: 3mm;
+  }
+}
