@@ -6,8 +6,12 @@
   animation: fadeIn 0.4s ease-out;
 }
 
+.help-modal .modal-actions {
+  margin-top: 0.5rem;
+}
+
 .help-content {
-  max-height: 65vh;
+  max-height: 68vh;
   overflow-y: auto;
   padding-right: 1rem;
   line-height: 1.6;
@@ -109,4 +113,8 @@
   border-top: 2px solid #e0e6ed;
   border-bottom: 2px solid #e0e6ed;
   margin-bottom: 1rem;
+}
+
+.help-modal .modal-body {
+  padding: 0 2.4rem 0.8rem 2.4rem;
 }
