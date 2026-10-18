@@ -92,7 +92,8 @@ export default function Login() {
             className={role === 'admin' ? 'tab active' : 'tab'}
             onClick={() => {
               setRole('admin');
-              setUsername('admin');
+              const lastUsername = localStorage.getItem('domoupravitel_last_username');
+              setUsername(lastUsername || 'admin');
               setError('');
               localStorage.setItem('domoupravitel_last_role', 'admin');
             }}
