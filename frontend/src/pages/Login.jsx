@@ -93,7 +93,7 @@ export default function Login() {
             onClick={() => {
               setRole('admin');
               const lastUsername = localStorage.getItem('domoupravitel_last_username');
-              setUsername(lastUsername || 'admin');
+              setUsername(lastUsername || '');
               setError('');
               localStorage.setItem('domoupravitel_last_role', 'admin');
             }}
