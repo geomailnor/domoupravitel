@@ -15,7 +15,11 @@ export default function Login() {
   });
   const [username, setUsername] = useState(() => {
     const lastRole = localStorage.getItem('domoupravitel_last_role');
-    return lastRole === 'resident' ? '' : 'admin';
+    const lastUsername = localStorage.getItem('domoupravitel_last_username');
+
+    if (lastRole === 'resident') return '';
+    if (lastRole === 'admin') return lastUsername || 'admin';
+    return '';
   });
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -58,6 +62,7 @@ export default function Login() {
       });
 
       const { token, user } = response.data;
+      if (user.username) { localStorage.setItem('domoupravitel_last_username', user.username); }
       login(user, token, rememberMe);
 
       if (user.role === 'admin') {

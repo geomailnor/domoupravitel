@@ -91,6 +91,7 @@ export default function ProfileModal({ onClose }) {
         newUsername: newUsername.trim(),
       });
       toast.success('Потребителското име е сменено');
+      localStorage.setItem('domoupravitel_last_username', response.data.username);
       login({ ...user, username: response.data.username }, token);
       onClose();
     } catch (err) {
