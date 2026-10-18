@@ -54,7 +54,7 @@
 
 .confirm-close:hover {
 
-  background: #7f8c8d;
+  background: #6e7680;
   color: white;
 }
 
@@ -107,17 +107,17 @@
 
 
 .confirm-cancel {
-  background: #95a5a6;
+  background: #7d8692;
   color: white;
 }
 
 .confirm-cancel:hover {
-  background: #7f8c8d;
+  background: #6e7680;
   transform: translateY(-2px);
 }
 
 .confirm-cancel:active {
-  background: #7f8c8d;
+  background: #6e7680;
   transform: scale(0.97);
   box-shadow: none;
 }

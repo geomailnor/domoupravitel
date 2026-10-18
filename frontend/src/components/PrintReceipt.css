@@ -47,14 +47,14 @@
 }
 
 .btn-close {
-  background: #95a5a6;
+  background: #7d8692;
   color: white;
 }
 
 .btn-close:hover {
-  background: #7f8c8d;
+  background: #6e7680;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+  box-shadow: 0 4px 12px rgba(125, 134, 146, 0.3);
 }
 
 .btn-close:active {

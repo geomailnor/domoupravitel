@@ -121,7 +121,7 @@
 }
 
 .login-container form button[type="submit"]:disabled {
-  background: #95a5a6;
+  background: #7d8692;
   cursor: not-allowed;
 }
 

@@ -58,14 +58,12 @@
 
 .dashboard header button.change-password-btn,
 .dashboard header button.change-username-btn,
-.dashboard header button.security-btn,
 .dashboard header button.help-btn {
   background: #7d8692;
 }
 
 .dashboard header button.change-password-btn:hover,
 .dashboard header button.change-username-btn:hover,
-.dashboard header button.security-btn:hover,
 .dashboard header button.help-btn:hover {
   background: #6e7680;
   box-shadow: 0 4px 12px rgba(143, 169, 192, 0.3);
@@ -73,7 +71,6 @@
 
 .dashboard header button.change-password-btn:active,
 .dashboard header button.change-username-btn:active,
-.dashboard header button.security-btn:active,
 .dashboard header button.help-btn:active {
   box-shadow: none;
 }
