@@ -95,14 +95,15 @@ export default function ResidentView() {
     const unpaidDue = unpaidCount * monthlyFee;
 
     const partialMonthly = payments.filter(
-      p => p.type === 'monthly' && p.status === 'partial'
+      p => p.type === 'monthly' && p.status === 'partial' && p.month >= startMonth
     );
     const partialPaidSum = partialMonthly.reduce((sum, p) => sum + parseFloat(p.amount), 0);
     const partialCount = partialMonthly.length;
     const partialDue = partialCount * monthlyFee - partialPaidSum;
 
+    // 3. Неплатени други разходи (само от startMonth нататък)
     const unpaidOther = payments.filter(
-      p => p.type === 'other' && p.status === 'unpaid'
+      p => p.type === 'other' && p.status === 'unpaid' && p.month >= startMonth
     );
     const otherCount = unpaidOther.length;
     const otherDue = unpaidOther.reduce((sum, p) => sum + parseFloat(p.amount), 0);
