@@ -1,5 +1,5 @@
 .profile-modal {
-  max-width: 640px;
+  max-width: 720px;
   min-width: 450px;
   height: auto;
   max-height: 95vh;
@@ -83,13 +83,6 @@
   box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
 }
 
-.profile-form .form-row input[type="checkbox"] {
-  width: auto;
-  cursor: pointer;
-  accent-color: #2980b9;
-  margin-right: 0.3rem;
-}
-
 .password-field {
   position: relative;
 }
@@ -133,4 +126,119 @@
   font-size: 1rem;
   color: #7d6608;
   margin: 0;
+}
+
+/* Таб „Пароли" */
+.passwords-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.passwords-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.passwords-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  height: 40px;
+}
+
+.passwords-search:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+.toggle-passwords-btn {
+  width: 109px;
+  padding: 0 0.75rem;
+  height: 40px;
+  background: #7d8692;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  line-height: 1;
+}
+
+.toggle-passwords-btn:hover {
+  background: #6e7680;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(125, 134, 146, 0.3);
+}
+
+.toggle-passwords-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.passwords-table-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}
+
+.passwords-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.passwords-table thead {
+  position: sticky;
+  top: 0;
+  background: #34495e;
+  color: white;
+  z-index: 1;
+}
+
+.passwords-table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.passwords-table td {
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.passwords-table tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.passwords-table tbody tr:hover {
+  background: #e7f0f9;
+}
+
+.passwords-table .password-cell {
+  font-family: 'Consolas', 'Courier New', monospace;
+  color: #2980b9;
+  font-weight: 600;
+  letter-spacing: 0.05rem;
+}
+
+.current-question-info {
+  padding: 0.6rem 0.75rem;
+  background: #f0f7ff;
+  border-left: 3px solid #2980b9;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
 }

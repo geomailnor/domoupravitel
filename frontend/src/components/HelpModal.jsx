@@ -43,25 +43,27 @@ export default function HelpModal({ onClose }) {
         </div>
 
         <div className="modal-body">
-          <div className="help-content">
-            <ReactMarkdown
-              components={{
-                h1: ({ children }) => {
-                  const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яА-Я-]/g, '');
-                  return <h1 id={id}>{children}</h1>;
-                },
-                h2: ({ children }) => {
-                  const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яА-Я-]/g, '');
-                  return <h2 id={id}>{children}</h2>;
-                },
-                h3: ({ children }) => {
-                  const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яА-Я-]/g, '');
-                  return <h3 id={id}>{children}</h3>;
-                },
-              }}
-            >
-              {readmeContent}
-            </ReactMarkdown>
+          <div className='help-content-wrapper'>
+            <div className="help-content">
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => {
+                    const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яА-Я-]/g, '');
+                    return <h1 id={id}>{children}</h1>;
+                  },
+                  h2: ({ children }) => {
+                    const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яА-Я-]/g, '');
+                    return <h2 id={id}>{children}</h2>;
+                  },
+                  h3: ({ children }) => {
+                    const id = String(children).toLowerCase().replace(/\s+/g, '-').replace(/[^\wа-яА-Я-]/g, '');
+                    return <h3 id={id}>{children}</h3>;
+                  },
+                }}
+              >
+                {readmeContent}
+              </ReactMarkdown>
+            </div>
           </div>
 
           <div className="modal-actions">

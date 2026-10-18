@@ -9,7 +9,8 @@
   z-index: 1000;
   padding: 1.25rem;
   animation: fadeIn 0.5s ease-out;
-  overflow-x: auto;
+  /* overflow-x: auto; */
+  overflow: hidden;
 }
 
 .modal-content {

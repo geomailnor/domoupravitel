@@ -45,7 +45,8 @@ router.post('/login', async (req, res) => {
           id: admin.id,
           username: admin.username,
           role: 'admin'
-        }
+        },
+        has_security_question: !!admin.security_question
       });
     }
 
@@ -363,6 +364,20 @@ router.post('/reset-with-answer', async (req, res) => {
     });
   } catch (error) {
     console.error('Грешка при възстановяване:', error);
+    res.status(500).json({ error: 'Сървърна грешка' });
+  }
+});
+router.get('/my-security-question', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT security_question, security_answer FROM admins WHERE id = $1',
+      [req.user.id]
+    );
+    res.json({
+      question: result.rows[0]?.security_question || null,
+      answer: result.rows[0]?.security_answer || null,
+    });
+  } catch (error) {
     res.status(500).json({ error: 'Сървърна грешка' });
   }
 });

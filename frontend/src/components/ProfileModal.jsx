@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import Spinner from './Spinner.jsx';
 import oko1 from '../assets/oko1.png';
 import oko2 from '../assets/oko2.png';
 import './ProfileModal.css';
@@ -17,13 +18,16 @@ const COMMON_QUESTIONS = [
   'Име на най-добрия ми приятел от детството',
   'Марка на първата ми кола',
   'Любим футболен отбор',
-  'Име на първия ми домашен любимец',
 ];
 
 export default function ProfileModal({ onClose }) {
   const { user, token, login } = useAuth();
   const modalRef = useRef(null);
   const [activeTab, setActiveTab] = useState('username');
+  const [apartments, setApartments] = useState([]);
+  const [loadingApartments, setLoadingApartments] = useState(true);
+  const [searchPasswords, setSearchPasswords] = useState('');
+  const [showPasswords, setShowPasswords] = useState(true);
 
   // Username
   const [newUsername, setNewUsername] = useState(user?.username || '');
@@ -36,11 +40,11 @@ export default function ProfileModal({ onClose }) {
   const [savingPassword, setSavingPassword] = useState(false);
 
   // Security question
-  const [question, setQuestion] = useState(COMMON_QUESTIONS[0]);
-  const [customQuestion, setCustomQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [useCustom, setUseCustom] = useState(false);
   const [savingQuestion, setSavingQuestion] = useState(false);
+  const [currentAnswer, setCurrentAnswer] = useState(null);
+  const [selectedNewQuestion, setSelectedNewQuestion] = useState('');
+  const [currentQuestion, setCurrentQuestion] = useState(null);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -55,6 +59,36 @@ export default function ProfileModal({ onClose }) {
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
+  useEffect(() => {
+    const loadQuestion = async () => {
+      try {
+        const res = await api.get('/auth/my-security-question');
+        setCurrentQuestion(res.data.question);
+        setCurrentAnswer(res.data.answer);
+
+        if (res.data.answer) {
+          setAnswer(res.data.answer);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadQuestion();
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await api.get('/apartments');
+        setApartments(response.data);
+      } catch (err) {
+        console.error('Грешка при зареждане:', err);
+      } finally {
+        setLoadingApartments(false);
+      }
+    };
+    load();
+  }, []);
   // Блокиране на скрола
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -81,7 +115,8 @@ export default function ProfileModal({ onClose }) {
     }
 
     if (newUsername.trim() === user?.username) {
-      toast.error('Новото потребителско име трябва да е различно от текущото');
+      toast('Няма промени за запазване', { icon: 'ℹ️', duration: 1200 });
+      onClose();
       return;
     }
 
@@ -131,26 +166,36 @@ export default function ProfileModal({ onClose }) {
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
 
-    const finalQuestion = useCustom ? customQuestion.trim() : question;
+    // 1. Определяме кой въпрос да ползваме (новия, ако е избран, или стария)
+    const finalQuestion = selectedNewQuestion || currentQuestion;
 
-    if (!finalQuestion || finalQuestion.length < 5) {
-      toast.error('Въпросът трябва да е поне 5 символа');
+    // 2. Отговорът е това, което е в полето в момента
+    const finalAnswer = answer;
+
+    // 3. Проверки
+    if (!finalQuestion) {
+      toast.error('Трябва да изберете въпрос');
+      return;
+    }
+    if (!finalAnswer || !finalAnswer.trim()) {
+      toast.error('Трябва да въведете отговор');
       return;
     }
 
-    if (!answer || answer.trim().length < 2) {
-      toast.error('Отговорът трябва да е поне 2 символа');
+    // 4. Ако нищо не е променено -> просто затваряме
+    if (finalQuestion === currentQuestion && finalAnswer === currentAnswer) {
+      onClose();
       return;
     }
 
+    // 5. Записваме
     setSavingQuestion(true);
     try {
       await api.post('/auth/set-security-question', {
         question: finalQuestion,
-        answer: answer.trim(),
+        answer: finalAnswer.trim(),
       });
-      toast.success('Въпросът е запазен');
-      setAnswer('');
+      toast.success('Въпросът/отговорът е запазен');
       onClose();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Грешка');
@@ -175,19 +220,25 @@ export default function ProfileModal({ onClose }) {
               className={`profile-tab ${activeTab === 'username' ? 'active' : ''}`}
               onClick={() => setActiveTab('username')}
             >
-              Потребителско име
+              Логин име
             </button>
             <button
               className={`profile-tab ${activeTab === 'password' ? 'active' : ''}`}
               onClick={() => setActiveTab('password')}
             >
-              Парола
+              Смяна парола
             </button>
             <button
               className={`profile-tab ${activeTab === 'question' ? 'active' : ''}`}
               onClick={() => setActiveTab('question')}
             >
               Таен въпрос
+            </button>
+            <button
+              className={`profile-tab ${activeTab === 'passwords' ? 'active' : ''}`}
+              onClick={() => setActiveTab('passwords')}
+            >
+              Виж паролите
             </button>
           </div>
 
@@ -270,46 +321,30 @@ export default function ProfileModal({ onClose }) {
 
           {activeTab === 'question' && (
             <form onSubmit={handleSaveQuestion} className="profile-form">
-              <div className="form-row">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={useCustom}
-                    onChange={(e) => setUseCustom(e.target.checked)}
-                  />
-                  {' '}Собствен въпрос
-                </label>
-              </div>
 
-              {useCustom ? (
-                <div className="form-row">
-                  <label htmlFor="custom-question">Въпрос:</label>
-                  <input
-                    id="custom-question"
-                    type="text"
-                    value={customQuestion}
-                    onChange={(e) => setCustomQuestion(e.target.value)}
-                    required
-                    minLength={5}
-                    maxLength={200}
-                    placeholder="Напр. Как се казва първата ми котка?"
-                  />
-                </div>
-              ) : (
-                <div className="form-row">
-                  <label htmlFor="question-select">Въпрос:</label>
-                  <select
-                    id="question-select"
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                  >
-                    {COMMON_QUESTIONS.map((q) => (
-                      <option key={q} value={q}>{q}</option>
-                    ))}
-                  </select>
+              {/* Показваме САМО текущия въпрос (без отговора) */}
+              {currentQuestion && (
+                <div className="current-question-info">
+                  <p>Текущ въпрос: <strong>{currentQuestion}</strong></p>
                 </div>
               )}
 
+              {/* Падащо меню - празно по подразбиране */}
+              <div className="form-row">
+                <label htmlFor="question-select">Смени въпроса (по избор):</label>
+                <select
+                  id="question-select"
+                  value={selectedNewQuestion}
+                  onChange={(e) => setSelectedNewQuestion(e.target.value)}
+                >
+                  <option value="">-- Изберете нов въпрос --</option>
+                  {COMMON_QUESTIONS.map((q) => (
+                    <option key={q} value={q}>{q}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Полето за отговор - вече съдържа текущия отговор */}
               <div className="form-row">
                 <label htmlFor="answer">Отговор:</label>
                 <input
@@ -318,15 +353,8 @@ export default function ProfileModal({ onClose }) {
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   required
-                  minLength={2}
-                  maxLength={200}
-                  placeholder="Вашият отговор"
                 />
               </div>
-
-              <p className="security-note">
-                ⚠️ Запомнете отговора! Ще ви трябва при забравена парола.
-              </p>
 
               <div className="modal-actions">
                 <button type="button" className="cancel-btn" onClick={onClose}>
@@ -337,6 +365,71 @@ export default function ProfileModal({ onClose }) {
                 </button>
               </div>
             </form>
+          )}
+          {activeTab === 'passwords' && (
+            <div className="passwords-tab">
+              <div className="passwords-controls">
+                <input
+                  type="text"
+                  placeholder="Търсене по номер или име..."
+                  value={searchPasswords}
+                  onChange={(e) => setSearchPasswords(e.target.value)}
+                  className="passwords-search"
+                />
+                {searchPasswords && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchPasswords('')}
+                    className="clear-filters-btn"
+                  >
+                    Изчисти
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="toggle-passwords-btn"
+                  onClick={() => setShowPasswords(!showPasswords)}
+                >
+                  {showPasswords ? '👁️ Скрий' : '👁️ Покажи'}
+                </button>
+              </div>
+
+              {loadingApartments ? (
+                <Spinner size="small" />
+              ) : (
+                <div className="passwords-table-wrapper">
+                  <table className="passwords-table">
+                    <thead>
+                      <tr>
+                        <th>Ап.№</th>
+                        <th>Етаж</th>
+                        <th>Собственик</th>
+                        <th>Парола</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {apartments
+                        .filter(apt => {
+                          if (!searchPasswords.trim()) return true;
+                          const term = searchPasswords.toLowerCase().trim();
+                          return String(apt.number).includes(term) ||
+                            (apt.owner_name || '').toLowerCase().includes(term);
+                        })
+                        .map(apt => (
+                          <tr key={apt.id}>
+                            <td><strong>{apt.number}</strong></td>
+                            <td>{apt.floor}</td>
+                            <td>{apt.owner_name || '—'}</td>
+                            <td className="password-cell">
+                              {showPasswords ? apt.password : '••••••••'}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

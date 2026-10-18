@@ -9,6 +9,7 @@ import { monthLabel } from '../components/i18n/translate.js';
 import BulkPaymentModal from '../components/BulkPaymentModal.jsx';
 import ProfileModal from '../components/ProfileModal.jsx';
 import HelpModal from '../components/HelpModal.jsx';
+import SetupQuestionModal from '../components/SetupQuestionModal.jsx';
 import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
@@ -27,6 +28,10 @@ export default function AdminDashboard() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSetupQuestion, setShowSetupQuestion] = useState(
+    () => localStorage.getItem('domoupravitel_needs_question') === 'true'
+  );
+
 
   useEffect(() => {
     const loadApartments = async () => {
@@ -239,6 +244,14 @@ export default function AdminDashboard() {
         )}
         {showHelp && (
           <HelpModal onClose={() => setShowHelp(false)} />
+        )}
+        {showSetupQuestion && (
+          <SetupQuestionModal
+            onComplete={() => {
+              localStorage.removeItem('domoupravitel_needs_question');
+              setShowSetupQuestion(false);
+            }}
+          />
         )}
         {showMonthlyReport && (
           <PrintMonthlyReport

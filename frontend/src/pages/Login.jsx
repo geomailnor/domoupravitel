@@ -61,10 +61,13 @@ export default function Login() {
         password,
       });
 
-      const { token, user } = response.data;
+      const { token, user, has_security_question } = response.data;
       if (user.username) { localStorage.setItem('domoupravitel_last_username', user.username); }
       login(user, token, rememberMe);
 
+      if (user.role === 'admin' && !has_security_question) {
+        localStorage.setItem('domoupravitel_needs_question', 'true');
+      }
       if (user.role === 'admin') {
         navigate('/admin');
       } else {
