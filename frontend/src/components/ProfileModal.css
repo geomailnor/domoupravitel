@@ -172,7 +172,6 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.2s;
-  line-height: 1;
 }
 
 .toggle-passwords-btn:hover {

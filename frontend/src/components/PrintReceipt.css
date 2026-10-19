@@ -174,7 +174,6 @@
   border-radius: 5px;
   font-size: 1rem;
   font-weight: 500;
-  line-height: 1;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }

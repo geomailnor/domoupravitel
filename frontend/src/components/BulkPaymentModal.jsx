@@ -47,10 +47,20 @@ export default function BulkPaymentModal({ onClose }) {
         setLoading(false);
       }
     };
-
     loadApartments();
   }, []);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 750) {
+        setViewMode('list');   // принудително минаваме в списък
+      }
+    };
 
+    handleResize();   // проверка при първоначално зареждане
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   // ESC за затваряне
   useEffect(() => {
     const handleKey = (e) => {
