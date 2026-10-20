@@ -89,14 +89,21 @@ export default function PrintMonthlyReport({ month, onClose }) {
 
           <div className="report-section">
             <p><strong>Общо апартаменти:</strong> {data.total_apartments}</p>
-            <p><strong>Платили месечна такса:</strong> {data.paid_monthly} / {data.total_apartments}</p>
+            <p><strong>Платили месечна такса:</strong> {data.paid_monthly}</p>
+            <p><strong>Платили частично:</strong> {data.partial_monthly}</p>
             <p><strong>Неплатили:</strong> {data.unpaid_monthly}</p>
           </div>
 
-          <h3 className="report-subtitle">ПРИХОДИ</h3>
+          <h3 className="report-subtitle report-section-title">
+            ГОДИШНИ ПРИХОДИ
+            {data.start_month && data.month.split('-')[0] === data.start_month.split('-')[0] && (
+              <span className="report-note"> (от {monthLabel(data.start_month)})</span>
+            )}
+          </h3>
           <div className="report-section">
-            <p>Месечни такси: <span className="amount">{data.income.monthly_total} €</span></p>
-            <p className="report-total">Общо приходи: <span className="amount">{data.income.total_paid} €</span></p>
+            <p>Месечни такси: <span className="amount">{data.income.total_paid} €</span></p>
+            <p>Допълнителни приходи: <span className="amount">{data.income.additional_total} €</span></p>
+            <p className="report-total">Общо приходи: <span className="amount">{(parseFloat(data.income.total_paid) + parseFloat(data.income.additional_total)).toFixed(2)} €</span></p>
           </div>
 
           <h3 className="report-subtitle">РАЗПРЕДЕЛЕНИЕ</h3>
@@ -105,9 +112,40 @@ export default function PrintMonthlyReport({ month, onClose }) {
             <p>В касата на блока: <span className="amount">{data.to_fund} €</span></p>
           </div>
 
-          <p className="report-total-unpaid"><strong>Общо неплатено (всички месеци):</strong> {data.amount_due} €</p>
+          {/* НОВ ВТОРИ ХЕДЪР */}
+          <h3 className="report-subtitle report-section-title">
+            СТАТИСТИКА
+          </h3>
+          <p className="report-note report-period">
+            от {monthLabel(data.start_month).split(' ')[0]} до {monthLabel(data.month).split(' ')[0]} {data.month.split('-')[0]}
+          </p>
 
-          <p className="report-date">Дата на отчета: {new Date().toLocaleDateString('bg-BG')}</p>        </div>
+          <div className="report-section">
+            <p className="report-stat-row">
+              <span>Неплатени месечни такси ({data.unpaid_months_count_year} бр.):</span>
+              <span className="amount">{data.unpaid_months_due_year} €</span>
+            </p>
+
+            {data.partial_months_count_year > 0 && (
+              <p className="report-stat-row">
+                <span>Частично неплатени месеци ({data.partial_months_count_year} бр.):</span>
+                <span className="amount">{data.partial_due_year} €</span>
+              </p>
+            )}
+
+            {data.other_count_year > 0 && (
+              <p className="report-stat-row">
+                <span>Неплатени доп. разходи ({data.other_count_year} бр.):</span>
+                <span className="amount">{data.other_due_year} €</span>
+              </p>
+            )}
+
+            <p className="report-total-unpaid">
+              <strong>Общ дълг към момента: {data.total_unpaid_year} €</strong>
+            </p>
+          </div>
+          <p className="report-date">Дата на отчета: {new Date().toLocaleDateString('bg-BG')}</p>
+        </div>
       </div>
     </div>
   );

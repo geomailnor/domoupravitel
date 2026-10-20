@@ -132,8 +132,8 @@ router.get('/apartment/:number', requireAuth, requireAdmin, async (req, res) => 
         unpaid_other: unpaidOther.length,
         unpaid_other_due: unpaidOtherSum.toFixed(2),
 
-        // Общо дължимо
-        amount_due: amountDue.toFixed(2),
+        // Общо дължимо за периода
+        total_unpaid: amountDue.toFixed(2),
         monthly_fee: monthlyFee.toFixed(2),
       },
     });
@@ -190,19 +190,53 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
     `, [month]);
 
     const paidMonthly = paidMonthlyResult.rows[0].count;
-    const unpaidMonthly = totalApartments - paidMonthly;
+
+    // Добавяме заявка за частично платените
+    const partialMonthlyResult = await pool.query(`
+      SELECT COUNT(*)::int AS count
+      FROM payments
+      WHERE month = $1 AND type = 'monthly' AND status = 'partial'
+    `, [month]);
+    const partialMonthly = partialMonthlyResult.rows[0].count;
+
+    // Коригираме: Неплатили са тези, които не са платили нито пълно, нито частично
+    const unpaidMonthly = totalApartments - paidMonthly - partialMonthly;
+
 
     // 5. Общо неплатени месечни такси (от start_month до този месец)
     // За всеки месец от start_month до month:
     // - брой дължими = 90
     // - брой платени = колко апартамента имат paid monthly за този месец
     // - неплатени = 90 - платени
-    let totalUnpaidMonths = 0;
 
-    if (startMonth && startMonth <= month) {
+    // Определи годината на отчета
+    const reportYear = month.split('-')[0];
+    const startMonthYear = startMonth ? parseInt(startMonth.split('-')[0], 10) : null;
+    const reportYearNum = parseInt(reportYear, 10);
+
+    let effectiveStart;
+    if (startMonth && reportYearNum === startMonthYear) {
+      // Първата година → ползваме реалния start_month
+      effectiveStart = startMonth;
+    } else {
+      // Следващи години → винаги януари
+      effectiveStart = `${reportYear}-01`;
+    }
+
+    const yearEnd = `${reportYear}-12`;
+
+    let totalUnpaidMonths = 0;
+    let partialCount = 0;
+    let partialDue = 0;
+    let otherCount = 0;
+    let otherDue = 0;
+    let unpaidMonthsDue = 0;
+    let amountDue = 0;
+
+    if (effectiveStart <= yearEnd) {
       const monthsRange = [];
-      let [y, m] = startMonth.split('-').map(Number);
-      const [toY, toM] = month.split('-').map(Number);
+      let [y, m] = effectiveStart.split('-').map(Number);
+      const [toY, toM] = yearEnd.split('-').map(Number);
 
       while (y < toY || (y === toY && m <= toM)) {
         monthsRange.push(`${y}-${String(m).padStart(2, '0')}`);
@@ -213,26 +247,39 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
         }
       }
 
-      // Вземи колко платени месечни такси има за всеки месец
-      const paidPerMonthResult = await pool.query(`
-        SELECT month, COUNT(*)::int AS count
+      // Броим само реално неплатените (status = 'unpaid')
+      const unpaidMonthsResult = await pool.query(`
+        SELECT COUNT(*)::int AS count
         FROM payments
-        WHERE type = 'monthly' AND status = 'paid' AND month = ANY($1)
-        GROUP BY month
+        WHERE type = 'monthly' AND status = 'unpaid' AND month = ANY($1)
       `, [monthsRange]);
+      totalUnpaidMonths = unpaidMonthsResult.rows[0].count;
 
-      const paidMap = {};
-      paidPerMonthResult.rows.forEach(r => {
-        paidMap[r.month] = r.count;
-      });
+      // Броим частичните (status = 'partial')
+      const partialMonthsResult = await pool.query(`
+        SELECT COUNT(*)::int AS count, SUM(amount)::numeric AS paid_sum
+        FROM payments
+        WHERE type = 'monthly' AND status = 'partial' AND month = ANY($1)
+      `, [monthsRange]);
+      partialCount = partialMonthsResult.rows[0].count || 0;
+      const partialPaidSum = parseFloat(partialMonthsResult.rows[0].paid_sum) || 0;
+      partialDue = (partialCount * monthlyFee) - partialPaidSum;
 
-      monthsRange.forEach(m => {
-        const paid = paidMap[m] || 0;
-        totalUnpaidMonths += (totalApartments - paid);
-      });
+      // Броим неплатените "други" разходи
+      const unpaidOtherResult = await pool.query(`
+        SELECT COUNT(*)::int AS count, SUM(amount)::numeric AS sum
+        FROM payments
+        WHERE type = 'other' AND status = 'unpaid' AND month = ANY($1)
+      `, [monthsRange]);
+      otherCount = unpaidOtherResult.rows[0].count || 0;
+      otherDue = parseFloat(unpaidOtherResult.rows[0].sum) || 0;
+
+      // Общ дълг = неплатени месечни + частични + други
+      unpaidMonthsDue = totalUnpaidMonths * monthlyFee;
+      amountDue = unpaidMonthsDue + partialDue + otherDue;
     }
 
-    const amountDue = totalUnpaidMonths * monthlyFee;
+    // 6. Приходи – групирай
 
     // 6. Приходи – групирай
     const incomeByType = {};
@@ -251,21 +298,22 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
       }
     });
 
-    // 7. Общ приход
+    // 7. Общ приход (САМО от месечни такси)
     const totalIncome = incomeResult.rows
-      .filter(r => r.status === 'paid')
+      .filter(r => r.status === 'paid' && r.type === 'monthly')
       .reduce((sum, r) => sum + parseFloat(r.total), 0);
 
-    // 8. Разпределение
-    // За домоуправителя: managerFee × брой платени месечни такси
-    const managerPay = paidMonthly * managerFee;
-
-    // В касата на блока: (monthlyFee - managerFee) × брой платени месечни такси + доп. плащания
-    const monthlyToFund = paidMonthly * (monthlyFee - managerFee);
+    // 7.1. Допълнителни приходи (други)
     const additionalIncome = incomeResult.rows
       .filter(r => r.type !== 'monthly' && r.status === 'paid')
       .reduce((sum, r) => sum + parseFloat(r.total), 0);
-    const toFund = monthlyToFund + additionalIncome;
+
+    // 8. Разпределение
+    const managerPay = paidMonthly * managerFee;
+    const monthlyToFund = paidMonthly * (monthlyFee - managerFee);
+
+    // В касата влизат само месечните такси (без допълнителните)
+    const toFund = monthlyToFund;
 
     // 9. Разходи за този месец
     const expensesResult = await pool.query(`
@@ -290,17 +338,23 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
 
     res.json({
       month,
+      start_month: settings.start_month,
       total_apartments: totalApartments,
       paid_monthly: paidMonthly,
+      partial_monthly: partialMonthly,
       unpaid_monthly: unpaidMonthly,
-      unpaid_months_total: totalUnpaidMonths,
-      amount_due: amountDue.toFixed(2),
+      unpaid_months_count_year: totalUnpaidMonths,
+      unpaid_months_due_year: unpaidMonthsDue.toFixed(2),
+      partial_months_count_year: partialCount,
+      partial_due_year: partialDue.toFixed(2),
+      other_count_year: otherCount,
+      other_due_year: otherDue.toFixed(2),
+      total_unpaid_year: amountDue.toFixed(2),
       monthly_fee: monthlyFee.toFixed(2),
       manager_fee: managerFee.toFixed(2),
       income: {
         by_type: incomeByType,
         total_paid: totalIncome.toFixed(2),
-        monthly_total: (incomeByType.monthly?.paid_total || 0).toFixed(2),
         additional_total: additionalIncome.toFixed(2),
       },
       manager_pay: managerPay.toFixed(2),
