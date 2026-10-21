@@ -198,10 +198,12 @@ export default function AdminDashboard() {
             <table className="apartments-table">
               <thead>
                 <tr>
-                  <th>Ап.№</th>
                   <th>Етаж</th>
+                  <th>Ап.№</th>
+                  <th>Живущи</th>
                   <th>Собственик</th>
                   <th>Телефон</th>
+                  <th>Бележки</th>
                 </tr>
               </thead>
               <tbody>
@@ -212,10 +214,12 @@ export default function AdminDashboard() {
                     className="clickable-row"
                     title="Кликнете за подробности"
                   >
-                    <td><strong>{apt.number}</strong></td>
                     <td>{apt.floor}</td>
+                    <td><strong>{apt.number}</strong></td>
+                    <td>{apt.residents || 0}</td>
                     <td>{apt.owner_name || '—'}</td>
                     <td>{apt.phone || '—'}</td>
+                    <td className="notes-cell" title={apt.notes || ''}>{apt.notes || '—'}</td>
                   </tr>
                 ))}
               </tbody>

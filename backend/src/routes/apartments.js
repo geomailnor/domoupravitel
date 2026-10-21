@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT id, number, floor, owner_name, phone, notes, password, created_at
+      SELECT id, number, floor, residents, owner_name, phone, notes, password, created_at
       FROM apartments
       ORDER BY number ASC
     `);
@@ -30,7 +30,7 @@ router.get('/:number', requireAuth, requireAdmin, async (req, res) => {
 
   try {
     const result = await pool.query(`
-      SELECT id, number, floor, owner_name, phone, notes, password, created_at
+      SELECT id, number, floor, residents, owner_name, phone, notes, password, created_at
       FROM apartments
       WHERE number = $1
     `, [number]);
@@ -55,7 +55,7 @@ router.put('/:number', requireAuth, requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Невалиден номер на апартамент' });
   }
 
-  const { owner_name, phone, notes } = req.body;
+  const { owner_name, phone, notes, residents } = req.body;
 
   try {
     const exists = await pool.query(
@@ -71,13 +71,15 @@ router.put('/:number', requireAuth, requireAdmin, async (req, res) => {
       UPDATE apartments
       SET owner_name = $1,
           phone = $2,
-          notes = $3
-      WHERE number = $4
-      RETURNING id, number, floor, owner_name, phone, notes, created_at
+          notes = $3,
+          residents = $4
+      WHERE number = $5
+      RETURNING id, number, floor, residents, owner_name, phone, notes, created_at
     `, [
       owner_name || null,
       phone || null,
       notes || null,
+      residents || 0,
       number
     ]);
 

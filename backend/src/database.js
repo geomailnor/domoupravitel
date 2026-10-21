@@ -18,6 +18,7 @@ async function createTables() {
         id                    SERIAL PRIMARY KEY,
         number                INTEGER UNIQUE NOT NULL,
         floor                 INTEGER NOT NULL,
+        residents             INTEGER DEFAULT 0,
         owner_name            VARCHAR(100),
         phone                 VARCHAR(20),
         email                 VARCHAR(100),

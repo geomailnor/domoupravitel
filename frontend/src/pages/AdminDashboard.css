@@ -134,7 +134,7 @@
   text-align: left;
   color: white;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .apartments-table thead th:first-child {
@@ -160,6 +160,33 @@
 
 .apartments-table tbody tr.clickable-row {
   cursor: pointer;
+}
+
+.apartments-table th:nth-child(1) {
+  width: 6%;
+}
+
+.apartments-table th:nth-child(2) {
+  width: 6%;
+  text-wrap: nowrap;
+  background: tomato;
+}
+
+.apartments-table th:nth-child(3) {
+  width: 6%;
+}
+
+.apartments-table th:nth-child(4) {
+  width: 34%;
+  background: tomato;
+}
+
+.apartments-table th:nth-child(5) {
+  width: 18%;
+}
+
+.apartments-table th:nth-child(6) {
+  width: 30%;
 }
 
 /* Бутон "Бързо въвеждане" */
@@ -221,6 +248,15 @@
 .report-btn:active {
   transform: scale(0.97);
   box-shadow: none;
+}
+
+.notes-cell {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #7f8c8d;
+  font-style: italic;
 }
 
 @media (max-width: 750px) {

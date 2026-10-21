@@ -47,6 +47,7 @@ export default function ApartmentModal({ apartment, onClose, onUpdate }) {
   const [editData, setEditData] = useState({
     owner_name: apartment?.owner_name || '',
     phone: apartment?.phone || '',
+    residents: apartment?.residents || 0,
     notes: apartment?.notes || '',
   });
   const [savingField, setSavingField] = useState(null);
@@ -83,6 +84,7 @@ export default function ApartmentModal({ apartment, onClose, onUpdate }) {
       // eslint-disable-next-line
       setEditData({
         owner_name: apartment.owner_name || '',
+        residents: apartment.residents || 0,
         phone: apartment.phone || '',
         notes: apartment.notes || '',
       });
@@ -138,6 +140,7 @@ export default function ApartmentModal({ apartment, onClose, onUpdate }) {
         owner_name: editData.owner_name || null,
         phone: editData.phone || null,
         notes: editData.notes || null,
+        residents: parseInt(editData.residents, 10) || 0
       });
 
       // Вземи обновения апартамент
@@ -515,6 +518,25 @@ export default function ApartmentModal({ apartment, onClose, onUpdate }) {
                   </div>
                 </div>
 
+                {/* Брой живущи */}
+                <div className="info-row">
+                  <span className="info-label">Живущи:</span>
+                  <div className="editable-wrapper">
+                    <input
+                      type="number"
+                      min="0"
+                      className={`editable-input ${hasChanged('residents') ? 'changed' : ''}`}
+                      value={editData.residents}
+                      onChange={(e) => setEditData({ ...editData, residents: e.target.value })}
+                      onFocus={(e) => e.target.select()}
+                      onBlur={() => handleSaveField('residents')}
+                      placeholder="0"
+                    />
+                    {savingField === 'residents' && (
+                      <span className="saving-indicator">...</span>
+                    )}
+                  </div>
+                </div>
                 {/* Телефон */}
                 <div className="info-row">
                   <span className="info-label">Телефон:</span>
