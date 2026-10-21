@@ -15,8 +15,8 @@ async function seed() {
 
   // 1. Настройки в block_params
   const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
+  // const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonth = '2026-01';
   await pool.query(`
   INSERT INTO block_params (name, value) VALUES
     ('monthly_fee', '7.00'),
