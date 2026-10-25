@@ -9,8 +9,8 @@
   z-index: 1000;
   padding: 1.25rem;
   animation: fadeIn 0.5s ease-out;
-  /* overflow-x: auto; */
-  overflow: hidden;
+  /* overflow: hidden; */
+  overflow: auto;
 }
 
 .modal-content {
@@ -20,7 +20,8 @@
   border-radius: 10px;
   width: 100%;
   max-width: 900px;
-  min-width: 788px;
+  /* min-width: 788px; */
+  min-width: 0;
   height: 90vh;
   max-height: 90vh;
   overflow-y: auto;
@@ -64,7 +65,7 @@
 }
 
 .modal-body {
-  padding: 0 2.4rem 2rem 2.4rem;
+  padding: 0 2rem 2rem 2rem;
 }
 
 .modal-close {
@@ -168,14 +169,6 @@
   gap: 0.2rem;
 }
 
-/* .password-value {
-  font-family: 'Consolas', 'Courier New', monospace;
-  letter-spacing: 0.05rem;
-  color: #2c3e50;
-  display: inline-block;
-  width: 72px;
-  text-align: left;
-} */
 .password-value-input {
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 1rem;
@@ -260,37 +253,63 @@
   font-size: 1rem;
 }
 
-/* Ширини на колоните */
-.payments-table th:nth-child(1) {
-  width: 24%;
-}
-
 /* Месец */
-.payments-table th:nth-child(2) {
+.payments-table th:nth-child(1) {
   width: 14%;
 }
 
-/* Сума */
-.payments-table th:nth-child(3) {
-  width: 20%;
+/* Асанс такса */
+.payments-table th:nth-child(2) {
+  width: 10%;
+  text-align: center;
 }
 
-/* Вид */
+/* Асанс. ток */
+.payments-table th:nth-child(3) {
+  width: 10%;
+  text-align: center;
+}
+
+/* Общ ток */
 .payments-table th:nth-child(4) {
-  width: 16%;
+  width: 10%;
+  text-align: center;
+}
+
+/* Фонд Р.О. */
+.payments-table th:nth-child(5) {
+  width: 10%;
+  text-align: center;
+}
+
+/* Дом. сис */
+.payments-table th:nth-child(6) {
+  width: 10%;
+  text-align: center;
+}
+
+/* Хонорар */
+.payments-table th:nth-child(7) {
+  width: 10%;
+  text-align: center;
+}
+
+/* Всичко */
+.payments-table th:nth-child(8) {
+  width: 8%;
+  text-align: center;
 }
 
 /* Статус */
-.payments-table th:nth-child(5) {
-  width: 10%;
+.payments-table th:nth-child(9) {
+  width: 14%;
+  text-align: center;
 }
 
-/* Описание */
-.payments-table th:nth-child(6) {
-  width: 16%;
+/* Центриране на данните от 4-та до последната колона */
+.payments-table td:nth-child(n+4) {
+  text-align: center;
 }
-
-/* edit/delete */
 
 .payments-table th {
   padding: 0.6rem 0.75rem;
@@ -299,6 +318,7 @@
   color: white;
   font-weight: 600;
   font-size: 1rem;
+  vertical-align: top;
 }
 
 .payments-table th:first-child {
@@ -321,209 +341,11 @@
   background: #f0f2f5;
 }
 
-.payments-table th:nth-child(2) {
-  text-align: center;
-}
-
-.payments-table td:nth-child(2) {
-  text-align: right;
-}
-
-.payments-table td.amount-cell {
-  text-align: right;
-}
-
-.payments-table td.amount-empty {
-  text-align: center;
-}
-
-.description-cell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #7f8c8d;
-  font-size: 1rem;
-}
-
 /* Статуси */
 
 .status-unpaid.status-current,
 .status-partial.status-current {
   color: #7f8c8d;
-}
-
-.actions-cell {
-  text-align: center;
-  width: 50px;
-}
-
-.edit-row-btn {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.edit-row-btn:hover {
-  background: #e7f0f9;
-  transform: scale(1.1);
-}
-
-.edit-row-btn:active {
-  transform: scale(0.95);
-}
-
-.delete-row-btn {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.delete-row-btn:hover {
-  background: #fadbd8;
-  transform: scale(1.1);
-}
-
-.delete-row-btn:active {
-  transform: scale(0.95);
-}
-
-.payment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.payment-form .form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.payment-form .form-row label {
-  font-weight: 500;
-  color: #34495e;
-  font-size: 1rem;
-}
-
-.payment-form .form-row input,
-.payment-form .form-row select,
-.payment-form .form-row textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-family: inherit;
-  box-sizing: border-box;
-  width: 100%;
-}
-
-.payment-form .form-row input[type="text"],
-.payment-form .form-row select {
-  max-width: 250px;
-}
-
-.payment-form .form-row input#amount {
-  max-width: 120px;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.payment-form .month-year-selects select {
-  max-width: 140px;
-}
-
-/* Padding за стрелката на select */
-.payment-form .form-row select {
-  padding-right: 2.5rem;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2334495e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1rem;
-  cursor: pointer;
-}
-
-.payment-form .form-row input:focus,
-.payment-form .form-row select:focus,
-.payment-form .form-row textarea:focus {
-  outline: none;
-  border-color: #2980b9;
-  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
-}
-
-.payment-form .form-row textarea {
-  resize: vertical;
-  min-height: 60px;
-  box-sizing: border-box;
-  min-width: 0;
-  width: 100%;
-}
-
-/* Чекбокс ред */
-.payment-form .form-checkbox {
-  display: block;
-}
-
-.payment-form .form-checkbox label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: normal;
-  cursor: pointer;
-  color: #2c3e50;
-}
-
-.payment-form .form-checkbox input[type="checkbox"] {
-  width: auto;
-  max-width: none;
-  cursor: pointer;
-  accent-color: #2980b9;
-  transform: scale(1.2);
-}
-
-.form-hint {
-  color: #95a5a6;
-  font-size: 0.95rem;
-}
-
-/* Месец/година selects */
-.payment-form .month-year-selects {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.payment-form .month-year-selects select:first-child {
-  flex: 1.5;
-  max-width: 140px;
-}
-
-.payment-form .month-year-selects select:last-child {
-  flex: 1;
-  max-width: 100px;
-}
-
-/* Обща сума */
-.payment-form .total-amount {
-  padding: 0.75rem 1rem;
-  background: #f0f7ff;
-  border-radius: 5px;
-  border-left: 4px solid #2980b9;
-  color: #2c3e50;
-  font-size: 1rem;
-}
-
-.payment-form .total-amount strong {
-  color: #2980b9;
-  font-size: 1.15rem;
 }
 
 /* === БУТОНИ ВЪВ ФОРМАТА === */
@@ -536,28 +358,6 @@
   flex-wrap: wrap;
 }
 
-.add-payment-btn {
-  padding: 0.6rem 1.2rem;
-  background: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-}
-
-.add-payment-btn:hover {
-  background: #229954;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-}
-
-.add-payment-btn:active {
-  transform: scale(0.97);
-  box-shadow: none;
-}
 
 .close-btn {
   padding: 0.6rem 1.2rem;
@@ -582,71 +382,7 @@
   box-shadow: none;
 }
 
-.cancel-btn,
-.save-btn {
-  padding: 0.6rem 1.2rem;
-  height: 40px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-}
-
-.cancel-btn {
-  background: #7d8692;
-  color: white;
-}
-
-.cancel-btn:hover {
-  background: #6e7680;
-  transform: translateY(-2px);
-}
-
-.save-btn {
-  background: #27ae60;
-  color: white;
-}
-
-.save-btn:hover {
-  background: #229954;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-}
-
-.cancel-btn:active,
-.save-btn:active {
-  transform: scale(0.97);
-}
-
-.save-btn:disabled:hover {
-  background: #95a5a6;
-  transform: none;
-  box-shadow: none;
-}
-
-.save-btn:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* === ДРУГИ === */
-
-.payments-area {
-  min-height: 100px;
-}
-
-.status-warning {
-  color: #e67e22;
-  font-size: 0.95rem;
-  margin-left: 0.5rem;
-  font-weight: 400;
-}
-
 /* === АНИМАЦИИ === */
-
 
 .editable-wrapper {
   position: relative;
@@ -779,13 +515,17 @@
 
 /* === RESPONSIVE === */
 @media (max-width: 825px) {
-  .payments-table th:nth-child(5) {
-    width: 8%;
-    padding-left: 2px;
-    padding-right: 2px;
-  }
 
   .payments-table td.description-cell {
     overflow: hidden;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .payments-table {
+    min-width: 694px;
+    /* За да може да се скролира, ако екрана е много малък */
   }
 }

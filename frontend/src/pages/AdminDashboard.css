@@ -39,12 +39,18 @@
   color: #c0392b;
 }
 
+.main-header .start-month-info .short-text {
+  display: none;
+}
+
 .filters-row {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.25rem;
   align-items: center;
   flex-wrap: wrap;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1.1rem;
 }
 
 .search-input {
@@ -94,6 +100,7 @@
   transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
   white-space: nowrap;
   height: 40px;
+  width: 180px;
 }
 
 .clear-filters-btn:hover {
@@ -119,6 +126,7 @@
 /* Таблица с апартаменти */
 .apartments-table {
   width: 100%;
+  table-layout: fixed;
   min-width: 700px;
   border-collapse: separate;
   border-spacing: 0;
@@ -130,11 +138,15 @@
 }
 
 .apartments-table th {
-  padding: 0.9rem 0.95rem;
+  padding: 0.75rem 0.8rem;
   text-align: left;
+  vertical-align: top;
   color: white;
   font-weight: 600;
   font-size: 1rem;
+  line-height: 1.3;
+  text-align: center;
+  text-overflow: ellipsis;
 }
 
 .apartments-table thead th:first-child {
@@ -146,8 +158,14 @@
 }
 
 .apartments-table td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.8rem;
+  text-align: center;
   border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+}
+
+.apartments-table td:nth-child(3) {
+  text-align: left;
 }
 
 .apartments-table tbody tr:nth-child(even) {
@@ -163,28 +181,68 @@
 }
 
 .apartments-table th:nth-child(1) {
-  width: 6%;
+  width: 4%;
 }
 
 .apartments-table th:nth-child(2) {
-  width: 6%;
-  text-wrap: nowrap;
+  width: 4%;
+  /* text-wrap: nowrap; */
 }
 
 .apartments-table th:nth-child(3) {
-  width: 6%;
+  width: 16%;
+  text-align: left;
 }
 
 .apartments-table th:nth-child(4) {
-  width: 38%;
+  width: 6%;
 }
 
 .apartments-table th:nth-child(5) {
-  width: 18%;
+  width: 6%;
 }
 
 .apartments-table th:nth-child(6) {
-  width: 22%;
+  width: 7%;
+}
+
+.apartments-table th:nth-child(7) {
+  width: 7%;
+}
+
+.apartments-table th:nth-child(8) {
+  width: 7%;
+}
+
+.apartments-table th:nth-child(9) {
+  width: 6%;
+}
+
+.apartments-table th:nth-child(10) {
+  width: 6%;
+}
+
+.apartments-table th:nth-child(11) {
+  width: 6%;
+}
+
+.apartments-table th:nth-child(12) {
+  width: 8%;
+}
+
+.apartments-table th:nth-child(13) {
+  width: 8%;
+}
+
+.apartments-table th:nth-child(14) {
+  width: 8%;
+}
+
+/* Ограничаване на дългите имена на собственици */
+.apartments-table td:nth-child(3) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Бутон "Бързо въвеждане" */
@@ -231,7 +289,7 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-  margin-left: auto;
+  margin-left: 0;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -257,10 +315,253 @@
   font-style: italic;
 }
 
-@media (max-width: 750px) {
+/* Нов стил за избор на месец */
+/* .month-selector-wrapper {
+  margin-left: auto;
+  margin-right: 1rem;
+} */
+
+.month-selector-input {
+  padding: 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+  height: 40px;
+  box-sizing: border-box;
+  margin-left: auto;
+  width: 180px;
+}
+
+/* Инлайн редактиране */
+.inline-edit-trigger {
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 3px;
+  display: inline-block;
+  min-width: 30px;
+  transition: background 0.2s;
+}
+
+.inline-edit-trigger:hover {
+  background: #e0e0e0;
+}
+
+.inline-edit-input {
+  width: 60px;
+  padding: 4px;
+  font-size: 1rem;
+  text-align: center;
+  border: 2px solid #f1c40f;
+  border-radius: 4px;
+  background-color: #fff9e6;
+  outline: none;
+}
+
+/* Подравняване на числата */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: 600;
+}
+
+/* Статус бутон */
+.status-btn {
+  padding: 6px 12px;
+  width: 67px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  color: white;
+  font-size: 1rem;
+  text-align: center;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.status-btn.paid {
+  background: #27ae60;
+}
+
+.status-btn.paid:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.status-btn.paid:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.status-btn.unpaid {
+  background: #c0392b;
+}
+
+.status-btn.unpaid:hover {
+  background: #a93226;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
+}
+
+.status-btn.unpaid:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* Бутон за детайли */
+.details-btn {
+  padding: 6px 10px;
+  width: 67px;
+  background: #34495e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.details-btn:hover {
+  background: #2c3e50;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+}
+
+.details-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+  /* Плавно появяване на таблицата */
+  animation: fadeInTable 0.6s ease-in-out;
+}
+
+/* Стил за самото поле – използваме класа от модала */
+.editable-input {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  border-radius: 3px;
+}
+
+/* Ограничаваме ширината на полетата за числа (4-та и 5-та колона) */
+.apartments-table td:nth-child(4) .editable-input,
+.apartments-table td:nth-child(5) .editable-input {
+  max-width: 40px;
+  text-align: center;
+}
+
+/* Полето за име (3-та колона) заема цялата ширина на клетката */
+.apartments-table td:nth-child(3) .editable-input {
+  min-width: 100%;
+  max-width: none;
+}
+
+.totals-row {
+  background: #e8f4f8;
+  border-top: 2px solid #34495e;
+  font-size: 1rem;
+}
+
+.totals-row td {
+  padding: 0.75rem 0.8rem;
+  border-bottom: none;
+}
+
+.revenue-row {
+  background: #eafaf1;
+  /* Светло зелено */
+  border-top: 1px solid #27ae60;
+}
+
+.revenue-row td {
+  padding: 0.5rem 0.8rem;
+}
+
+/* Залепваме хедъра на таблицата */
+.apartments-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #34495e;
+}
+
+@keyframes fadeInTable {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1030px) {
+  .apartments-table th:nth-child(3) {
+    width: 12%;
+  }
+
+  .dashboard main {
+    padding: 0.5rem;
+  }
+
+  /* Намаляваме отстъпите в клетките, за да спечелим място */
+  .apartments-table td,
+  .apartments-table th {
+    padding: 0.5rem 2px;
+  }
+}
+
+@media (max-width: 980px) {
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .apartments-table {
+    min-width: 873px;
+  }
+}
+
+@media (max-width: 870px) {
+  .main-header {
+    column-gap: 0.7rem;
+    justify-content: space-between;
+  }
+
+  .main-header .start-month-info .full-text {
+    display: none;
+  }
+
+  .main-header .start-month-info .short-text {
+    display: inline;
+  }
+
+  .main-header .start-month-info {
+    margin-left: 0;
+  }
+
+  .month-selector-input {
+    width: 160px;
+    margin-left: 0;
+  }
+
   .bulk-btn {
-    flex-basis: 100%;
+    flex-basis: 50%;
     justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .report-btn .btn-text {
@@ -272,30 +573,30 @@
     padding: 0.6rem 0.75rem;
   }
 
-  .dashboard header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+  .clear-filters-btn.on-mobile-btn {
+    flex-basis: 50%;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .dashboard header h1 {
+  .admin-dashboard header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .admin-dashboard header h1 {
     text-align: center;
   }
 
-  .dashboard header>div {
+  .admin-dashboard header>div {
     justify-content: center;
     flex-wrap: wrap;
   }
 
-  .dashboard header>div span {
+  .admin-dashboard header>div span {
     flex-basis: 100%;
     text-align: center;
     margin-bottom: 0.5rem;
-  }
-}
-
-@media(max-width: 770px) {
-  .dashboard header button {
-    padding: 0.5rem;
   }
 }

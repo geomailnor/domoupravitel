@@ -8,18 +8,18 @@
 
 /* В ResidentView.css */
 
-.main-header {
+.resident-dashboard .main-header {
   display: flex;
   align-items: baseline;
   gap: 1rem;
   margin-bottom: 1.25rem;
 }
 
-.main-header h2 {
+.resident-dashboard .main-header h2 {
   margin: 0;
 }
 
-.main-header .start-month-info {
+.resident-dashboard .main-header .start-month-info {
   margin-left: auto;
   color: #7f8c8d;
   font-size: 1rem;

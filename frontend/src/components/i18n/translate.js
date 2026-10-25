@@ -21,3 +21,8 @@ export function monthLabel(monthStr) {
   const monthName = bg.months[month];
   return `${monthName} ${year}`;
 }
+export function monthNameOnly(monthStr) {
+  if (!monthStr) return '';
+  const [, month] = monthStr.split('-');
+  return bg.months[month]; // Връща само името на месеца
+}

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
 import Spinner from '../components/Spinner.jsx';
-import ApartmentModal from '../components/ApartmentModal.jsx';
+import ChargeDetailsModal from '../components/ChargeDetailsModal.jsx';
 import { monthLabel } from '../components/i18n/translate.js';
 import BulkPaymentModal from '../components/BulkPaymentModal.jsx';
 import ProfileModal from '../components/ProfileModal.jsx';
@@ -14,16 +14,74 @@ import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
+// Компонент за инлайн редактиране на поле
+const EditableCell = ({ value, onSave, type = 'text', disabled = false }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
+
+  // Ако стойността се промени отвън, я обновяваме
+  if (!isEditing && localValue !== value) {
+    setLocalValue(value);
+  }
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    if (localValue !== value) {
+      onSave(localValue);
+    }
+  };
+
+  if (disabled) {
+    return <span style={{ color: '#bdc3c7' }}>{value}</span>;
+  }
+
+  if (!isEditing) {
+    return (
+      <span
+        onClick={() => setIsEditing(true)}
+        className="inline-edit-trigger"
+        title="Кликнете за редакция"
+      >
+        {value || '—'}
+      </span>
+    );
+  }
+
+  return (
+    <input
+      type={type}
+      value={localValue}
+      onChange={(e) => {
+        const val = type === 'number' ? e.target.value.replace(/\D/g, '') : e.target.value;
+        setLocalValue(val);
+      }}
+      onBlur={handleBlur}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.target.blur();
+        if (e.key === 'Escape') {
+          setLocalValue(value);
+          setIsEditing(false);
+        }
+      }}
+      onFocus={(e) => e.target.select()}
+      // ⭐ Добавяме changed, ако локалната стойност е различна от оригиналната
+      className={`editable-input ${localValue !== value ? 'changed' : ''}`}
+      autoFocus
+    />
+  );
+};
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [apartments, setApartments] = useState([]);
+  const [charges, setCharges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [floorFilter, setFloorFilter] = useState('');
-  const [selectedApartment, setSelectedApartment] = useState(null);
+  const [selectedCharge, setSelectedCharge] = useState(null);
   const [startMonth, setStartMonth] = useState('');
+  const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7));
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -32,12 +90,29 @@ export default function AdminDashboard() {
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
 
-
+  // Зареждане на таксите за текущия месец
   useEffect(() => {
-    const loadApartments = async () => {
+    const loadCharges = async () => {
       try {
-        const response = await api.get('/apartments');
-        setApartments(response.data);
+        setLoading(true);
+        // 1. Вземаме таксите
+        const chargesRes = await api.get(`/charges?month=${currentMonth}`);
+
+        // 2. Вземаме апартаментите (за да намерим ID-то по номер)
+        const apartmentsRes = await api.get('/apartments');
+
+        // 3. Свързваме ги: за всяка такса добавяме ap_id
+        const apartmentsMap = {};
+        apartmentsRes.data.forEach(apt => {
+          apartmentsMap[apt.number] = apt.id;
+        });
+
+        const chargesWithApId = chargesRes.data.map(charge => ({
+          ...charge,
+          ap_id: apartmentsMap[charge.ap_number] || null
+        }));
+
+        setCharges(chargesWithApId);
       } catch (err) {
         const message = err.response?.data?.error || 'Грешка при зареждане';
         toast.error(message);
@@ -46,56 +121,99 @@ export default function AdminDashboard() {
       }
     };
 
-    loadApartments();
-  }, []);
+    loadCharges();
+  }, [currentMonth]);
+
+  // Зареждане на start_month
   useEffect(() => {
     const loadStartMonth = async () => {
       try {
         const response = await api.get('/settings');
         setStartMonth(response.data.start_month || '');
-      } catch (err) {
-        console.error('Грешка при зареждане на start_month:', err);
+      } catch {
+        console.error('Грешка при зареждане на start_month');
       }
     };
     loadStartMonth();
   }, []);
+
   const handleLogout = () => {
     logout();
     toast.success('Излязохте успешно');
     navigate('/login');
   };
-  const getPreviousMonth = () => {
-    const now = new Date();
-    let year = now.getFullYear();
-    let month = now.getMonth();
 
-    if (month === 0) {
-      month = 12;
-      year -= 1;
+  // Инлайн запазване на промяна
+  const handleInlineSave = async (chargeId, field, newValue) => {
+    const oldCharges = [...charges];
+    setCharges((prev) =>
+      prev.map((c) => (c.charge_id === chargeId ? { ...c, [field]: newValue } : c))
+    );
+
+    try {
+      const payload = {};
+      if (field === 'residents_count') payload.residents_count = newValue;
+      if (field === 'elevator_payers_count') payload.elevator_payers_count = newValue;
+      if (field === 'owner_name') payload.owner_name = newValue; // <-- Ново
+
+      const res = await api.put(`/charges/${chargeId}`, payload);
+
+      setCharges((prev) =>
+        prev.map((c) => (c.charge_id === chargeId ? { ...c, ...res.data } : c))
+      );
+      toast.success('Запазено', { duration: 1000 });
+    } catch {
+      setCharges(oldCharges);
+      toast.error('Грешка при запазване');
     }
-
-    return `${year}-${String(month).padStart(2, '0')}`;
   };
-  const filteredApartments = apartments.filter((apt) => {
-    // Филтър по етаж
-    if (floorFilter && apt.floor !== parseInt(floorFilter, 10)) {
+  const toggleStatus = async (chargeId, currentStatus) => {
+    const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+
+    // Оптимистично обновяване
+    const oldCharges = [...charges];
+    setCharges((prev) =>
+      prev.map((c) => (c.charge_id === chargeId ? { ...c, status: newStatus } : c))
+    );
+
+    try {
+      await api.put(`/charges/${chargeId}`, { status: newStatus });
+    } catch {
+      setCharges(oldCharges);
+      toast.error('Грешка при промяна на статуса');
+    }
+  };
+  const filteredCharges = charges.filter((charge) => {
+    if (floorFilter && charge.floor !== parseInt(floorFilter, 10)) {
       return false;
     }
     const term = searchTerm.toLowerCase().trim();
     if (!term) return true;
 
-    // Ако търсенето е само цифри – точно съвпадение с номера
     if (/^\d+$/.test(term)) {
-      return apt.number === parseInt(term, 10);
+      return charge.ap_number === parseInt(term, 10);
     }
-
-    // Иначе – частично съвпадение с име
-    const nameMatch = (apt.owner_name || '').toLowerCase().includes(term);
+    const nameMatch = (charge.owner_name || '').toLowerCase().includes(term);
     return nameMatch;
   });
+
   const clearFilters = () => {
     setSearchTerm('');
     setFloorFilter('');
+  };
+  const calculateTotals = () => {
+    return filteredCharges.reduce((acc, charge) => ({
+      elevator_fee: acc.elevator_fee + Number(charge.elevator_fee || 0),
+      elevator_power: acc.elevator_power + Number(charge.elevator_power || 0),
+      general_power: acc.general_power + Number(charge.general_power || 0),
+      fund_ro: acc.fund_ro + Number(charge.fund_ro || 0),
+      intercom: acc.intercom + Number(charge.intercom || 0),
+      manager_fee: acc.manager_fee + Number(charge.manager_fee || 0),
+      total_amount: acc.total_amount + Number(charge.total_amount || 0),
+    }), {
+      elevator_fee: 0, elevator_power: 0, general_power: 0,
+      fund_ro: 0, intercom: 0, manager_fee: 0, total_amount: 0
+    });
   };
   return (
     <div className="dashboard admin-dashboard">
@@ -103,21 +221,12 @@ export default function AdminDashboard() {
         <h1>Панел на домоуправителя</h1>
         <div>
           <span className='hello-admin'>Здравей, {user?.username}!</span>
-          <button
-            className="help-btn"
-            onClick={() => setShowHelp(true)}
-            title="Помощ"
-          >
+          <button className="help-btn" onClick={() => setShowHelp(true)} title="Помощ">
             Помощ
           </button>
-          <button
-            className="change-username-btn"
-            onClick={() => setShowProfile(true)}
-            title="Профил"
-          >
+          <button className="change-username-btn" onClick={() => setShowProfile(true)} title="Профил">
             Профил
           </button>
-
           <button onClick={handleLogout} title="Изход от системата">
             Изход
           </button>
@@ -127,12 +236,18 @@ export default function AdminDashboard() {
       <main>
         <div className='main-header'>
           <h2>Апартаменти</h2>
-          <p className={`results-info ...`}>...</p>
           {startMonth && (
             <div className="start-month-info">
-              Следим от: <strong>{monthLabel(startMonth)}</strong>
+              <span className="full-text">Следим от: <strong>{monthLabel(startMonth)}</strong></span>
+              <span className="short-text">от <strong>{monthLabel(startMonth)}</strong></span>
             </div>
           )}
+          <input
+            type="month"
+            value={currentMonth}
+            onChange={(e) => setCurrentMonth(e.target.value)}
+            className="month-selector-input"
+          />
           <button
             type="button"
             className="report-btn"
@@ -142,6 +257,7 @@ export default function AdminDashboard() {
             📊<span className="btn-text"> Месечен отчет</span>
           </button>
         </div>
+
         <div className="filters-row">
           <input
             type="text"
@@ -162,11 +278,7 @@ export default function AdminDashboard() {
             ))}
           </select>
           {(floorFilter || searchTerm) && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="clear-filters-btn"
-            >
+            <button type="button" onClick={clearFilters} className="clear-filters-btn on-mobile-btn">
               Изчисти филтрите
             </button>
           )}
@@ -176,21 +288,17 @@ export default function AdminDashboard() {
             className="bulk-btn"
             title="Бързо въвеждане на плащания"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="#f39c12"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="#f39c12">
               <path d="M7 2h9l-2 7h5l-9 13h-1l1.5-9H5l3-11z" />
             </svg>
             Бързо въвеждане
           </button>
         </div>
-        {!loading && searchTerm && filteredApartments.length === 0 && (
+
+        {!loading && searchTerm && filteredCharges.length === 0 && (
           <div className="no-results">Няма намерени апартаменти</div>
         )}
+
         {loading ? (
           <Spinner />
         ) : (
@@ -198,57 +306,138 @@ export default function AdminDashboard() {
             <table className="apartments-table">
               <thead>
                 <tr>
-                  <th>Етаж</th>
+                  <th>Ет.</th>
                   <th>Ап.№</th>
-                  <th>Живущи</th>
                   <th>Собственик</th>
-                  <th>Телефон</th>
-                  <th>Бележки</th>
+                  <th>Бр.<br />жив.</th>
+                  <th>Плащ.<br />асанс.</th>
+                  <th>Асанс.<br />такса</th>
+                  <th>Асанс.<br />ток</th>
+                  <th>Общ<br />ток</th>
+                  <th>Фонд<br />Р.О.</th>
+                  <th>Дом.<br />сис.</th>
+                  <th>Хоно-<br />рар</th>
+                  <th>Всичко</th>
+                  <th>Статус</th>
+                  <th>Още</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredApartments.map((apt) => (
-                  <tr
-                    key={apt.id}
-                    onClick={() => setSelectedApartment(apt)}
-                    className="clickable-row"
-                    title="Кликнете за подробности"
-                  >
-                    <td>{apt.floor}</td>
-                    <td><strong>{apt.number}</strong></td>
-                    <td>{apt.residents || 0}</td>
-                    <td>{apt.owner_name || '—'}</td>
-                    <td>{apt.phone || '—'}</td>
-                    <td className="notes-cell" title={apt.notes || ''}>{apt.notes || '—'}</td>
+                {filteredCharges.map((charge) => (
+                  <tr key={charge.charge_id}>
+                    <td>{charge.floor}</td>
+                    <td><strong>{charge.ap_number}</strong></td>
+                    <td title={charge.owner_name || ''}>
+                      {charge.is_vacant ? (
+                        <em style={{ color: '#7f8c8d' }}>СВОБОДЕН</em>
+                      ) : (
+                        <EditableCell
+                          value={charge.owner_name || ''}
+                          onSave={(val) => handleInlineSave(charge.charge_id, 'owner_name', val)}
+                        />
+                      )}
+                    </td>
+
+                    <td className="text-center">
+                      <EditableCell
+                        value={charge.residents_count}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'residents_count', val)}
+                        disabled={charge.is_vacant}
+                      />
+                    </td>
+
+                    <td className="text-center">
+                      <EditableCell
+                        value={charge.elevator_payers_count}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_payers_count', val)}
+                        disabled={charge.is_vacant}
+                      />
+                    </td>
+
+                    <td className="text-right">{Number(charge.elevator_fee).toFixed(2)}</td>
+                    <td className="text-right">{Number(charge.elevator_power).toFixed(2)}</td>
+                    <td className="text-right">{Number(charge.general_power).toFixed(2)}</td>
+                    <td className="text-right">{Number(charge.fund_ro).toFixed(2)}</td>
+                    <td className="text-right">{Number(charge.intercom).toFixed(2)}</td>
+                    <td className="text-right">{Number(charge.manager_fee).toFixed(2)}</td>
+                    <td className="text-right font-bold">{Number(charge.total_amount).toFixed(2)}</td>
+
+                    <td className="text-center">
+                      <button
+                        className={`status-btn ${charge.status === 'paid' ? 'paid' : 'unpaid'}`}
+                        onClick={() => toggleStatus(charge.charge_id, charge.status)}
+                      >
+                        {charge.status === 'paid' ? 'Плат.' : 'Непл.'}
+                      </button>
+                    </td>
+
+                    <td className="text-center">
+                      <button
+                        className="details-btn"
+                        onClick={() => {
+                          setSelectedCharge(charge);
+                        }}
+                        title="Виж парола и история"
+                      >
+                        Подр.
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="totals-row">
+                  <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>Общо (с хонорар):</td>
+                  <td className="text-right font-bold">{calculateTotals().elevator_fee.toFixed(2)}</td>
+                  <td className="text-right font-bold">{calculateTotals().elevator_power.toFixed(2)}</td>
+                  <td className="text-right font-bold">{calculateTotals().general_power.toFixed(2)}</td>
+                  <td className="text-right font-bold">{calculateTotals().fund_ro.toFixed(2)}</td>
+                  <td className="text-right font-bold">{calculateTotals().intercom.toFixed(2)}</td>
+                  <td className="text-right font-bold">{calculateTotals().manager_fee.toFixed(2)}</td>
+                  <td className="text-right font-bold">{calculateTotals().total_amount.toFixed(2)}</td>
+                  <td colSpan="2"></td>
+                </tr>
+                <tr className="totals-row revenue-row">
+                  <td colSpan="11" style={{ textAlign: 'right', fontWeight: 'bold', color: '#27ae60' }}>
+                    Приход за блока (без хонорар):
+                  </td>
+                  <td className="text-right font-bold" style={{ color: '#27ae60' }}>
+                    {(calculateTotals().total_amount - calculateTotals().manager_fee).toFixed(2)}
+                  </td>
+                  <td colSpan="2"></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         )}
-        {selectedApartment && (
-          <ApartmentModal
-            apartment={selectedApartment}
-            onClose={() => setSelectedApartment(null)}
-            onUpdate={(updatedApartment) => {
-              // Обнови selectedApartment
-              setSelectedApartment(updatedApartment);
-              // Обнови и в списъка с апартаменти
-              setApartments((prev) =>
-                prev.map((a) => (a.id === updatedApartment.id ? updatedApartment : a))
-              );
+
+        {selectedCharge && (
+          <ChargeDetailsModal
+            apartment={selectedCharge}
+            onClose={() => setSelectedCharge(null)}
+            onUpdate={async () => {
+              // Презареждаме charges
+              const res = await api.get(`/charges?month=${currentMonth}`);
+              const apartmentsRes = await api.get('/apartments');
+              const apartmentsMap = {};
+              apartmentsRes.data.forEach(apt => { apartmentsMap[apt.number] = apt.id; });
+
+              const updatedCharges = res.data.map(charge => ({
+                ...charge,
+                ap_id: apartmentsMap[charge.ap_number] || null
+              }));
+
+              setCharges(updatedCharges);
+
+              // ⭐ Обновяваме и selectedCharge с новите данни
+              const updatedSelected = updatedCharges.find(c => c.charge_id === selectedCharge.charge_id);
+              if (updatedSelected) setSelectedCharge(updatedSelected);
             }}
           />
         )}
-        {showBulkModal && (
-          <BulkPaymentModal onClose={() => setShowBulkModal(false)} />
-        )}
-        {showProfile && (
-          <ProfileModal onClose={() => setShowProfile(false)} />
-        )}
-        {showHelp && (
-          <HelpModal onClose={() => setShowHelp(false)} />
-        )}
+        {showBulkModal && <BulkPaymentModal onClose={() => setShowBulkModal(false)} />}
+        {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
+        {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
         {showSetupQuestion && (
           <SetupQuestionModal
             onComplete={() => {
@@ -258,10 +447,7 @@ export default function AdminDashboard() {
           />
         )}
         {showMonthlyReport && (
-          <PrintMonthlyReport
-            month={getPreviousMonth()}
-            onClose={() => setShowMonthlyReport(false)}
-          />
+          <PrintMonthlyReport month={currentMonth} onClose={() => setShowMonthlyReport(false)} />
         )}
       </main>
     </div>

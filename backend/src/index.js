@@ -10,6 +10,7 @@ import paymentsRoutes from './routes/payments.js';
 import expensesRoutes from './routes/expenses.js';
 import settingsRoutes from './routes/settings.js';
 import reportsRoutes from './routes/reports.js';
+import chargesRoutes from './routes/charges.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/expenses', expensesRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/charges', chargesRoutes);
 
 // Тестов endpoint
 app.get('/api/health', (req, res) => {
