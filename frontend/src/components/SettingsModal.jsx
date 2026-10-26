@@ -63,7 +63,7 @@ export default function SettingsModal({ onClose, onSave }) {
           <button className="modal-close settings-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">
-          <h2>Промяна на таксите</h2>
+          <h2 className="settings-title">Промяна на таксите</h2>
 
           {loading ? (
             <Spinner size="small" />
@@ -131,10 +131,10 @@ export default function SettingsModal({ onClose, onSave }) {
           </p>
 
           <div className="modal-actions">
-            <button type="button" className="cancel-btn" onClick={onClose} disabled={saving}>
+            <button type="button" className="cancel-btn settings-action-btn" onClick={onClose} disabled={saving}>
               Отказ
             </button>
-            <button type="button" className="save-btn" onClick={handleSave} disabled={saving || loading}>
+            <button type="button" className="save-btn settings-action-btn" onClick={handleSave} disabled={saving || loading}>
               {saving ? 'Запазване...' : 'Запази'}
             </button>
           </div>

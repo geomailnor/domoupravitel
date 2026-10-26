@@ -14,7 +14,7 @@
 }
 
 .settings-field label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #34495e;
   font-weight: 500;
 }
@@ -35,8 +35,8 @@
 }
 
 .settings-note {
-  font-size: 0.9rem;
-  color: #7f8c8d;
+  font-size: 1rem;
+  color: #636d6d;
   font-style: italic;
   margin-bottom: 1.5rem;
   line-height: 1.4;
@@ -44,6 +44,15 @@
 
 .settings-close:hover {
   background: #7d8692;
-  /* Сиво */
   color: white;
+}
+
+.modal-content .settings-title {
+  margin-bottom: 1.9rem;
+}
+
+.settings-action-btn {
+  min-width: 116px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
