@@ -499,6 +499,7 @@
 /* Стил за кликаемите заглавия на колоните с такси */
 .apartments-table th.clickable-header {
   cursor: pointer;
+  color: #efe2b2;
   transition: background-color 0.2s, color 0.2s;
 }
 
