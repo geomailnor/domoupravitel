@@ -63,7 +63,7 @@ export default function SettingsModal({ onClose, onSave }) {
           <button className="modal-close settings-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">
-          <h2>Настройки на таксите</h2>
+          <h2>Промяна на таксите</h2>
 
           {loading ? (
             <Spinner size="small" />

@@ -249,7 +249,8 @@
 .bulk-btn {
   padding: 0.6rem;
   min-width: 175px;
-  background: #27ae60;
+  /* background: #27ae60; */
+  background: #4f8562;
   color: white;
   border: none;
   border-radius: 5px;
@@ -265,14 +266,13 @@
 }
 
 .bulk-btn:hover {
-  background: #229954;
+  background: #3c6b4d;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .bulk-btn:active {
   transform: scale(0.97);
-  background: #229954;
   box-shadow: none;
 }
 
@@ -385,11 +385,12 @@
 }
 
 .status-btn.paid {
-  background: #27ae60;
+  /* background: #27ae60; */
+  background: #4f8562;
 }
 
 .status-btn.paid:hover {
-  background: #229954;
+  background: #3c6b4d;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
@@ -400,11 +401,12 @@
 }
 
 .status-btn.unpaid {
-  background: #c0392b;
+  /* background: #c0392b; */
+  background: #a4534a;
 }
 
 .status-btn.unpaid:hover {
-  background: #a93226;
+  background: #89443c;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
 }
@@ -499,7 +501,7 @@
 /* Стил за кликаемите заглавия на колоните с такси */
 .apartments-table th.clickable-header {
   cursor: pointer;
-  color: #efe2b2;
+  color: #f8eec9;
   transition: background-color 0.2s, color 0.2s;
 }
 
