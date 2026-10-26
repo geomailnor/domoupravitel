@@ -46,5 +46,45 @@ router.get('/', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Сървърна грешка' });
   }
 });
+// PUT /api/settings – обновяване на цените (само за админ)
+router.put('/', requireAuth, async (req, res) => {
+  try {
+    const {
+      elevator_fee_rate, elevator_power_rate, general_power_rate,
+      fund_ro_rate, intercom_rate, manager_fee_rate
+    } = req.body;
 
+    // Проверка дали всички са подадени
+    if (
+      elevator_fee_rate === undefined || elevator_power_rate === undefined ||
+      general_power_rate === undefined || fund_ro_rate === undefined ||
+      intercom_rate === undefined || manager_fee_rate === undefined
+    ) {
+      return res.status(400).json({ error: 'Липсват стойности за някои от таксите' });
+    }
+
+    // Обновяваме всяка стойност в block_params
+    const updates = [
+      ['elevator_fee_rate', elevator_fee_rate],
+      ['elevator_power_rate', elevator_power_rate],
+      ['general_power_rate', general_power_rate],
+      ['fund_ro_rate', fund_ro_rate],
+      ['intercom_rate', intercom_rate],
+      ['manager_fee_rate', manager_fee_rate],
+    ];
+
+    for (const [name, value] of updates) {
+      await pool.query(
+        `INSERT INTO block_params (name, value) VALUES ($1, $2)
+         ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value`,
+        [name, String(value)]
+      );
+    }
+
+    res.json({ message: 'Настройките са запазени успешно' });
+  } catch (error) {
+    console.error('Грешка при запис на настройки:', error);
+    res.status(500).json({ error: 'Сървърна грешка при запис на настройки' });
+  }
+});
 export default router;

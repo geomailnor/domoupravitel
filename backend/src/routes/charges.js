@@ -148,7 +148,6 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (chargeRes.rows.length === 0) {
       return res.status(404).json({ error: 'Записът не е намерен' });
     }
-
     const charge = chargeRes.rows[0];
 
     // 3. Определяме новите стойности
@@ -248,6 +247,58 @@ router.get('/history/:ap_id', requireAuth, requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Грешка при зареждане на историята:', error);
     res.status(500).json({ error: 'Вътрешна грешка при зареждане на историята' });
+  }
+});
+// POST /api/charges/recalculate-unpaid – преизчислява неплатените такси за текущия месец
+router.post('/recalculate-unpaid', requireAuth, requireAdmin, async (req, res) => {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+
+  try {
+    // 1. Вземаме актуалните цени
+    const paramsRes = await pool.query('SELECT name, value FROM block_params WHERE name LIKE \'%_rate\'');
+    const rates = {};
+    paramsRes.rows.forEach(row => { rates[row.name] = parseFloat(row.value); });
+
+    const defaultRates = {
+      elevator_fee_rate: 1.13, elevator_power_rate: 0.82, general_power_rate: 0.65,
+      fund_ro_rate: 3.00, intercom_rate: 1.00, manager_fee_rate: 3.00
+    };
+    Object.assign(rates, defaultRates, rates);
+
+    // 2. Вземаме неплатените такси за текущия месец
+    const unpaidRes = await pool.query(`
+      SELECT m.id, m.ap_id, m.residents_count, m.elevator_payers_count, a.is_vacant
+      FROM monthly_charges m
+      JOIN apartments a ON m.ap_id = a.id
+      WHERE m.month = $1 AND m.status = 'unpaid'
+    `, [currentMonth]);
+
+    // 3. Преизчисляваме всяка неплатена такса
+    for (const charge of unpaidRes.rows) {
+      let elevatorPayers = charge.elevator_payers_count;
+      // Ако е свободен, 0
+      if (charge.is_vacant) elevatorPayers = 0;
+
+      const elevator_fee = Math.round(elevatorPayers * rates.elevator_fee_rate * 100) / 100;
+      const elevator_power = Math.round(elevatorPayers * rates.elevator_power_rate * 100) / 100;
+      const general_power = Math.round(charge.residents_count * rates.general_power_rate * 100) / 100;
+      const fund_ro = rates.fund_ro_rate;
+      const intercom = rates.intercom_rate;
+      const manager_fee = rates.manager_fee_rate;
+      const total_amount = Math.round((elevator_fee + elevator_power + general_power + fund_ro + intercom + manager_fee) * 100) / 100;
+
+      await pool.query(`
+        UPDATE monthly_charges SET
+          elevator_fee = $1, elevator_power = $2, general_power = $3,
+          fund_ro = $4, intercom = $5, manager_fee = $6, total_amount = $7
+        WHERE id = $8
+      `, [elevator_fee, elevator_power, general_power, fund_ro, intercom, manager_fee, total_amount, charge.id]);
+    }
+
+    res.json({ message: `Преизчислени ${unpaidRes.rowCount} неплатени такси.` });
+  } catch (error) {
+    console.error('Грешка при преизчисляване:', error);
+    res.status(500).json({ error: 'Грешка при преизчисляване' });
   }
 });
 export default router;

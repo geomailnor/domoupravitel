@@ -11,6 +11,7 @@ import ProfileModal from '../components/ProfileModal.jsx';
 import HelpModal from '../components/HelpModal.jsx';
 import SetupQuestionModal from '../components/SetupQuestionModal.jsx';
 import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
+import SettingsModal from '../components/SettingsModal.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
@@ -86,6 +87,7 @@ export default function AdminDashboard() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -311,12 +313,12 @@ export default function AdminDashboard() {
                   <th>Собственик</th>
                   <th>Бр.<br />жив.</th>
                   <th>Плащ.<br />асанс.</th>
-                  <th>Асанс.<br />такса</th>
-                  <th>Асанс.<br />ток</th>
-                  <th>Общ<br />ток</th>
-                  <th>Фонд<br />Р.О.</th>
-                  <th>Дом.<br />сис.</th>
-                  <th>Хоно-<br />рар</th>
+                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Асанс.<br />такса</th>
+                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Асанс.<br />ток</th>
+                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Общ<br />ток</th>
+                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Фонд<br />Р.О.</th>
+                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Дом.<br />сис.</th>
+                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Хоно-<br />рар</th>
                   <th>Всичко</th>
                   <th>Статус</th>
                   <th>Още</th>
@@ -448,6 +450,15 @@ export default function AdminDashboard() {
         )}
         {showMonthlyReport && (
           <PrintMonthlyReport month={currentMonth} onClose={() => setShowMonthlyReport(false)} />
+        )}
+        {showSettings && (
+          <SettingsModal
+            onClose={() => setShowSettings(false)}
+            onSave={() => {
+              // Презареждаме данните след запазване
+              api.get(`/charges?month=${currentMonth}`).then(res => setCharges(res.data));
+            }}
+          />
         )}
       </main>
     </div>

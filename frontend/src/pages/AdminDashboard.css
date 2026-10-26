@@ -496,6 +496,17 @@
   background-color: #34495e;
 }
 
+/* Стил за кликаемите заглавия на колоните с такси */
+.apartments-table th.clickable-header {
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.apartments-table th.clickable-header:hover {
+  background-color: #273849;
+  color: #f1c40f;
+}
+
 @keyframes fadeInTable {
   from {
     opacity: 0;
