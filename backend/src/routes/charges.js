@@ -49,7 +49,13 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
   if (!month || !/^\d{4}-\d{2}$/.test(month)) {
     return res.status(400).json({ error: 'Невалиден месец. Формат: YYYY-MM' });
   }
+  // Проверка дали месецът е преди start_month
+  const startRes = await pool.query('SELECT value FROM block_params WHERE name = $1', ['start_month']);
+  const startMonth = startRes.rows[0]?.value;
 
+  if (startMonth && month < startMonth) {
+    return res.json([]); // Връщаме празен масив, без да генерираме
+  }
   try {
     // 1. Вземаме текущите настройки (цени)
     const paramsRes = await pool.query('SELECT name, value FROM block_params WHERE name LIKE \'%_rate\'');
@@ -70,16 +76,43 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 
     if (parseInt(checkRes.rows[0].count) === 0) {
       // Ако няма, генерираме за всички апартаменти
+      // Вземаме последния съществуващ месец (преди текущия)
+      const prevMonthRes = await pool.query(
+        'SELECT MAX(month) as prev_month FROM monthly_charges WHERE month < $1',
+        [month]
+      );
+      const prevMonth = prevMonthRes.rows[0]?.prev_month;
+
       const apsRes = await pool.query('SELECT * FROM apartments ORDER BY number');
 
-      const insertPromises = apsRes.rows.map(ap => {
-        // Определяме броя плащащи асансьор по подразбиране
-        // За етажи 1 и 2 (default_pays_elevator = false) слагаме residents_count (за да не е празно)
-        // За свободните слагаме 0
-        let elevatorPayers = ap.residents;
-        if (ap.is_vacant) elevatorPayers = 0;
+      let prevChargesMap = {};
+      if (prevMonth) {
+        const prevChargesRes = await pool.query(
+          'SELECT ap_id, residents_count, elevator_payers_count FROM monthly_charges WHERE month = $1',
+          [prevMonth]
+        );
+        prevChargesRes.rows.forEach(row => {
+          prevChargesMap[row.ap_id] = {
+            residents: row.residents_count,
+            elevatorPayers: row.elevator_payers_count
+          };
+        });
+      }
 
-        const calc = calculateCharges(ap, rates, ap.residents, elevatorPayers);
+      const insertPromises = apsRes.rows.map(ap => {
+        let residentsCount = ap.residents;
+        let elevatorPayers = ap.residents;
+
+        // Ако има предишен месец, взимаме неговите стойности
+        if (prevMonth && prevChargesMap[ap.id]) {
+          residentsCount = prevChargesMap[ap.id].residents;
+          elevatorPayers = prevChargesMap[ap.id].elevatorPayers;
+        } else {
+          // Ако няма предишен месец (първи месец), взимаме от apartments
+          if (ap.is_vacant) elevatorPayers = 0;
+        }
+
+        const calc = calculateCharges(ap, rates, residentsCount, elevatorPayers);
 
         return pool.query(`
           INSERT INTO monthly_charges (
@@ -88,7 +121,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
             fund_ro, intercom, manager_fee, total_amount, status
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'unpaid')
         `, [
-          ap.id, month, ap.residents, elevatorPayers,
+          ap.id, month, residentsCount, elevatorPayers,
           calc.elevator_fee, calc.elevator_power, calc.general_power,
           calc.fund_ro, calc.intercom, calc.manager_fee, calc.total_amount
         ]);
@@ -195,6 +228,14 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     // Ако сме променили is_vacant на ниво апартамент (може да не е нужно, но за сигурност)
     if (is_vacant !== undefined) {
       await pool.query('UPDATE apartments SET is_vacant = $1 WHERE id = $2', [isVacant, charge.ap_id]);
+    }
+    // Ако сме променили residents_count, обновяваме и apartments таблицата
+    // (за да може първият месец да взима правилните данни)
+    if (residents_count !== undefined) {
+      await pool.query(
+        'UPDATE apartments SET residents = $1 WHERE id = $2',
+        [finalResidents, charge.ap_id]
+      );
     }
     // Ако е подадено ново име, обновяваме и apartments таблицата
     if (owner_name !== undefined) {

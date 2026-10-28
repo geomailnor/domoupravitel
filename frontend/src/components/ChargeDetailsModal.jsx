@@ -66,7 +66,6 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
         // 1. Вземаме настройките (за start_month)
         const settingsRes = await api.get('/settings');
         const startM = settingsRes.data.start_month;
-
         // 2. Вземаме данните за апартамента
         const aptRes = await api.get(`/apartments/${apartment.ap_number}`);
         setApartmentData(aptRes.data);

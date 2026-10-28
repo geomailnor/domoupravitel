@@ -228,6 +228,7 @@
 
 .apartments-table th:nth-child(12) {
   width: 8%;
+  text-align: right;
 }
 
 .apartments-table th:nth-child(13) {
@@ -243,6 +244,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.apartments-table td:nth-child(12) {
+  text-align: right;
 }
 
 /* Бутон "Бързо въвеждане" */
@@ -362,7 +367,7 @@
   text-align: center;
 }
 
-.text-right {
+.apartments-table tfoot td.text-right {
   text-align: right;
 }
 
@@ -508,6 +513,37 @@
 .apartments-table th.clickable-header:hover {
   background-color: #273849;
   color: #f1c40f;
+}
+
+.paid-row {
+  background: #eaf2f8;
+  border-top: 1px solid #2980b9;
+}
+
+/* Стилове за редовете в tfoot */
+.apartments-table .totals-label {
+  text-align: right;
+  font-weight: bold;
+}
+
+.apartments-table .revenue-label {
+  text-align: right;
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.apartments-table .revenue-amount {
+  color: #27ae60;
+}
+
+.apartments-table .paid-label {
+  text-align: right;
+  font-weight: bold;
+  color: #2980b9;
+}
+
+.apartments-table .paid-amount {
+  color: #2980b9;
 }
 
 @keyframes fadeInTable {

@@ -19,7 +19,6 @@ import './AdminDashboard.css';
 const EditableCell = ({ value, onSave, type = 'text', disabled = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
-
   // Ако стойността се промени отвън, я обновяваме
   if (!isEditing && localValue !== value) {
     setLocalValue(value);
@@ -88,6 +87,9 @@ export default function AdminDashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const todayMonth = new Date().toISOString().slice(0, 7);
+  const isPastMonth = currentMonth < todayMonth;
+  const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -217,6 +219,13 @@ export default function AdminDashboard() {
       fund_ro: 0, intercom: 0, manager_fee: 0, total_amount: 0
     });
   };
+  const calculatePaidTotals = () => {
+    return filteredCharges
+      .filter(c => c.status === 'paid')
+      .reduce((acc, charge) => ({
+        total_amount: acc.total_amount + Number(charge.total_amount || 0),
+      }), { total_amount: 0 });
+  };
   return (
     <div className="dashboard admin-dashboard">
       <header>
@@ -313,12 +322,12 @@ export default function AdminDashboard() {
                   <th>Собственик</th>
                   <th>Бр.<br />жив.</th>
                   <th>Плащ.<br />асанс.</th>
-                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Асанс.<br />такса</th>
-                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Асанс.<br />ток</th>
-                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Общ<br />ток</th>
-                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Фонд<br />Р.О.</th>
-                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Дом.<br />сис.</th>
-                  <th className="clickable-header" onClick={() => setShowSettings(true)} title="Кликнете за настройки">Хоно-<br />рар</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />такса</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />ток</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Общ<br />ток</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Фонд<br />Р.О.</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
                   <th>Всичко</th>
                   <th>Статус</th>
                   <th>Още</th>
@@ -344,7 +353,7 @@ export default function AdminDashboard() {
                       <EditableCell
                         value={charge.residents_count}
                         onSave={(val) => handleInlineSave(charge.charge_id, 'residents_count', val)}
-                        disabled={charge.is_vacant}
+                        disabled={charge.is_vacant || isPastMonth}
                       />
                     </td>
 
@@ -352,7 +361,7 @@ export default function AdminDashboard() {
                       <EditableCell
                         value={charge.elevator_payers_count}
                         onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_payers_count', val)}
-                        disabled={charge.is_vacant}
+                        disabled={charge.is_vacant || isPastMonth}
                       />
                     </td>
 
@@ -389,7 +398,7 @@ export default function AdminDashboard() {
               </tbody>
               <tfoot>
                 <tr className="totals-row">
-                  <td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold' }}>Общо (с хонорар):</td>
+                  <td colSpan="5" className="totals-label">Общо (за плащане):</td>
                   <td className="text-right font-bold">{calculateTotals().elevator_fee.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().elevator_power.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().general_power.toFixed(2)}</td>
@@ -400,11 +409,16 @@ export default function AdminDashboard() {
                   <td colSpan="2"></td>
                 </tr>
                 <tr className="totals-row revenue-row">
-                  <td colSpan="11" style={{ textAlign: 'right', fontWeight: 'bold', color: '#27ae60' }}>
-                    Приход за блока (без хонорар):
-                  </td>
-                  <td className="text-right font-bold" style={{ color: '#27ae60' }}>
+                  <td colSpan="11" className="revenue-label">Приход за блока (без хонорар):</td>
+                  <td className="text-right font-bold revenue-amount">
                     {(calculateTotals().total_amount - calculateTotals().manager_fee).toFixed(2)}
+                  </td>
+                  <td colSpan="2"></td>
+                </tr>
+                <tr className="totals-row paid-row">
+                  <td colSpan="11" className="paid-label">Реално платено:</td>
+                  <td className="text-right font-bold paid-amount">
+                    {calculatePaidTotals().total_amount.toFixed(2)}
                   </td>
                   <td colSpan="2"></td>
                 </tr>
