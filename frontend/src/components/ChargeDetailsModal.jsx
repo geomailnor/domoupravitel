@@ -19,10 +19,65 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [newPassword, setNewPassword] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
   const [apartmentData, setApartmentData] = useState(null);
+  const [showAddOther, setShowAddOther] = useState(false);
+  const [newOther, setNewOther] = useState({
+    month: new Date().toISOString().slice(0, 7),
+    amount: '',
+    description: '',
+  });
+  const [savingOther, setSavingOther] = useState(false);
   const modalRef = useRef(null);
 
   useFocusTrap(modalRef, !showResetConfirm);
+  const handleAddOther = async () => {
+    if (!newOther.amount || parseFloat(newOther.amount) <= 0) {
+      toast.error('Моля, въведете валидна сума');
+      return;
+    }
+    if (!newOther.description.trim()) {
+      toast.error('Моля, въведете описание');
+      return;
+    }
 
+    setSavingOther(true);
+    try {
+      await api.post('/payments', {
+        apartment_number: apartment.ap_number,
+        month: newOther.month,
+        amount: parseFloat(newOther.amount),
+        type: 'other',
+        description: newOther.description.trim(),
+        status: 'unpaid',
+      });
+
+      toast.success('Разходът е добавен');
+      setShowAddOther(false);
+      setNewOther({ month: new Date().toISOString().slice(0, 7), amount: '', description: '' });
+
+      // Презареждаме историята
+      const res = await api.get(`/charges/history/${apartmentData.id}`);
+      setHistory({ monthly: res.data.monthly, other: res.data.other });
+    } catch {
+      toast.error('Грешка при добавяне');
+    } finally {
+      setSavingOther(false);
+    }
+  };
+
+  const handleDeleteOther = async (id) => {
+    if (!window.confirm('Сигурни ли сте, че искате да изтриете този разход?')) return;
+
+    try {
+      await api.delete(`/payments/${id}`);
+      toast.success('Разходът е изтрит');
+
+      // Презареждаме историята
+      const res = await api.get(`/charges/history/${apartmentData.id}`);
+      setHistory({ monthly: res.data.monthly, other: res.data.other });
+    } catch {
+      toast.error('Грешка при изтриване');
+    }
+  };
   const fillMissingMonths = (monthlyData, startMonth) => {
     if (!startMonth || monthlyData.length === 0) return monthlyData;
 
@@ -249,7 +304,86 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
               </div>
             </div>
           )}
+          {/* Други разходи */}
+          <h3 className="modal-section-title">Други разходи</h3>
 
+          {history.other.length > 0 ? (
+            <table className="payments-table">
+              <thead>
+                <tr>
+                  <th>Месец</th>
+                  <th>Сума</th>
+                  <th>Описание</th>
+                  <th>Статус</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.other.map((o) => (
+                  <tr key={o.id}>
+                    <td>{monthLabel(o.month)}</td>
+                    <td>{o.amount.toFixed(2)} €</td>
+                    <td>{o.description || '—'}</td>
+                    <td className={`status-${o.status}`}>
+                      {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                    </td>
+                    <td>
+                      <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="no-payments">Няма други разходи</p>
+          )}
+
+          {!showAddOther ? (
+            <button
+              type="button"
+              className="add-other-btn"
+              onClick={() => setShowAddOther(true)}
+            >
+              + Добави разход
+            </button>
+          ) : (
+            <div className="add-other-form">
+              <div className="form-row">
+                <label>Месец:</label>
+                <input
+                  type="month"
+                  value={newOther.month}
+                  onChange={(e) => setNewOther({ ...newOther, month: e.target.value })}
+                />
+              </div>
+              <div className="form-row">
+                <label>Сума (€):</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={newOther.amount}
+                  onChange={(e) => setNewOther({ ...newOther, amount: e.target.value })}
+                />
+              </div>
+              <div className="form-row">
+                <label>Описание:</label>
+                <input
+                  type="text"
+                  value={newOther.description}
+                  onChange={(e) => setNewOther({ ...newOther, description: e.target.value })}
+                  placeholder="Напр. Ремонт на асансьор"
+                />
+              </div>
+              <div className="add-other-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowAddOther(false)} disabled={savingOther}>
+                  Отказ
+                </button>
+                <button type="button" className="save-btn" onClick={handleAddOther} disabled={savingOther}>
+                  {savingOther ? 'Запазване...' : 'Запази'}
+                </button>
+              </div>
+            </div>
+          )}
           {/* История на месечните такси */}
           <h3 className="modal-section-title">
             История на месечните такси
@@ -294,35 +428,6 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                 </tbody>
               </table>
             </div>
-          )}
-
-          {/* Други разходи (ако има) */}
-          {history.other.length > 0 && (
-            <>
-              <h3 className="modal-section-title">Други разходи</h3>
-              <table className="payments-table">
-                <thead>
-                  <tr>
-                    <th>Месец</th>
-                    <th>Сума</th>
-                    <th>Описание</th>
-                    <th>Статус</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.other.map((o) => (
-                    <tr key={o.id}>
-                      <td>{monthLabel(o.month)}</td>
-                      <td>{o.amount.toFixed(2)} €</td>
-                      <td>{o.description || '—'}</td>
-                      <td className={`status-${o.status}`}>
-                        {o.status === 'paid' ? 'Плат.' : 'Непл.'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
           )}
 
           <div className="modal-actions">
