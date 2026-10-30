@@ -20,6 +20,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [showResetModal, setShowResetModal] = useState(false);
   const [apartmentData, setApartmentData] = useState(null);
   const [showAddOther, setShowAddOther] = useState(false);
+  const [deleteOtherConfirm, setDeleteOtherConfirm] = useState(null);
   const [newOther, setNewOther] = useState({
     month: new Date().toISOString().slice(0, 7),
     amount: '',
@@ -28,7 +29,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [savingOther, setSavingOther] = useState(false);
   const modalRef = useRef(null);
 
-  useFocusTrap(modalRef, !showResetConfirm);
+  useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm);
   const handleAddOther = async () => {
     if (!newOther.amount || parseFloat(newOther.amount) <= 0) {
       toast.error('Моля, въведете валидна сума');
@@ -64,14 +65,18 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
     }
   };
 
-  const handleDeleteOther = async (id) => {
-    if (!window.confirm('Сигурни ли сте, че искате да изтриете този разход?')) return;
+  const handleDeleteOther = (id) => {
+    setDeleteOtherConfirm(id);
+  };
+
+  const performDeleteOther = async () => {
+    if (!deleteOtherConfirm) return;
 
     try {
-      await api.delete(`/payments/${id}`);
+      await api.delete(`/payments/${deleteOtherConfirm}`);
       toast.success('Разходът е изтрит');
+      setDeleteOtherConfirm(null);
 
-      // Презареждаме историята
       const res = await api.get(`/charges/history/${apartmentData.id}`);
       setHistory({ monthly: res.data.monthly, other: res.data.other });
     } catch {
@@ -113,6 +118,23 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
     }
 
     return result.sort((a, b) => b.month.localeCompare(a.month));
+  };
+  const toggleOtherStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+
+    try {
+      await api.put(`/payments/${id}`, { status: newStatus });
+      toast.success(newStatus === 'paid' ? 'Маркирано като платено' : 'Маркирано като неплатено', { duration: 1000 });
+
+      // Презареждаме историята
+      const res = await api.get(`/charges/history/${apartmentData.id}`);
+      setHistory({ monthly: res.data.monthly, other: res.data.other });
+
+      // Уведомяваме родителя, за да обнови индикатора в Dashboard-а
+      if (onUpdate) onUpdate();
+    } catch {
+      toast.error('Грешка при промяна на статуса');
+    }
   };
   // Зареждане на данните и историята
   useEffect(() => {
@@ -324,8 +346,14 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                     <td>{monthLabel(o.month)}</td>
                     <td>{o.amount.toFixed(2)} €</td>
                     <td>{o.description || '—'}</td>
-                    <td className={`status-${o.status}`}>
-                      {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                    <td>
+                      <button
+                        className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
+                        onClick={() => toggleOtherStatus(o.id, o.status)}
+                        style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '60px' }}
+                      >
+                        {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                      </button>
                     </td>
                     <td>
                       <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
@@ -337,7 +365,6 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
           ) : (
             <p className="no-payments">Няма други разходи</p>
           )}
-
           {!showAddOther ? (
             <button
               type="button"
@@ -386,8 +413,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
           )}
           {/* История на месечните такси */}
           <h3 className="modal-section-title">
-            История на месечните такси
-            {history.monthly.length > 0 && ` за ${history.monthly[0].month.split('-')[0]}`}
+            История на месечните такси за {apartmentData?.owner_name || `ап. ${apartment.ap_number || apartment.number}`} {history.monthly.length > 0 && `(${history.monthly[0].month.split('-')[0]})`}
           </h3>
           {loading ? (
             <Spinner size="small" />
@@ -469,6 +495,17 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
               confirmColor="danger"
               onConfirm={performResetPassword}
               onCancel={() => setShowResetConfirm(false)}
+            />
+          )}
+          {deleteOtherConfirm && (
+            <ConfirmModal
+              title="Изтриване на разход"
+              message="Сигурни ли сте, че искате да изтриете този разход?"
+              confirmText="Да, изтрий"
+              cancelText="Отказ"
+              confirmColor="danger"
+              onConfirm={performDeleteOther}
+              onCancel={() => setDeleteOtherConfirm(null)}
             />
           )}
         </div>

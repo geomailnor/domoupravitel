@@ -568,4 +568,19 @@ router.post('/bulk', requireAuth, requireAdmin, async (req, res) => {
     client.release();
   }
 });
+// GET /api/payments/other-unpaid – връща списък с ap_number на тези с неплатени other
+router.get('/other-unpaid', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT a.number as ap_number
+      FROM payments p
+      JOIN apartments a ON p.ap_id = a.id
+      WHERE p.type = 'other' AND p.status = 'unpaid'
+    `);
+    res.json(result.rows.map(r => r.ap_number));
+  } catch (error) {
+    console.error('Грешка при зареждане на неплатени other:', error);
+    res.status(500).json({ error: 'Вътрешна грешка' });
+  }
+});
 export default router;

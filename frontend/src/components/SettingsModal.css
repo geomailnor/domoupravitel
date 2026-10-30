@@ -1,38 +1,4 @@
 /* Настройки на таксите */
-.settings-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  text-align: left;
-  margin-bottom: 1.5rem;
-}
-
-.settings-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.settings-field label {
-  font-size: 1rem;
-  color: #34495e;
-  font-weight: 500;
-}
-
-.settings-field input {
-  padding: 0.5rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 5px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.settings-field input:focus {
-  outline: none;
-  border-color: #2980b9;
-  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
-}
 
 .settings-note {
   font-size: 1rem;
@@ -55,4 +21,46 @@
   min-width: 116px;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
+}
+
+.settings-subtitle {
+  color: #7f8c8d;
+  font-size: 1rem;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.settings-single-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.settings-single-field label {
+  font-weight: 500;
+  color: #34495e;
+}
+
+.settings-single-field input {
+  padding: 0.6rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.settings-single-field input:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+/* Махаме стрелките на number полето */
+.settings-single-field input::-webkit-outer-spin-button,
+.settings-single-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

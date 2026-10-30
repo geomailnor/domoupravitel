@@ -70,7 +70,6 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
       fund_ro_rate: 3.00, intercom_rate: 1.00, manager_fee_rate: 3.00
     };
     Object.assign(rates, defaultRates, rates);
-
     // 2. Проверяваме дали има записи за този месец
     const checkRes = await pool.query('SELECT COUNT(*) FROM monthly_charges WHERE month = $1', [month]);
 
@@ -291,33 +290,25 @@ router.get('/history/:ap_id', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 // POST /api/charges/recalculate-unpaid – преизчислява неплатените такси за текущия месец
+// POST /api/charges/recalculate-unpaid – преизчислява неплатените такси
 router.post('/recalculate-unpaid', requireAuth, requireAdmin, async (req, res) => {
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const { rates, month } = req.body;
+
+  if (!rates || !month) {
+    return res.status(400).json({ error: 'Липсват rates или month' });
+  }
 
   try {
-    // 1. Вземаме актуалните цени
-    const paramsRes = await pool.query('SELECT name, value FROM block_params WHERE name LIKE \'%_rate\'');
-    const rates = {};
-    paramsRes.rows.forEach(row => { rates[row.name] = parseFloat(row.value); });
-
-    const defaultRates = {
-      elevator_fee_rate: 1.13, elevator_power_rate: 0.82, general_power_rate: 0.65,
-      fund_ro_rate: 3.00, intercom_rate: 1.00, manager_fee_rate: 3.00
-    };
-    Object.assign(rates, defaultRates, rates);
-
-    // 2. Вземаме неплатените такси за текущия месец
     const unpaidRes = await pool.query(`
       SELECT m.id, m.ap_id, m.residents_count, m.elevator_payers_count, a.is_vacant
       FROM monthly_charges m
       JOIN apartments a ON m.ap_id = a.id
-      WHERE m.month = $1 AND m.status = 'unpaid'
-    `, [currentMonth]);
+      WHERE m.month >= $1 AND m.status = 'unpaid'
+    `, [month]);
 
-    // 3. Преизчисляваме всяка неплатена такса
+    // Преизчисляваме всяка неплатена такса
     for (const charge of unpaidRes.rows) {
       let elevatorPayers = charge.elevator_payers_count;
-      // Ако е свободен, 0
       if (charge.is_vacant) elevatorPayers = 0;
 
       const elevator_fee = Math.round(elevatorPayers * rates.elevator_fee_rate * 100) / 100;
@@ -342,4 +333,5 @@ router.post('/recalculate-unpaid', requireAuth, requireAdmin, async (req, res) =
     res.status(500).json({ error: 'Грешка при преизчисляване' });
   }
 });
+
 export default router;

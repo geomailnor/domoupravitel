@@ -328,9 +328,11 @@
 
 .month-selector-input {
   padding: 0.5rem;
-  border: 1px solid #d0d0d0;
+  border: 2px solid #d0d0d0;
   border-radius: 5px;
   font-size: 1rem;
+  font-weight: 600;
+  color: #7d2313;
   height: 40px;
   box-sizing: border-box;
   margin-left: auto;
@@ -379,6 +381,7 @@
 .status-btn {
   padding: 6px 12px;
   width: 67px;
+  height: 28px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -544,6 +547,19 @@
 
 .apartments-table .paid-amount {
   color: #2980b9;
+}
+
+.details-btn.has-debt {
+  background: #a4534a;
+}
+
+.details-btn.has-debt:hover {
+  background: #89443c;
+}
+
+.debt-indicator {
+  color: white;
+  font-weight: bold;
 }
 
 @keyframes fadeInTable {

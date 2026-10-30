@@ -4,49 +4,50 @@ import api from '../api.js';
 import Spinner from './Spinner.jsx';
 import './SettingsModal.css';
 
-export default function SettingsModal({ onClose, onSave }) {
-  const [rates, setRates] = useState({
-    elevator_fee_rate: 1.13,
-    elevator_power_rate: 0.82,
-    general_power_rate: 0.65,
-    fund_ro_rate: 3.00,
-    intercom_rate: 1.00,
-    manager_fee_rate: 3.00,
-  });
+export default function SettingsModal({ field, label, currentMonth, onClose, onSave }) {
+  const [value, setValue] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const loadSettings = async () => {
+    const loadSetting = async () => {
       try {
         const res = await api.get('/settings');
-        setRates({
-          elevator_fee_rate: parseFloat(res.data.elevator_fee_rate) || 1.13,
-          elevator_power_rate: parseFloat(res.data.elevator_power_rate) || 0.82,
-          general_power_rate: parseFloat(res.data.general_power_rate) || 0.65,
-          fund_ro_rate: parseFloat(res.data.fund_ro_rate) || 3.00,
-          intercom_rate: parseFloat(res.data.intercom_rate) || 1.00,
-          manager_fee_rate: parseFloat(res.data.manager_fee_rate) || 3.00,
-        });
+        const currentValue = res.data[field];
+        setValue(currentValue !== undefined ? parseFloat(currentValue).toFixed(2) : '');
       } catch {
-        toast.error('Грешка при зареждане на настройките');
+        toast.error('Грешка при зареждане');
       } finally {
         setLoading(false);
       }
     };
-    loadSettings();
-  }, []);
+    loadSetting();
+  }, [field]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // 1. Запазваме новите цени
-      await api.put('/settings', rates);
+      // Вземаме всички текущи rates, за да не загубим другите
+      const settingsRes = await api.get('/settings');
+      const currentRates = {
+        elevator_fee_rate: parseFloat(settingsRes.data.elevator_fee_rate) || 1.13,
+        elevator_power_rate: parseFloat(settingsRes.data.elevator_power_rate) || 0.82,
+        general_power_rate: parseFloat(settingsRes.data.general_power_rate) || 0.65,
+        fund_ro_rate: parseFloat(settingsRes.data.fund_ro_rate) || 3.00,
+        intercom_rate: parseFloat(settingsRes.data.intercom_rate) || 1.00,
+        manager_fee_rate: parseFloat(settingsRes.data.manager_fee_rate) || 3.00,
+      };
 
-      // 2. Преизчисляваме неплатените такси за текущия месец
-      await api.post('/charges/recalculate-unpaid');
+      // Обновяваме само полето, което редактираме
+      const newRates = { ...currentRates, [field]: parseFloat(value) };
 
-      toast.success('Настройките са запазени. Неплатените такси са преизчислени.');
+      // 1. Записваме всички rates (за да е сигурно)
+      await api.put('/settings', newRates);
+
+      // 2. Преизчисляваме неплатените с новите rates
+      await api.post('/charges/recalculate-unpaid', { rates: newRates, month: currentMonth });
+
+      toast.success('Промяната е запазена');
       if (onSave) onSave();
       onClose();
     } catch {
@@ -58,76 +59,32 @@ export default function SettingsModal({ onClose, onSave }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '600px', height: 'auto' }}>
+      <div className="modal-content" style={{ maxWidth: '400px', height: 'auto' }}>
         <div className="modal-header">
           <button className="modal-close settings-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">
-          <h2 className="settings-title">Промяна на таксите</h2>
+          <h2 className="settings-title">Промяна на такса</h2>
+          <p className="settings-subtitle">{label}</p>
 
           {loading ? (
             <Spinner size="small" />
           ) : (
-            <div className="settings-grid">
-              <div className="settings-field">
-                <label>Асансьорна такса (€/човек):</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={rates.elevator_fee_rate}
-                  onChange={(e) => setRates({ ...rates, elevator_fee_rate: e.target.value })}
-                />
-              </div>
-              <div className="settings-field">
-                <label>Асансьорен ток (€/човек):</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={rates.elevator_power_rate}
-                  onChange={(e) => setRates({ ...rates, elevator_power_rate: e.target.value })}
-                />
-              </div>
-              <div className="settings-field">
-                <label>Общ ток (€/човек):</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={rates.general_power_rate}
-                  onChange={(e) => setRates({ ...rates, general_power_rate: e.target.value })}
-                />
-              </div>
-              <div className="settings-field">
-                <label>Фонд Р.О. (€/апартамент):</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={rates.fund_ro_rate}
-                  onChange={(e) => setRates({ ...rates, fund_ro_rate: e.target.value })}
-                />
-              </div>
-              <div className="settings-field">
-                <label>Дом. сис. (€/апартамент):</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={rates.intercom_rate}
-                  onChange={(e) => setRates({ ...rates, intercom_rate: e.target.value })}
-                />
-              </div>
-              <div className="settings-field">
-                <label>Хонорар (€/апартамент):</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={rates.manager_fee_rate}
-                  onChange={(e) => setRates({ ...rates, manager_fee_rate: e.target.value })}
-                />
-              </div>
+            <div className="settings-single-field">
+              <label>Нова стойност (€):</label>
+              <input
+                type="number"
+                step="0.01"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                autoFocus
+              />
             </div>
           )}
 
           <p className="settings-note">
-            Промените ще важат за всички неплатени такси в текущия месец. Платените остават със старите цени.
+            Промяната ще важи за всички неплатени такси в текущия месец.
           </p>
 
           <div className="modal-actions">

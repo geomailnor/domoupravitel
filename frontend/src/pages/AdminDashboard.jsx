@@ -86,10 +86,11 @@ export default function AdminDashboard() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [settingsField, setSettingsField] = useState(null);
   const todayMonth = new Date().toISOString().slice(0, 7);
   const isPastMonth = currentMonth < todayMonth;
   const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
+  const [unpaidOthers, setUnpaidOthers] = useState([]);
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -127,7 +128,17 @@ export default function AdminDashboard() {
 
     loadCharges();
   }, [currentMonth]);
-
+  useEffect(() => {
+    const loadUnpaidOthers = async () => {
+      try {
+        const res = await api.get('/payments/other-unpaid');
+        setUnpaidOthers(res.data);
+      } catch {
+        // игнорираме грешката, за да не пречи
+      }
+    };
+    loadUnpaidOthers();
+  }, [currentMonth]); // или без зависимост, ако искаш да се зарежда веднъж
   // Зареждане на start_month
   useEffect(() => {
     const loadStartMonth = async () => {
@@ -322,12 +333,12 @@ export default function AdminDashboard() {
                   <th>Собственик</th>
                   <th>Бр.<br />жив.</th>
                   <th>Плащ.<br />асанс.</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />такса</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />ток</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Общ<br />ток</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Фонд<br />Р.О.</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setShowSettings(true) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_fee_rate', label: 'Асансьорна такса (€ / човек)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />такса</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_power_rate', label: 'Асансьорен ток (€ / човек)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />ток</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'general_power_rate', label: 'Общ ток (€ / човек)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Общ<br />ток</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'fund_ro_rate', label: 'Фонд Р.О. (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Фонд<br />Р.О.</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'intercom_rate', label: 'Дом. сис. (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
+                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'manager_fee_rate', label: 'Хонорар (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
                   <th>Всичко</th>
                   <th>Статус</th>
                   <th>Още</th>
@@ -384,13 +395,10 @@ export default function AdminDashboard() {
 
                     <td className="text-center">
                       <button
-                        className="details-btn"
-                        onClick={() => {
-                          setSelectedCharge(charge);
-                        }}
+                        className={`details-btn ${unpaidOthers.includes(charge.ap_number) ? 'has-debt' : ''}`}
+                        onClick={() => setSelectedCharge(charge)}
                         title="Виж парола и история"
-                      >
-                        Подр.
+                      >Подр.{unpaidOthers.includes(charge.ap_number) && <span className="debt-indicator">!</span>}
                       </button>
                     </td>
                   </tr>
@@ -448,6 +456,10 @@ export default function AdminDashboard() {
               // ⭐ Обновяваме и selectedCharge с новите данни
               const updatedSelected = updatedCharges.find(c => c.charge_id === selectedCharge.charge_id);
               if (updatedSelected) setSelectedCharge(updatedSelected);
+
+              // ⭐ НОВО: Презареждаме и неплатените other разходи
+              const othersRes = await api.get('/payments/other-unpaid');
+              setUnpaidOthers(othersRes.data);
             }}
           />
         )}
@@ -465,12 +477,22 @@ export default function AdminDashboard() {
         {showMonthlyReport && (
           <PrintMonthlyReport month={currentMonth} onClose={() => setShowMonthlyReport(false)} />
         )}
-        {showSettings && (
+        {settingsField && (
           <SettingsModal
-            onClose={() => setShowSettings(false)}
-            onSave={() => {
-              // Презареждаме данните след запазване
-              api.get(`/charges?month=${currentMonth}`).then(res => setCharges(res.data));
+            field={settingsField.field}
+            label={settingsField.label}
+            currentMonth={currentMonth}
+            onClose={() => setSettingsField(null)}
+            onSave={async () => {
+              const res = await api.get(`/charges?month=${currentMonth}`);
+              const apartmentsRes = await api.get('/apartments');
+              const apartmentsMap = {};
+              apartmentsRes.data.forEach(apt => { apartmentsMap[apt.number] = apt.id; });
+              const updatedCharges = res.data.map(charge => ({
+                ...charge,
+                ap_id: apartmentsMap[charge.ap_number] || null
+              }));
+              setCharges(updatedCharges);
             }}
           />
         )}

@@ -9,16 +9,15 @@ const router = express.Router();
 // Достъпно за всички логнати (админ и жилец)
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT name, value FROM block_params WHERE name IN ($1, $2, $3)',
-      ['monthly_fee', 'manager_fee', 'start_month']
-    );
+    const result = await pool.query('SELECT name, value FROM block_params');
 
     const settings = {};
     for (const row of result.rows) {
-      settings[row.name] = row.name === 'start_month'
-        ? row.value
-        : parseFloat(row.value);
+      if (row.name === 'start_month') {
+        settings[row.name] = row.value;
+      } else {
+        settings[row.name] = parseFloat(row.value);
+      }
     }
 
     // Автоматично превключване на start_month на 1 януари новата година
@@ -28,19 +27,15 @@ router.get('/', requireAuth, async (req, res) => {
 
       if (startYear < currentYear) {
         const newStartMonth = `${currentYear}-01`;
-
-        // Запиши в базата
         await pool.query(
           'UPDATE block_params SET value = $1 WHERE name = $2',
           [newStartMonth, 'start_month']
         );
-
         settings.start_month = newStartMonth;
       }
     }
 
     res.json(settings);
-
   } catch (error) {
     console.error('Грешка при взимане на настройки:', error);
     res.status(500).json({ error: 'Сървърна грешка' });
