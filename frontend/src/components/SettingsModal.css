@@ -57,10 +57,3 @@
   border-color: #2980b9;
   box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
 }
-
-/* Махаме стрелките на number полето */
-.settings-single-field input::-webkit-outer-spin-button,
-.settings-single-field input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}

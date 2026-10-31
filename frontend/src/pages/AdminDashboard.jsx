@@ -306,7 +306,7 @@ export default function AdminDashboard() {
           )}
           <button
             type="button"
-            // onClick={() => setShowBulkModal(true)}
+            onClick={() => setShowBulkModal(true)}
             className="bulk-btn"
             title="Бързо въвеждане на плащания"
           >
@@ -463,7 +463,27 @@ export default function AdminDashboard() {
             }}
           />
         )}
-        {showBulkModal && <BulkPaymentModal onClose={() => setShowBulkModal(false)} />}
+        {showBulkModal && (
+          <BulkPaymentModal
+            onClose={() => setShowBulkModal(false)}
+            onUpdate={async () => {
+              // Презареждаме charges
+              const res = await api.get(`/charges?month=${currentMonth}`);
+              const apartmentsRes = await api.get('/apartments');
+              const apartmentsMap = {};
+              apartmentsRes.data.forEach(apt => { apartmentsMap[apt.number] = apt.id; });
+              const updatedCharges = res.data.map(charge => ({
+                ...charge,
+                ap_id: apartmentsMap[charge.ap_number] || null
+              }));
+              setCharges(updatedCharges);
+
+              // Презареждаме и неплатените other
+              const othersRes = await api.get('/payments/other-unpaid');
+              setUnpaidOthers(othersRes.data);
+            }}
+          />
+        )}
         {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
         {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
         {showSetupQuestion && (

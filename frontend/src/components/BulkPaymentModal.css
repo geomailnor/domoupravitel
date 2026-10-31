@@ -249,6 +249,42 @@
   box-shadow: none;
 }
 
+.bulk-modal .profile-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 2px solid #e0e6ed;
+  margin-bottom: 1.5rem;
+}
+
+.bulk-modal .profile-tab {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.bulk-modal .profile-tab:hover {
+  color: #2c3e50;
+  background: #f8f9fa;
+}
+
+.bulk-modal .profile-tab.active {
+  color: #2980b9;
+  border-bottom-color: #2980b9;
+  font-weight: 600;
+}
+
+.bulk-modal h2 {
+  margin-bottom: 1.2rem;
+}
+
 @media (max-width: 750px) {
   .bulk-view-toggle {
     display: none;

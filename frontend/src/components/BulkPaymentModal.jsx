@@ -12,21 +12,23 @@ const getCurrentMonth = () => {
   return `${year}-${month}`;
 };
 
-export default function BulkPaymentModal({ onClose }) {
+export default function BulkPaymentModal({ onClose, onUpdate }) {
   const [apartments, setApartments] = useState([]);
   const [selected, setSelected] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState('list');   // 'list' или 'grid'
   const modalRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('monthly'); // 'monthly' или 'other'
 
-  useFocusTrap(modalRef, true);
-  const [formData, setFormData] = useState({
+  // Данни за втория таб (други разходи)
+  const [otherData, setOtherData] = useState({
     month: getCurrentMonth(),
-    amount: '7.00',
-    type: 'monthly',
+    amount: '',
+    description: '',
+    status: 'unpaid',
   });
-
+  useFocusTrap(modalRef, true);
   // Зареждане на апартаментите
   useEffect(() => {
     const loadApartments = async () => {
@@ -105,59 +107,81 @@ export default function BulkPaymentModal({ onClose }) {
   const selectedCount = Object.values(selected).filter(Boolean).length;
   const allSelected = selectedCount === apartments.length && apartments.length > 0;
 
-  const handleSave = async () => {
-    if (selectedCount === 0) {
-      toast.error('Не сте избрали нито един апартамент');
-      return;
-    }
-
-    if (!formData.month) {
-      toast.error('Изберете месец');
-      return;
-    }
-
-    const amountNum = parseFloat(formData.amount);
-    if (isNaN(amountNum) || amountNum <= 0) {
-      toast.error('Въведете валидна сума');
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      // Строим масива от плащания
-      const payments = apartments
-        .filter(apt => selected[apt.id])
-        .map(apt => ({
-          apartment_number: apt.number,
-          month: formData.month,
-          amount: amountNum,
-          type: formData.type,
-          status: 'paid',
-        }));
-
-      const response = await api.post('/payments/bulk', { payments });
-
-      const { created } = response.data;
-
-      toast.success(
-        created === 1 ? 'Създадено 1 плащане' : `Създадени ${created} плащания`
-      );
-      // Затвори модала
-      onClose();
-
-    } catch (err) {
-      const message = err.response?.data?.error || 'Грешка при запазване';
-      toast.error(message);
-    } finally {
-      setSaving(false);
-    }
-  };
   const apartmentsByFloor = apartments.reduce((acc, apt) => {
     if (!acc[apt.floor]) acc[apt.floor] = [];
     acc[apt.floor].push(apt);
     return acc;
   }, {});
+  const handleSaveMonthly = async () => {
+    if (selectedCount === 0) {
+      toast.error('Не сте избрали нито един апартамент');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const apartmentNumbers = apartments
+        .filter(apt => selected[apt.id])
+        .map(apt => apt.number);
+
+      // Изпращаме към новия endpoint (ще го добавим в backend-а)
+      await api.post('/charges/bulk-mark-paid', {
+        apartment_numbers: apartmentNumbers,
+        month: getCurrentMonth(), // или избрания месец, ако има поле
+      });
+
+      toast.success(`Маркирани ${apartmentNumbers.length} апартамента като платени`);
+      if (onUpdate) onUpdate();
+      onClose();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Грешка при запазване');
+    } finally {
+      setSaving(false);
+    }
+  };
+  const handleSaveOther = async () => {
+    if (selectedCount === 0) {
+      toast.error('Не сте избрали нито един апартамент');
+      return;
+    }
+    const num = parseFloat(otherData.amount);
+    if (isNaN(num) || num <= 0) {
+      toast.error('Въведете валидна сума');
+      return;
+    }
+    if (!otherData.description.trim()) {
+      toast.error('Въведете описание');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const apartmentNumbers = apartments
+        .filter(apt => selected[apt.id])
+        .map(apt => apt.number);
+
+      // Изпращаме една заявка за всички (или цикъл)
+      // За сега използваме цикъл с POST /payments
+      for (const apNumber of apartmentNumbers) {
+        await api.post('/payments', {
+          apartment_number: apNumber,
+          month: otherData.month,
+          amount: parseFloat(otherData.amount),
+          type: 'other',
+          description: otherData.description.trim(),
+          status: otherData.status,
+        });
+      }
+
+      toast.success(`Добавен разход за ${apartmentNumbers.length} апартамента`);
+      if (onUpdate) onUpdate();
+      onClose();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Грешка при запазване');
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <div className="modal-overlay">
       <div className="modal-content bulk-modal" ref={modalRef}>
@@ -166,52 +190,86 @@ export default function BulkPaymentModal({ onClose }) {
         </div>
 
         <div className="modal-body">
-          <h2>⚡ Бързо въвеждане на плащания</h2>
-          <p className="modal-subtitle">
-            Изберете месец, сума и махнете чекчетата на неплатилите
-          </p>
+          <h2>⚡ Бързо въвеждане</h2>
 
-          <div className="bulk-form">
-            <div className="form-row">
-              <label htmlFor="bulk-month">Месец:</label>
-              <input
-                id="bulk-month"
-                type="month"
-                value={formData.month}
-                onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-              />
-            </div>
-
-            <div className="form-row">
-              <label htmlFor="bulk-amount">Сума (€):</label>
-              <input
-                id="bulk-amount"
-                type="text"
-                inputMode="decimal"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                onFocus={(e) => e.target.select()}
-                onBlur={(e) => {
-                  const num = parseFloat(e.target.value);
-                  if (!isNaN(num)) {
-                    setFormData({ ...formData, amount: num.toFixed(2) });
-                  }
-                }}
-              />
-            </div>
-
-            <div className="form-row">
-              <label htmlFor="bulk-type">Вид:</label>
-              <select
-                id="bulk-type"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              >
-                <option value="monthly">Месечна такса</option>
-                <option value="other">Друго</option>
-              </select>
-            </div>
+          <div className="profile-tabs">
+            <button
+              className={`profile-tab ${activeTab === 'monthly' ? 'active' : ''}`}
+              onClick={() => setActiveTab('monthly')}
+            >
+              Месечни такси
+            </button>
+            <button
+              className={`profile-tab ${activeTab === 'other' ? 'active' : ''}`}
+              onClick={() => setActiveTab('other')}
+            >
+              Други разходи
+            </button>
           </div>
+
+          {activeTab === 'monthly' ? (
+            <p className="modal-subtitle">
+              Маркирайте апартаментите, които са платили, и натиснете „Запази като платено“.
+            </p>
+          ) : (
+            <div className="bulk-form">
+              <div className="form-row">
+                <label>Месец:</label>
+                <input
+                  type="month"
+                  value={otherData.month}
+                  onChange={(e) => setOtherData({ ...otherData, month: e.target.value })}
+                />
+              </div>
+              <div className="form-row">
+                <label>Сума (€):</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={otherData.amount}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/[^0-9.]/g, '');
+                    const parts = val.split('.');
+                    if (parts.length > 2) {
+                      val = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    // Ако е само точка, я махаме
+                    if (val === '.') val = '';
+                    setOtherData({ ...otherData, amount: val });
+                  }}
+                  onBlur={(e) => {
+                    const num = parseFloat(e.target.value);
+                    if (!isNaN(num)) {
+                      setOtherData({ ...otherData, amount: num.toFixed(2) });
+                    } else {
+                      setOtherData({ ...otherData, amount: '' });
+                    }
+                  }}
+                  placeholder="0.00"
+                  className="bulk-amount-input"
+                />
+              </div>
+              <div className="form-row">
+                <label>Описание:</label>
+                <input
+                  type="text"
+                  value={otherData.description}
+                  onChange={(e) => setOtherData({ ...otherData, description: e.target.value })}
+                  placeholder="Напр. Ремонт на асансьор"
+                />
+              </div>
+              <div className="form-row">
+                <label>Статус:</label>
+                <select
+                  value={otherData.status}
+                  onChange={(e) => setOtherData({ ...otherData, status: e.target.value })}
+                >
+                  <option value="unpaid">Неплатено</option>
+                  <option value="paid">Платено</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           <div className="bulk-actions-row">
             <button
@@ -295,7 +353,7 @@ export default function BulkPaymentModal({ onClose }) {
             <button
               type="button"
               className="save-btn"
-              onClick={handleSave}
+              onClick={activeTab === 'monthly' ? handleSaveMonthly : handleSaveOther}
               disabled={saving || selectedCount === 0}
             >
               {saving ? (
@@ -303,8 +361,10 @@ export default function BulkPaymentModal({ onClose }) {
                   <span className="spinner-button"></span>
                   <span>Запазване... ({selectedCount})</span>
                 </>
+              ) : activeTab === 'monthly' ? (
+                `Запази ${selectedCount} като платени`
               ) : (
-                `Запази ${selectedCount} плащания`
+                `Добави разход за ${selectedCount} ап.`
               )}
             </button>
           </div>

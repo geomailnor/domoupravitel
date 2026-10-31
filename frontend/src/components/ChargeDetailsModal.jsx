@@ -79,6 +79,8 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
 
       const res = await api.get(`/charges/history/${apartmentData.id}`);
       setHistory({ monthly: res.data.monthly, other: res.data.other });
+
+      if (onUpdate) onUpdate(); // <-- ТОВА ЛИПСВА
     } catch {
       toast.error('Грешка при изтриване');
     }
@@ -386,10 +388,27 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
               <div className="form-row">
                 <label>Сума (€):</label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={newOther.amount}
-                  onChange={(e) => setNewOther({ ...newOther, amount: e.target.value })}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/[^0-9.]/g, '');
+                    const parts = val.split('.');
+                    if (parts.length > 2) {
+                      val = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    // Ако е само точка, я махаме
+                    if (val === '.') val = '';
+                    setNewOther({ ...newOther, amount: val });
+                  }}
+                  onBlur={(e) => {
+                    const num = parseFloat(e.target.value);
+                    if (!isNaN(num)) {
+                      setNewOther({ ...newOther, amount: num.toFixed(2) });
+                    } else {
+                      setNewOther({ ...newOther, amount: '' });
+                    }
+                  }}
                 />
               </div>
               <div className="form-row">

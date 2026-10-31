@@ -333,5 +333,43 @@ router.post('/recalculate-unpaid', requireAuth, requireAdmin, async (req, res) =
     res.status(500).json({ error: 'Грешка при преизчисляване' });
   }
 });
+// POST /api/charges/bulk-mark-paid – маркира много такси като платени
+router.post('/bulk-mark-paid', requireAuth, requireAdmin, async (req, res) => {
+  const { apartment_numbers, month } = req.body;
 
+  if (!apartment_numbers || !Array.isArray(apartment_numbers) || !month) {
+    return res.status(400).json({ error: 'Липсват apartment_numbers или month' });
+  }
+
+  try {
+    // Вземаме ID-тата на апартаментите по номерата
+    const placeholders = apartment_numbers.map((_, i) => `$${i + 1}`).join(',');
+    const apsRes = await pool.query(
+      `SELECT id FROM apartments WHERE number IN (${placeholders})`,
+      apartment_numbers
+    );
+    const apIds = apsRes.rows.map(r => r.id);
+
+    if (apIds.length === 0) {
+      return res.status(404).json({ error: 'Няма намерени апартаменти' });
+    }
+
+    // Обновяваме статуса на всички такси за тези апартаменти за дадения месец
+    const updatePlaceholders = apIds.map((_, i) => `$${i + 2}`).join(',');
+    const result = await pool.query(
+      `UPDATE monthly_charges 
+       SET status = 'paid', paid_at = NOW()
+       WHERE month = $1 AND ap_id IN (${updatePlaceholders}) AND status != 'paid'`,
+      [month, ...apIds]
+    );
+
+    res.json({
+      message: `Маркирани ${result.rowCount} такси като платени.`,
+      updated: result.rowCount
+    });
+  } catch (error) {
+    console.error('Грешка при масово маркиране:', error);
+    res.status(500).json({ error: 'Вътрешна грешка' });
+  }
+});
 export default router;

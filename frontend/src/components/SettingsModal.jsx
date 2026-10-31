@@ -25,6 +25,10 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
   }, [field]);
 
   const handleSave = async () => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) {
+      toast.error('Моля, въведете валидна стойност'); return;
+    }
     setSaving(true);
     try {
       // Вземаме всички текущи rates, за да не загубим другите
@@ -73,10 +77,26 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
             <div className="settings-single-field">
               <label>Нова стойност (€):</label>
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/[^0-9.]/g, '');
+                  const parts = val.split('.');
+                  if (parts.length > 2) {
+                    val = parts[0] + '.' + parts.slice(1).join('');
+                  }
+                  if (val === '.') val = '';
+                  setValue(val);
+                }}
+                onBlur={(e) => {
+                  const num = parseFloat(e.target.value);
+                  if (!isNaN(num)) {
+                    setValue(num.toFixed(2));
+                  } else {
+                    setValue(''); // <-- изчиства, ако е невалидно
+                  }
+                }}
                 onFocus={(e) => e.target.select()}
                 autoFocus
               />
