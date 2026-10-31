@@ -296,7 +296,7 @@
 
 /* Всичко */
 .payments-table th:nth-child(8) {
-  width: 8%;
+  width: 12%;
   text-align: center;
 }
 
@@ -306,9 +306,8 @@
   text-align: center;
 }
 
-/* Центриране на данните от 4-та до последната колона */
-.payments-table td:nth-child(n+4) {
-  text-align: center;
+.payments-table td:nth-child(9) {
+  padding-left: 24px;
 }
 
 .payments-table th {
@@ -339,6 +338,12 @@
 
 .payments-table tbody tr:nth-child(even) {
   background: #f0f2f5;
+}
+
+/* Подравняване на данните в историята на таксите (колони 2-9) */
+.payments-table:not(.other-table) td:nth-child(n+2):nth-child(-n+8) {
+  text-align: right;
+  padding-right: 22px;
 }
 
 /* Статуси */
@@ -628,6 +633,58 @@
 
 .delete-other-btn:hover {
   background: #fadbd8;
+}
+
+/* Таблица Други разходи */
+/* Месец */
+.other-table th:nth-child(1) {
+  width: 23%;
+  text-align: left;
+}
+
+/* Сума */
+.other-table th:nth-child(2) {
+  width: 15%;
+  text-align: right;
+  padding-right: 16px;
+}
+
+/* Описание */
+.other-table th:nth-child(3) {
+  width: 35%;
+  text-align: center;
+}
+
+/* Статус */
+.other-table th:nth-child(4) {
+  width: 15%;
+  text-align: center;
+}
+
+/* Кошче */
+.other-table th:nth-child(5) {
+  width: 12%;
+}
+
+
+/* Сума вдясно */
+.other-table td:nth-child(2) {
+  text-align: right;
+}
+
+/* Описание вляво */
+.other-table td:nth-child(3) {
+  text-align: center;
+}
+
+/* Статус центриран */
+.other-table td:nth-child(4) {
+  text-align: center;
+}
+
+/* Кошче центрирано */
+.other-table td:nth-child(5) {
+  text-align: center;
 }
 
 /* === RESPONSIVE === */

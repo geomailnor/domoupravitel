@@ -12,14 +12,48 @@
 
 .bulk-form {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
 }
 
-.bulk-form .form-row {
+.form-row-half {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.form-row-half .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* Месец – по-широк */
+.form-row-half .form-row:first-child {
+  min-width: 175px;
   flex: 1;
-  min-width: 150px;
+}
+
+/* Сума – по-тясна и дясно подравнена */
+.form-row-half .form-row:last-child {
+  max-width: 120px;
+  flex: 0 0 auto;
+}
+
+.form-row-half .form-row:last-child input {
+  text-align: right;
+}
+
+/* Описание – заема повече място */
+.form-row-description {
+  flex: 1;
+}
+
+/* Статус – по-малко място */
+.form-row-status {
+  min-width: 140px;
+  flex: 0 0 auto;
 }
 
 .bulk-form .form-row label {

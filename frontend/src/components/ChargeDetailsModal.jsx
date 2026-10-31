@@ -21,6 +21,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [apartmentData, setApartmentData] = useState(null);
   const [showAddOther, setShowAddOther] = useState(false);
   const [deleteOtherConfirm, setDeleteOtherConfirm] = useState(null);
+  const [statusConfirm, setStatusConfirm] = useState(null);
   const [newOther, setNewOther] = useState({
     month: new Date().toISOString().slice(0, 7),
     amount: '',
@@ -29,7 +30,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [savingOther, setSavingOther] = useState(false);
   const modalRef = useRef(null);
 
-  useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm);
+  useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm && !statusConfirm);
   const handleAddOther = async () => {
     if (!newOther.amount || parseFloat(newOther.amount) <= 0) {
       toast.error('Моля, въведете валидна сума');
@@ -121,18 +122,26 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
 
     return result.sort((a, b) => b.month.localeCompare(a.month));
   };
-  const toggleOtherStatus = async (id, currentStatus) => {
+  const toggleOtherStatus = (id, currentStatus) => {
+    if (currentStatus === 'paid') {
+      // Ако е платено и искаме да го направим неплатено -> питаме
+      setStatusConfirm({ id, currentStatus });
+    } else {
+      // Ако е неплатено -> направо го правим платено
+      performToggleOtherStatus(id, currentStatus);
+    }
+  };
+
+  const performToggleOtherStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
 
     try {
       await api.put(`/payments/${id}`, { status: newStatus });
       toast.success(newStatus === 'paid' ? 'Маркирано като платено' : 'Маркирано като неплатено', { duration: 1000 });
 
-      // Презареждаме историята
       const res = await api.get(`/charges/history/${apartmentData.id}`);
       setHistory({ monthly: res.data.monthly, other: res.data.other });
 
-      // Уведомяваме родителя, за да обнови индикатора в Dashboard-а
       if (onUpdate) onUpdate();
     } catch {
       toast.error('Грешка при промяна на статуса');
@@ -332,14 +341,14 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
           <h3 className="modal-section-title">Други разходи</h3>
 
           {history.other.length > 0 ? (
-            <table className="payments-table">
+            <table className="payments-table other-table">
               <thead>
                 <tr>
                   <th>Месец</th>
                   <th>Сума</th>
                   <th>Описание</th>
                   <th>Статус</th>
-                  <th></th>
+                  <th>Изтрий</th>
                 </tr>
               </thead>
               <tbody>
@@ -525,6 +534,20 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
               confirmColor="danger"
               onConfirm={performDeleteOther}
               onCancel={() => setDeleteOtherConfirm(null)}
+            />
+          )}
+          {statusConfirm && (
+            <ConfirmModal
+              title="Връщане на статус"
+              message="Сигурни ли сте, че искате да маркирате този разход като НЕПЛАТЕНО?"
+              confirmText="Да, върни"
+              cancelText="Отказ"
+              confirmColor="danger"
+              onConfirm={() => {
+                performToggleOtherStatus(statusConfirm.id, statusConfirm.currentStatus);
+                setStatusConfirm(null);
+              }}
+              onCancel={() => setStatusConfirm(null)}
             />
           )}
         </div>

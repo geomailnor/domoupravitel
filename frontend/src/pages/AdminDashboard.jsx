@@ -12,6 +12,7 @@ import HelpModal from '../components/HelpModal.jsx';
 import SetupQuestionModal from '../components/SetupQuestionModal.jsx';
 import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
 import SettingsModal from '../components/SettingsModal.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
@@ -91,6 +92,7 @@ export default function AdminDashboard() {
   const isPastMonth = currentMonth < todayMonth;
   const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
   const [unpaidOthers, setUnpaidOthers] = useState([]);
+  const [statusConfirm, setStatusConfirm] = useState(null);
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -182,10 +184,19 @@ export default function AdminDashboard() {
       toast.error('Грешка при запазване');
     }
   };
-  const toggleStatus = async (chargeId, currentStatus) => {
+  const toggleStatus = (chargeId, currentStatus) => {
+    if (currentStatus === 'paid') {
+      // Ако е платено и искаме да го направим неплатено -> питаме
+      setStatusConfirm({ chargeId, currentStatus });
+    } else {
+      // Ако е неплатено -> направо го правим платено
+      performToggleStatus(chargeId, currentStatus);
+    }
+  };
+
+  const performToggleStatus = async (chargeId, currentStatus) => {
     const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
 
-    // Оптимистично обновяване
     const oldCharges = [...charges];
     setCharges((prev) =>
       prev.map((c) => (c.charge_id === chargeId ? { ...c, status: newStatus } : c))
@@ -514,6 +525,20 @@ export default function AdminDashboard() {
               }));
               setCharges(updatedCharges);
             }}
+          />
+        )}
+        {statusConfirm && (
+          <ConfirmModal
+            title="Връщане на статус"
+            message="Сигурни ли сте, че искате да маркирате това плащане като НЕПЛАТЕНО?"
+            confirmText="Да, върни"
+            cancelText="Отказ"
+            confirmColor="danger"
+            onConfirm={() => {
+              performToggleStatus(statusConfirm.chargeId, statusConfirm.currentStatus);
+              setStatusConfirm(null);
+            }}
+            onCancel={() => setStatusConfirm(null)}
           />
         )}
       </main>

@@ -213,60 +213,63 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
             </p>
           ) : (
             <div className="bulk-form">
-              <div className="form-row">
-                <label>Месец:</label>
-                <input
-                  type="month"
-                  value={otherData.month}
-                  onChange={(e) => setOtherData({ ...otherData, month: e.target.value })}
-                />
+              <div className="form-row-half">
+                <div className="form-row">
+                  <label>Месец:</label>
+                  <input
+                    type="month"
+                    value={otherData.month}
+                    onChange={(e) => setOtherData({ ...otherData, month: e.target.value })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Сума (€):</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={otherData.amount}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^0-9.]/g, '');
+                      const parts = val.split('.');
+                      if (parts.length > 2) {
+                        val = parts[0] + '.' + parts.slice(1).join('');
+                      }
+                      if (val === '.') val = '';
+                      setOtherData({ ...otherData, amount: val });
+                    }}
+                    onBlur={(e) => {
+                      const num = parseFloat(e.target.value);
+                      if (!isNaN(num)) {
+                        setOtherData({ ...otherData, amount: num.toFixed(2) });
+                      } else {
+                        setOtherData({ ...otherData, amount: '' });
+                      }
+                    }}
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
-              <div className="form-row">
-                <label>Сума (€):</label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={otherData.amount}
-                  onChange={(e) => {
-                    let val = e.target.value.replace(/[^0-9.]/g, '');
-                    const parts = val.split('.');
-                    if (parts.length > 2) {
-                      val = parts[0] + '.' + parts.slice(1).join('');
-                    }
-                    // Ако е само точка, я махаме
-                    if (val === '.') val = '';
-                    setOtherData({ ...otherData, amount: val });
-                  }}
-                  onBlur={(e) => {
-                    const num = parseFloat(e.target.value);
-                    if (!isNaN(num)) {
-                      setOtherData({ ...otherData, amount: num.toFixed(2) });
-                    } else {
-                      setOtherData({ ...otherData, amount: '' });
-                    }
-                  }}
-                  placeholder="0.00"
-                  className="bulk-amount-input"
-                />
-              </div>
-              <div className="form-row">
-                <label>Описание:</label>
-                <input
-                  type="text"
-                  value={otherData.description}
-                  onChange={(e) => setOtherData({ ...otherData, description: e.target.value })}
-                  placeholder="Напр. Ремонт на асансьор"
-                />
-              </div>
-              <div className="form-row">
-                <label>Статус:</label>
-                <select
-                  value={otherData.status}
-                  onChange={(e) => setOtherData({ ...otherData, status: e.target.value })}
-                >
-                  <option value="unpaid">Неплатено</option>
-                  <option value="paid">Платено</option>
-                </select>
+
+              <div className="form-row-half">
+                <div className="form-row form-row-description">
+                  <label>Описание:</label>
+                  <input
+                    type="text"
+                    value={otherData.description}
+                    onChange={(e) => setOtherData({ ...otherData, description: e.target.value })}
+                    placeholder="Напр. Ремонт на асансьор"
+                  />
+                </div>
+                <div className="form-row form-row-status">
+                  <label>Статус:</label>
+                  <select
+                    value={otherData.status}
+                    onChange={(e) => setOtherData({ ...otherData, status: e.target.value })}
+                  >
+                    <option value="unpaid">Неплатено</option>
+                    <option value="paid">Платено</option>
+                  </select>
+                </div>
               </div>
             </div>
           )}
