@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import './SetupQuestionModal.css';
 
 const COMMON_QUESTIONS = [
@@ -27,24 +28,7 @@ export default function SetupQuestionModal({ onComplete }) {
   const answerInputRef = useRef(null); // реф, за да маркираме текста
 
   useFocusTrap(modalRef, true);
-
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
+  useScrollLock();
   // 3. Автоматично маркиране на примерния текст при отваряне
   useEffect(() => {
     if (answerInputRef.current) {

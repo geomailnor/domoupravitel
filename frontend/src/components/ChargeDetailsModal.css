@@ -687,6 +687,11 @@
   text-align: center;
 }
 
+/* Само за заглавието на модала с разходи */
+.modal-content h2.expenses-title {
+  margin-bottom: 1.5rem;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 825px) {
 

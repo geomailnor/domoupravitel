@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import Spinner from './Spinner.jsx';
 import oko1 from '../assets/oko1.png';
 import oko2 from '../assets/oko2.png';
@@ -49,6 +50,7 @@ export default function ProfileModal({ onClose }) {
   const [showPassword, setShowPassword] = useState(false);
 
   useFocusTrap(modalRef, true);
+  useScrollLock();
 
   // ESC
   useEffect(() => {
@@ -88,22 +90,6 @@ export default function ProfileModal({ onClose }) {
       }
     };
     load();
-  }, []);
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
   }, []);
 
   const handleSaveUsername = async (e) => {

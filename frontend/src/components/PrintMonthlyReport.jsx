@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import api from '../api.js';
 import Spinner from './Spinner.jsx';
 import { monthLabel } from './i18n/translate.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import './PrintMonthlyReport.css';
 
 export default function PrintMonthlyReport({ month, onClose }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(month);
-
+  useScrollLock();
   useEffect(() => {
     const loadReport = async () => {
       setLoading(true);
@@ -101,7 +102,16 @@ export default function PrintMonthlyReport({ month, onClose }) {
             )}
             <p className="report-total">Общо в касата: <span className="amount">{data.balance} €</span></p>
           </div>
-
+          <h3 className="report-subtitle">САЛДО</h3>
+          <div className="report-section">
+            <p>Салдо от предходния месец: <span className="amount">{data.prev_balance} €</span></p>
+            <p>Приходи за месеца (в касата): <span className="amount">{data.to_fund} €</span></p>
+            {parseFloat(data.income.other_paid) > 0 && (
+              <p>Други приходи: <span className="amount">{data.income.other_paid} €</span></p>
+            )}
+            <p>Разходи за месеца: <span className="amount">{data.expenses.total} €</span></p>
+            <p className="report-total">Салдо към края на месеца: <span className="amount">{data.balance} €</span></p>
+          </div>
           <h3 className="report-subtitle">РАЗХОДИ</h3>
           <div className="report-section">
             {data.expenses.by_type.length === 0 ? (
@@ -109,7 +119,9 @@ export default function PrintMonthlyReport({ month, onClose }) {
             ) : (
               <>
                 {data.expenses.by_type.map((e, idx) => (
-                  <p key={idx}>{e.type}: <span className="amount">{e.total} €</span></p>
+                  <p key={idx}>
+                    {e.type === 'other' ? 'Други разходи' : e.type}: <span className="amount">{e.total} €</span>
+                  </p>
                 ))}
                 <p className="report-total">Общо разходи: <span className="amount">{data.expenses.total} €</span></p>
               </>

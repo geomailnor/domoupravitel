@@ -114,7 +114,8 @@ async function createTables() {
       ('general_power_rate', '0.65'),
       ('fund_ro_rate', '3.00'),
       ('intercom_rate', '1.00'),
-      ('manager_fee_rate', '3.00')
+      ('manager_fee_rate', '3.00'),
+      ('opening_balance', '0.00')
       ON CONFLICT (name) DO NOTHING;
     `);
 

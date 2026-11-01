@@ -4,6 +4,7 @@ import api from '../api.js';
 import oko1 from '../assets/oko1.png';
 import oko2 from '../assets/oko2.png';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import './ChangePasswordModal.css';
 
 export default function ChangePasswordModal({ onClose }) {
@@ -18,6 +19,7 @@ export default function ChangePasswordModal({ onClose }) {
 
   // Фокус при отваряне
   useFocusTrap(modalRef, true, firstInputRef);
+  useScrollLock();
 
   // ESC за затваряне
   useEffect(() => {
@@ -27,23 +29,6 @@ export default function ChangePasswordModal({ onClose }) {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
-
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

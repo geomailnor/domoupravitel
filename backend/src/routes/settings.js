@@ -46,10 +46,20 @@ router.put('/', requireAuth, async (req, res) => {
   try {
     const {
       elevator_fee_rate, elevator_power_rate, general_power_rate,
-      fund_ro_rate, intercom_rate, manager_fee_rate
+      fund_ro_rate, intercom_rate, manager_fee_rate, opening_balance
     } = req.body;
 
-    // Проверка дали всички са подадени
+    // 1. Ако е подаден САМО opening_balance, записваме го и излизаме
+    if (opening_balance !== undefined && Object.keys(req.body).length === 1) {
+      await pool.query(
+        `INSERT INTO block_params (name, value) VALUES ('opening_balance', $1)
+         ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value`,
+        [String(opening_balance)]
+      );
+      return res.json({ message: 'Началното салдо е запазено' });
+    }
+
+    // 2. Иначе проверяваме за таксите
     if (
       elevator_fee_rate === undefined || elevator_power_rate === undefined ||
       general_power_rate === undefined || fund_ro_rate === undefined ||
@@ -58,7 +68,7 @@ router.put('/', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Липсват стойности за някои от таксите' });
     }
 
-    // Обновяваме всяка стойност в block_params
+    // 3. Обновяваме таксите (и opening_balance, ако е подаден заедно с тях)
     const updates = [
       ['elevator_fee_rate', elevator_fee_rate],
       ['elevator_power_rate', elevator_power_rate],
@@ -67,6 +77,9 @@ router.put('/', requireAuth, async (req, res) => {
       ['intercom_rate', intercom_rate],
       ['manager_fee_rate', manager_fee_rate],
     ];
+    if (opening_balance !== undefined) {
+      updates.push(['opening_balance', opening_balance]);
+    }
 
     for (const [name, value] of updates) {
       await pool.query(

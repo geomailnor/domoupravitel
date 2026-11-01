@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import readmeContent from '../assets/README.md?raw';
 import './HelpModal.css';
 
@@ -8,7 +9,7 @@ export default function HelpModal({ onClose }) {
   const modalRef = useRef(null);
 
   useFocusTrap(modalRef, true);
-
+  useScrollLock();
   // ESC
   useEffect(() => {
     const handleKey = (e) => {
@@ -17,23 +18,6 @@ export default function HelpModal({ onClose }) {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
-
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
 
   return (
     <div className="modal-overlay">

@@ -13,6 +13,7 @@ import SetupQuestionModal from '../components/SetupQuestionModal.jsx';
 import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
 import SettingsModal from '../components/SettingsModal.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
+import ExpensesModal from '../components/ExpensesModal.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
@@ -93,6 +94,7 @@ export default function AdminDashboard() {
   const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
   const [unpaidOthers, setUnpaidOthers] = useState([]);
   const [statusConfirm, setStatusConfirm] = useState(null);
+  const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -248,6 +250,11 @@ export default function AdminDashboard() {
         total_amount: acc.total_amount + Number(charge.total_amount || 0),
       }), { total_amount: 0 });
   };
+  const calculatePaidManagerFee = () => {
+    return filteredCharges
+      .filter(c => c.status === 'paid')
+      .reduce((acc, charge) => acc + Number(charge.manager_fee || 0), 0);
+  };
   return (
     <div className="dashboard admin-dashboard">
       <header>
@@ -315,17 +322,25 @@ export default function AdminDashboard() {
               Изчисти филтрите
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => setShowBulkModal(true)}
-            className="bulk-btn"
-            title="Бързо въвеждане на плащания"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="#f39c12">
-              <path d="M7 2h9l-2 7h5l-9 13h-1l1.5-9H5l3-11z" />
-            </svg>
-            Бързо въвеждане
-          </button>
+          <div className="action-buttons-group">
+            <button
+              type="button"
+              onClick={() => setShowBulkModal(true)}
+              className="bulk-btn"
+              title="Бързо въвеждане на плащания"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="#f39c12">
+                <path d="M7 2h9l-2 7h5l-9 13h-1l1.5-9H5l3-11z" />
+              </svg>
+              Бързо въвеждане
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowExpensesModal(true)}
+              className="expenses-btn"
+              title="Разходи на блока"
+            >Разходи</button>
+          </div>
         </div>
 
         {!loading && searchTerm && filteredCharges.length === 0 && (
@@ -428,7 +443,7 @@ export default function AdminDashboard() {
                   <td colSpan="2"></td>
                 </tr>
                 <tr className="totals-row revenue-row">
-                  <td colSpan="11" className="revenue-label">Приход за блока (без хонорар):</td>
+                  <td colSpan="11" className="revenue-label">Очакван приход за блока (без хонорар):</td>
                   <td className="text-right font-bold revenue-amount">
                     {(calculateTotals().total_amount - calculateTotals().manager_fee).toFixed(2)}
                   </td>
@@ -438,6 +453,13 @@ export default function AdminDashboard() {
                   <td colSpan="11" className="paid-label">Реално платено:</td>
                   <td className="text-right font-bold paid-amount">
                     {calculatePaidTotals().total_amount.toFixed(2)}
+                  </td>
+                  <td colSpan="2"></td>
+                </tr>
+                <tr className="totals-row cash-row">
+                  <td colSpan="11" className="cash-label">В касата (реално събрано, без хонорар):</td>
+                  <td className="text-right font-bold cash-amount">
+                    {(calculatePaidTotals().total_amount - calculatePaidManagerFee()).toFixed(2)}
                   </td>
                   <td colSpan="2"></td>
                 </tr>
@@ -540,6 +562,9 @@ export default function AdminDashboard() {
             }}
             onCancel={() => setStatusConfirm(null)}
           />
+        )}
+        {showExpensesModal && (
+          <ExpensesModal onClose={() => setShowExpensesModal(false)} />
         )}
       </main>
     </div>

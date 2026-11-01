@@ -1,0 +1,88 @@
+/* Стил за полето за начално салдо */
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.form-row label {
+  font-weight: 500;
+  color: #34495e;
+  font-size: 1rem;
+  margin-bottom: 3px;
+  min-width: 360px;
+}
+
+.form-row input {
+  padding: 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.form-row input:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+.form-row input:disabled {
+  background: #f5f5f5;
+  color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Модален контейнер */
+.expenses-modal-content {
+  max-width: 700px;
+  height: auto;
+}
+
+/* Поле за начално салдо */
+.balance-field {
+  margin-bottom: 1rem;
+  max-width: 400px;
+}
+
+.balance-label-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.balance-label-row label:first-child {
+  margin: 0;
+}
+
+.edit-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.edit-checkbox-label input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+/* Активно и неактивно поле */
+.editable-balance {
+  background: white;
+  cursor: text;
+}
+
+.disabled-balance {
+  background: #f5f5f5;
+  color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Таблица с разходи */
+.expenses-table {
+  margin-bottom: 1rem;
+}

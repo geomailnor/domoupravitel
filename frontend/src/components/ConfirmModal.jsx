@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import './ConfirmModal.css';
 
 export default function ConfirmModal({
@@ -13,6 +14,7 @@ export default function ConfirmModal({
 }) {
   const modalRef = useRef(null);
   useFocusTrap(modalRef, true);
+  useScrollLock();
 
   // ESC за отказ
   useEffect(() => {
@@ -22,23 +24,6 @@ export default function ConfirmModal({
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onCancel]);
-
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
 
   return (
     <div className="confirm-overlay">

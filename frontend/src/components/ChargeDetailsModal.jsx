@@ -7,6 +7,7 @@ import oko1 from '../assets/oko1.png';
 import oko2 from '../assets/oko2.png';
 import ConfirmModal from './ConfirmModal.jsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import '../pages/Dashboard.css';
 import './ChargeDetailsModal.css';
 
@@ -31,6 +32,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const modalRef = useRef(null);
 
   useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm && !statusConfirm);
+  useScrollLock();
   const handleAddOther = async () => {
     if (!newOther.amount || parseFloat(newOther.amount) <= 0) {
       toast.error('Моля, въведете валидна сума');
@@ -171,23 +173,6 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
     };
     loadData();
   }, [apartment.ap_number]);
-
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
 
   const handleResetPassword = () => {
     setShowResetConfirm(true);

@@ -281,6 +281,43 @@
   box-shadow: none;
 }
 
+.expenses-btn {
+  padding: 0.6rem;
+  min-width: 175px;
+  background: #b05b10;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  height: 40px;
+}
+
+.expenses-btn:hover {
+  background: #954e10;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+}
+
+.expenses-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* Контейнер за двата бутона */
+.action-buttons-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .report-btn {
   padding: 0.5rem 1rem;
   min-width: 175px;
@@ -336,7 +373,7 @@
   height: 40px;
   box-sizing: border-box;
   margin-left: auto;
-  width: 180px;
+  width: 175px;
 }
 
 /* Инлайн редактиране */
@@ -542,11 +579,11 @@
 .apartments-table .paid-label {
   text-align: right;
   font-weight: bold;
-  color: #2980b9;
+  color: #27ae60;
 }
 
 .apartments-table .paid-amount {
-  color: #2980b9;
+  color: #27ae60;
 }
 
 .details-btn.has-debt {
@@ -560,6 +597,21 @@
 .debt-indicator {
   color: white;
   font-weight: bold;
+}
+
+.apartments-table .cash-row {
+  background: #e8f6f3;
+  border-top: 1px solid #1abc9c;
+}
+
+.apartments-table .cash-label {
+  text-align: right;
+  font-weight: bold;
+  color: #2980b9;
+}
+
+.apartments-table .cash-amount {
+  color: #2980b9;
 }
 
 @keyframes fadeInTable {
@@ -619,15 +671,25 @@
   }
 
   .month-selector-input {
-    width: 160px;
+    width: 165px;
     margin-left: 0;
   }
 
-  .bulk-btn {
-    flex-basis: 50%;
+  .action-buttons-group {
+    flex-basis: 100%;
     justify-content: center;
-    margin-left: auto;
-    margin-right: auto;
+  }
+
+  .bulk-btn,
+  .expenses-btn {
+    flex: 1;
+    /* Всеки заема равно място */
+    justify-content: center;
+  }
+
+  .filters-row {
+    justify-content: center;
+    /* Центрира всички елементи */
   }
 
   .report-btn .btn-text {

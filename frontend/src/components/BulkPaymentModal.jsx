@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import api from '../api.js';
 import Spinner from './Spinner.jsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
+import { useScrollLock } from '../hooks/useScrollLock.js';
 import './BulkPaymentModal.css';
 
 const getCurrentMonth = () => {
@@ -29,6 +30,8 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
     status: 'unpaid',
   });
   useFocusTrap(modalRef, true);
+  useScrollLock();
+
   // Зареждане на апартаментите
   useEffect(() => {
     const loadApartments = async () => {
@@ -71,23 +74,6 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
-
-  // Блокиране на скрола
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
 
   const toggleApartment = (id) => {
     setSelected(prev => ({

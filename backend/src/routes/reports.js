@@ -227,16 +227,51 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
     const balance = toFund + otherPaidSum - totalExpenses;
 
     // 7. Салдо от предходния месец
-    const prevMonth = new Date(month + '-01');
-    prevMonth.setMonth(prevMonth.getMonth() - 1);
-    const prevMonthStr = prevMonth.toISOString().slice(0, 7);
+    // 7. Салдо от предходния месец
+    const [yearStr, monthStr] = month.split('-');
+    let prevYear = parseInt(yearStr, 10);
+    let prevMonthNum = parseInt(monthStr, 10) - 1;
+    if (prevMonthNum === 0) {
+      prevMonthNum = 12;
+      prevYear -= 1;
+    }
+    const prevMonthStr = `${prevYear}-${String(prevMonthNum).padStart(2, '0')}`;
 
     let prevBalance = openingBalance;
+    console.log('startMonth:', startMonth, 'prevMonthStr:', prevMonthStr)
     if (prevMonthStr >= startMonth) {
-      // Изчисляваме салдото до предходния месец (може да е сложно, затова за сега го оставяме 0)
-      // За по-точна логика ще трябва да сумираме всички приходи и разходи от startMonth до prevMonth.
-      prevBalance = 0; // TODO: изчисли реалното салдо
+      // Вземаме всички платени месечни такси от startMonth до prevMonth
+      const monthlyIncomeRes = await pool.query(`
+        SELECT SUM(total_amount)::numeric AS total, SUM(manager_fee)::numeric AS manager
+        FROM monthly_charges
+        WHERE month >= $1 AND month <= $2 AND status = 'paid'
+      `, [startMonth, prevMonthStr]);
+
+      const monthlyIncome = parseFloat(monthlyIncomeRes.rows[0]?.total) || 0;
+      const monthlyManager = parseFloat(monthlyIncomeRes.rows[0]?.manager) || 0;
+      const monthlyToFund = monthlyIncome - monthlyManager;
+
+      // Вземаме всички платени other разходи от startMonth до prevMonth
+      const otherIncomeRes = await pool.query(`
+        SELECT SUM(amount)::numeric AS total
+        FROM payments
+        WHERE type = 'other' AND status = 'paid' AND month >= $1 AND month <= $2
+      `, [startMonth, prevMonthStr]);
+      const otherIncome = parseFloat(otherIncomeRes.rows[0]?.total) || 0;
+
+      // Вземаме всички разходи (expenses) от startMonth до prevMonth
+      const prevExpensesRes = await pool.query(`
+        SELECT SUM(amount)::numeric AS total
+        FROM expenses
+        WHERE to_char(date, 'YYYY-MM') >= $1 AND to_char(date, 'YYYY-MM') <= $2
+      `, [startMonth, prevMonthStr]);
+      const prevExpenses = parseFloat(prevExpensesRes.rows[0]?.total) || 0;
+
+      prevBalance = openingBalance + monthlyToFund + otherIncome - prevExpenses;
     }
+
+    // 8. Текущо салдо
+    const currentBalance = prevBalance + toFund + otherPaidSum - totalExpenses;
 
     res.json({
       month,
@@ -264,7 +299,7 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
         total: totalExpenses.toFixed(2),
       },
       to_fund: toFund.toFixed(2),
-      balance: balance.toFixed(2),
+      balance: currentBalance.toFixed(2), // <-- тук вече е currentBalance
       unpaid: {
         monthly: unpaidSum.toFixed(2),
         other: otherUnpaidSum.toFixed(2),
