@@ -137,49 +137,6 @@
   padding-left: 20px;
 }
 
-/* Асанс. такса (2-ра колона) */
-.resident-payments-table td:nth-child(2) {
-  /* padding-right: 40px; */
-}
-
-/* Асанс. ток (3-та колона) */
-.resident-payments-table td:nth-child(3) {
-  /* text-align: right;
-  padding-right: 12px; */
-}
-
-/* Общ ток (4-та колона) */
-.resident-payments-table td:nth-child(4) {
-  /* text-align: right;
-  padding-right: 12px; */
-}
-
-/* Фонд Р.О. (5-та колона) */
-.resident-payments-table td:nth-child(5) {
-  /* text-align: right;
-  padding-right: 12px; */
-}
-
-/* Дом. сис. (6-та колона) */
-.resident-payments-table td:nth-child(6) {
-  /* text-align: right;
-  padding-right: 12px; */
-}
-
-/* Хонорар (7-ма колона) */
-.resident-payments-table td:nth-child(7) {
-  /* text-align: right;
-  padding-right: 12px; */
-}
-
-/* Всичко (8-ма колона) */
-.resident-payments-table td:nth-child(8) {
-  /* text-align: right;
-  padding-right: 12px;
-  font-weight: 600; */
-  /* По-удебелено за общата сума */
-}
-
 /* Статус (9-та колона) */
 .resident-payments-table td:nth-child(9) {
   text-align: center;
@@ -202,27 +159,9 @@
   width: 20%;
 }
 
-
-/* Месец (1-ва колона) */
-.other-table td:nth-child(1) {
-  /* text-align: left;
-  padding-left: 12px; */
-}
-
 /* Сума (2-ра колона) – дясно подравняване */
 .other-table td:nth-child(2) {
   padding-right: 66px;
-}
-
-/* Описание (3-та колона) – ляво подравняване */
-.other-table td:nth-child(3) {
-  /* text-align: left;
-  padding-left: 12px; */
-}
-
-/* Статус (4-та колона) – центриране */
-.other-table td:nth-child(4) {
-  /* text-align: center; */
 }
 
 @media (max-width: 918px) {
