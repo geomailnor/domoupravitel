@@ -284,7 +284,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             className="report-btn"
-            // onClick={() => setShowMonthlyReport(true)}
+            onClick={() => setShowMonthlyReport(true)}
             title="Месечен отчет"
           >
             📊<span className="btn-text"> Месечен отчет</span>
