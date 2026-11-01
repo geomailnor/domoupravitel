@@ -255,6 +255,51 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Вътрешна грешка при обновяване' });
   }
 });
+// GET /api/charges/history/me – история за текущия логнат живущ
+router.get('/history/me', requireAuth, async (req, res) => {
+  try {
+    // Вземаме номера на апартамента от токена (user.number)
+    const apNumber = req.user.number;
+    if (!apNumber) {
+      return res.status(400).json({ error: 'Липсва номер на апартамент' });
+    }
+
+    // Намираме ID-то на апартамента
+    const aptRes = await pool.query('SELECT id FROM apartments WHERE number = $1', [apNumber]);
+    if (aptRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Апартаментът не е намерен' });
+    }
+    const apId = aptRes.rows[0].id;
+
+    // Вземаме месечните такси
+    const monthlyRes = await pool.query(`
+      SELECT 
+        id, month, residents_count, elevator_payers_count,
+        elevator_fee::float, elevator_power::float, general_power::float,
+        fund_ro::float, intercom::float, manager_fee::float, total_amount::float,
+        status, paid_at
+      FROM monthly_charges
+      WHERE ap_id = $1
+      ORDER BY month DESC
+    `, [apId]);
+
+    // Вземаме other разходите
+    const otherRes = await pool.query(`
+      SELECT id, month, amount::float, type, description, status
+      FROM payments
+      WHERE ap_id = $1 AND type = 'other'
+      ORDER BY month DESC
+    `, [apId]);
+
+    res.json({
+      monthly: monthlyRes.rows,
+      other: otherRes.rows,
+    });
+  } catch (error) {
+    console.error('Грешка при зареждане на историята:', error);
+    res.status(500).json({ error: 'Вътрешна грешка' });
+  }
+});
 // GET /api/charges/history/:ap_id – история на таксите и другите разходи
 router.get('/history/:ap_id', requireAuth, requireAdmin, async (req, res) => {
   const { ap_id } = req.params;

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
 import Spinner from '../components/Spinner.jsx';
-import { statusLabel, typeLabel, monthLabel } from '../components/i18n/translate.js';
+import { monthLabel, monthNameOnly } from '../components/i18n/translate.js';
 import ChangePasswordModal from '../components/ChangePasswordModal.jsx';
 import './Dashboard.css';
 import './ResidentView.css';
@@ -13,19 +13,17 @@ export default function ResidentView() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [payments, setPayments] = useState([]);
+  const [history, setHistory] = useState({ monthly: [], other: [] });
   const [loading, setLoading] = useState(true);
   const [startMonth, setStartMonth] = useState('');
-  const [monthlyFee, setMonthlyFee] = useState(7);
-  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-  // Зареждане на плащанията
+  // Зареждане на историята
   useEffect(() => {
-    const loadPayments = async () => {
+    const loadHistory = async () => {
       try {
-        const response = await api.get('/payments/me');
-        setPayments(response.data);
+        const res = await api.get('/charges/history/me');
+        setHistory(res.data);
       } catch (err) {
         const message = err.response?.data?.error || 'Грешка при зареждане';
         toast.error(message);
@@ -34,8 +32,8 @@ export default function ResidentView() {
       }
     };
 
-    loadPayments();
-  }, []);
+    loadHistory();
+  }, [user]);
 
   // Зареждане на start_month
   useEffect(() => {
@@ -43,80 +41,33 @@ export default function ResidentView() {
       try {
         const response = await api.get('/settings');
         setStartMonth(response.data.start_month || '');
-        setMonthlyFee(response.data.monthly_fee || 7);
-        setSettingsLoaded(true);
-      } catch (err) {
-        console.error('Грешка при зареждане на настройки', err);
+      } catch {
+        console.error('Грешка при зареждане на настройки');
       }
     };
     loadSettings();
   }, []);
 
-  // Изчисляване на неплатени месеци
+  // Изчисляване на дълга
   const unpaidStats = useMemo(() => {
-    const empty = {
-      unpaidCount: 0, unpaidDue: 0,
-      partialCount: 0, partialDue: 0,
-      otherCount: 0, otherDue: 0,
-      totalDue: 0,
-    };
+    // Месечни такси: неплатени
+    const unpaidMonthly = history.monthly.filter(m => m.status === 'unpaid');
+    const unpaidCount = unpaidMonthly.length;
+    const unpaidDue = unpaidMonthly.reduce((sum, m) => sum + m.total_amount, 0);
 
-    if (!startMonth) return empty;
-
-    const now = new Date();
-    let currentYear = now.getFullYear();
-    let currentMonth = now.getMonth() + 1 - 1;
-
-    if (currentMonth === 0) {
-      currentMonth = 12;
-      currentYear -= 1;
-    }
-
-    const dueMonths = [];
-    let [year, month] = startMonth.split('-').map(Number);
-
-    while (year < currentYear || (year === currentYear && month <= currentMonth)) {
-      dueMonths.push(`${year}-${String(month).padStart(2, '0')}`);
-      month++;
-      if (month > 12) {
-        month = 1;
-        year++;
-      }
-    }
-
-    const paidOrPartialSet = new Set(
-      payments
-        .filter(p => p.type === 'monthly' && (p.status === 'paid' || p.status === 'partial'))
-        .map(p => p.month)
-    );
-
-    const unpaidMonths = dueMonths.filter(m => !paidOrPartialSet.has(m));
-    const unpaidCount = unpaidMonths.length;
-    const unpaidDue = unpaidCount * monthlyFee;
-
-    const partialMonthly = payments.filter(
-      p => p.type === 'monthly' && p.status === 'partial' && p.month >= startMonth
-    );
-    const partialPaidSum = partialMonthly.reduce((sum, p) => sum + parseFloat(p.amount), 0);
-    const partialCount = partialMonthly.length;
-    const partialDue = partialCount * monthlyFee - partialPaidSum;
-
-    // 3. Неплатени други разходи (само от startMonth нататък)
-    const unpaidOther = payments.filter(
-      p => p.type === 'other' && p.status === 'unpaid' && p.month >= startMonth
-    );
+    // Други разходи: неплатени
+    const unpaidOther = history.other.filter(o => o.status === 'unpaid');
     const otherCount = unpaidOther.length;
-    const otherDue = unpaidOther.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    const otherDue = unpaidOther.reduce((sum, o) => sum + o.amount, 0);
 
-    const totalDue = unpaidDue + partialDue + otherDue;
+    const totalDue = unpaidDue + otherDue;
 
     return {
       unpaidCount, unpaidDue,
-      partialCount, partialDue,
       otherCount, otherDue,
       totalDue,
     };
-  }, [startMonth, payments, monthlyFee]);
+  }, [history]);
 
   const handleLogout = () => {
     logout();
@@ -135,7 +86,7 @@ export default function ResidentView() {
             onClick={() => setShowChangePassword(true)}
             title="Сменете паролата"
           >
-            Смени парола
+            Смяна на парола
           </button>
           <button onClick={handleLogout} title="Излизане от системата">Изход</button>
         </div>
@@ -151,91 +102,121 @@ export default function ResidentView() {
           )}
         </div>
 
-        {!loading && settingsLoaded && (() => {
-          const hasDebt = unpaidStats.totalDue > 0;
-
-          return (
-            <div className={`stat-unpaid-card ${!hasDebt ? 'stat-unpaid-ok'
-              : unpaidStats.unpaidCount + unpaidStats.partialCount + unpaidStats.otherCount <= 2 ? 'stat-unpaid-warning'
-                : 'stat-unpaid-danger'
-              }`}>
-              {!hasDebt ? (
-                <div className="stat-unpaid-label">Всичко е платено ✓</div>
-              ) : (
-                <div className="debt-summary">
-                  {unpaidStats.unpaidCount > 0 && (
-                    <div className="debt-row">
-                      <span className="debt-label">
-                        {unpaidStats.unpaidCount} {unpaidStats.unpaidCount === 1 ? 'неплатен месец' : 'неплатени месеца'}
-                      </span>
-                      <span className="debt-amount">{unpaidStats.unpaidDue.toFixed(2)} €</span>
-                    </div>
-                  )}
-
-                  {unpaidStats.partialCount > 0 && (
-                    <div className="debt-row">
-                      <span className="debt-label">
-                        {unpaidStats.partialCount} {unpaidStats.partialCount === 1 ? 'частично неплатен месец' : 'частично неплатени месеца'}
-                      </span>
-                      <span className="debt-amount">{unpaidStats.partialDue.toFixed(2)} €</span>
-                    </div>
-                  )}
-
-                  {unpaidStats.otherCount > 0 && (
-                    <div className="debt-row">
-                      <span className="debt-label">
-                        {unpaidStats.otherCount} {unpaidStats.otherCount === 1 ? 'неплатен доп. разход' : 'неплатени доп. разходи'}
-                      </span>
-                      <span className="debt-amount">{unpaidStats.otherDue.toFixed(2)} €</span>
-                    </div>
-                  )}
-
-                  <div className="debt-total-row">
-                    <span>Общо дължимо:</span>
-                    <span className="debt-total-amount">{unpaidStats.totalDue.toFixed(2)} €</span>
+        {/* Карта с дълга */}
+        {!loading && (
+          <div className={`stat-unpaid-card ${unpaidStats.totalDue === 0 ? 'stat-unpaid-ok'
+            : unpaidStats.unpaidCount + unpaidStats.otherCount <= 2 ? 'stat-unpaid-warning'
+              : 'stat-unpaid-danger'
+            }`}>
+            {unpaidStats.totalDue === 0 ? (
+              <div className="stat-unpaid-label">Всичко е платено ✓</div>
+            ) : (
+              <div className="debt-summary">
+                {unpaidStats.unpaidCount > 0 && (
+                  <div className="debt-row">
+                    <span className="debt-label">
+                      {unpaidStats.unpaidCount} {unpaidStats.unpaidCount === 1 ? 'неплатен месец' : 'неплатени месеца'}
+                    </span>
+                    <span className="debt-amount">{unpaidStats.unpaidDue.toFixed(2)} €</span>
                   </div>
+                )}
+                {unpaidStats.otherCount > 0 && (
+                  <div className="debt-row">
+                    <span className="debt-label">
+                      {unpaidStats.otherCount} {unpaidStats.otherCount === 1 ? 'неплатен доп. разход' : 'неплатени доп. разходи'}
+                    </span>
+                    <span className="debt-amount">{unpaidStats.otherDue.toFixed(2)} €</span>
+                  </div>
+                )}
+                <div className="debt-total-row">
+                  <span>Общо дължимо:</span>
+                  <span className="debt-total-amount">{unpaidStats.totalDue.toFixed(2)} €</span>
                 </div>
-              )}
-            </div>
-          );
-        })()}
+              </div>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <Spinner />
-        ) : payments.length === 0 ? (
-          <p className="no-payments">Няма записани плащания</p>
         ) : (
-          <div className="table-wrapper">
-            <table className="resident-payments-table">
-              <thead>
-                <tr>
-                  <th>Месец</th>
-                  <th>Сума</th>
-                  <th>Вид</th>
-                  <th>Статус</th>
-                  <th>Описание</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payments.map((p) => (
-                  <tr key={p.id}>
-                    <td>{monthLabel(p.month)}</td>
-                    <td className={p.status === 'unpaid' ? 'amount-empty' : 'amount-cell'}>
-                      {p.status === 'unpaid' ? '—' : `${p.amount} €`}
-                    </td>
-                    <td>{typeLabel(p.type)}</td>
-                    <td className={`status-${p.status}`}>
-                      {statusLabel(p.status)}
-                    </td>
-                    <td className="description-cell" title={p.description || ''}>
-                      {p.description}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Месечни такси */}
+            <h3 className="modal-section-title">
+              Месечни такси {history.monthly.length > 0 && `(${history.monthly[0].month.split('-')[0]})`}
+            </h3>
+            {history.monthly.length === 0 ? (
+              <p className="no-payments">Няма записани месечни такси</p>
+            ) : (
+              <div className="table-wrapper">
+                <table className="resident-payments-table">
+                  <thead>
+                    <tr>
+                      <th>Месец</th>
+                      <th>Асанс.<br />такса</th>
+                      <th>Асанс.<br />ток</th>
+                      <th>Общ<br />ток</th>
+                      <th>Фонд<br />Р.О.</th>
+                      <th>Дом.<br />сис.</th>
+                      <th>Хоно-<br />рар</th>
+                      <th>Всич-<br />ко</th>
+                      <th>Ста-<br />тус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.monthly.map((m) => (
+                      <tr key={m.id}>
+                        <td>{monthNameOnly(m.month)}</td>
+                        <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
+                        <td className="text-right">{m.elevator_power.toFixed(2)}</td>
+                        <td className="text-right">{m.general_power.toFixed(2)}</td>
+                        <td className="text-right">{m.fund_ro.toFixed(2)}</td>
+                        <td className="text-right">{m.intercom.toFixed(2)}</td>
+                        <td className="text-right">{m.manager_fee.toFixed(2)}</td>
+                        <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
+                        <td className={`status-${m.status}`}>
+                          {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Други разходи */}
+            <h3 className="modal-section-title" style={{ marginTop: '2rem' }}>Други разходи</h3>
+            {history.other.length === 0 ? (
+              <p className="no-payments">Няма други разходи</p>
+            ) : (
+              <div className="table-wrapper">
+                <table className="resident-payments-table other-table">
+                  <thead>
+                    <tr>
+                      <th>Месец</th>
+                      <th>Сума</th>
+                      <th>Описание</th>
+                      <th>Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.other.map((o) => (
+                      <tr key={o.id}>
+                        <td>{monthNameOnly(o.month)}</td>
+                        <td>{o.amount.toFixed(2)} €</td> {/* <-- махни className="text-right" */}
+                        <td>{o.description || '—'}</td>
+                        <td className={`status-${o.status}`}>
+                          {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
+
         {showChangePassword && (
           <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
         )}

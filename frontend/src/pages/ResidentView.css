@@ -29,7 +29,7 @@
 /* Таблица с плащания */
 .resident-payments-table {
   width: 100%;
-  min-width: 600px;
+  min-width: 750px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
@@ -43,6 +43,8 @@
   color: white;
   font-weight: 600;
   font-size: 1rem;
+  line-height: 1.2;
+  vertical-align: top;
   white-space: nowrap;
 }
 
@@ -70,45 +72,6 @@
   background: #d6eaf8;
 }
 
-/* Месец */
-.resident-payments-table th:nth-child(1) {
-  width: 150px;
-}
-
-/* Сума */
-.resident-payments-table th:nth-child(2) {
-  width: 92px;
-}
-
-/* Вид */
-.resident-payments-table th:nth-child(3) {
-  width: 180px;
-}
-
-/* Статус */
-.resident-payments-table th:nth-child(4) {
-  width: 110px;
-}
-
-/* Описание */
-.resident-payments-table th:nth-child(5) {
-  width: auto;
-}
-
-.resident-payments-table td.amount-cell {
-  text-align: right;
-}
-
-.resident-payments-table td.amount-empty {
-  text-align: center;
-  color: #7f8c8d;
-}
-
-.resident-payments-table .description-cell {
-  color: #7f8c8d;
-  font-size: 0.95rem;
-}
-
 .no-payments {
   padding: 1.25rem;
   text-align: center;
@@ -118,8 +81,152 @@
   font-size: 1.1rem;
 }
 
-@media (max-width: 800px) {
-  .resident-payments-table th:nth-child(5) {
-    width: 110px;
+.resident-payments-table th {
+  text-align: center;
+}
+
+.resident-payments-table td.text-right {
+  text-align: right;
+  padding-right: 42px;
+}
+
+.resident-payments-table th:nth-child(1) {
+  width: 16%;
+  text-align: left;
+  padding-left: 20px;
+}
+
+.resident-payments-table th:nth-child(2) {
+  width: 11%;
+  background: #386087;
+}
+
+.resident-payments-table th:nth-child(3) {
+  width: 11%;
+}
+
+.resident-payments-table th:nth-child(4) {
+  width: 11%;
+  background: #386087;
+}
+
+.resident-payments-table th:nth-child(5) {
+  width: 10%;
+}
+
+.resident-payments-table th:nth-child(6) {
+  width: 10%;
+  background: #386087;
+}
+
+.resident-payments-table th:nth-child(7) {
+  width: 10%;
+}
+
+.resident-payments-table th:nth-child(8) {
+  width: 11%;
+  background: #386087;
+}
+
+.resident-payments-table th:nth-child(9) {
+  width: 10%;
+}
+
+/* Месец (1-ва колона) – подравняваме вляво и даваме малко отстояние */
+.resident-payments-table td:nth-child(1) {
+  padding-left: 20px;
+}
+
+/* Асанс. такса (2-ра колона) */
+.resident-payments-table td:nth-child(2) {
+  /* padding-right: 40px; */
+}
+
+/* Асанс. ток (3-та колона) */
+.resident-payments-table td:nth-child(3) {
+  /* text-align: right;
+  padding-right: 12px; */
+}
+
+/* Общ ток (4-та колона) */
+.resident-payments-table td:nth-child(4) {
+  /* text-align: right;
+  padding-right: 12px; */
+}
+
+/* Фонд Р.О. (5-та колона) */
+.resident-payments-table td:nth-child(5) {
+  /* text-align: right;
+  padding-right: 12px; */
+}
+
+/* Дом. сис. (6-та колона) */
+.resident-payments-table td:nth-child(6) {
+  /* text-align: right;
+  padding-right: 12px; */
+}
+
+/* Хонорар (7-ма колона) */
+.resident-payments-table td:nth-child(7) {
+  /* text-align: right;
+  padding-right: 12px; */
+}
+
+/* Всичко (8-ма колона) */
+.resident-payments-table td:nth-child(8) {
+  /* text-align: right;
+  padding-right: 12px;
+  font-weight: 600; */
+  /* По-удебелено за общата сума */
+}
+
+/* Статус (9-та колона) */
+.resident-payments-table td:nth-child(9) {
+  text-align: center;
+}
+
+.other-table th:nth-child(1) {
+  width: 16%;
+}
+
+.other-table th:nth-child(2) {
+  text-align: center;
+  width: 20%;
+}
+
+.other-table th:nth-child(3) {
+  width: 44%;
+}
+
+.other-table th:nth-child(4) {
+  width: 20%;
+}
+
+
+/* Месец (1-ва колона) */
+.other-table td:nth-child(1) {
+  /* text-align: left;
+  padding-left: 12px; */
+}
+
+/* Сума (2-ра колона) – дясно подравняване */
+.other-table td:nth-child(2) {
+  padding-right: 66px;
+}
+
+/* Описание (3-та колона) – ляво подравняване */
+.other-table td:nth-child(3) {
+  /* text-align: left;
+  padding-left: 12px; */
+}
+
+/* Статус (4-та колона) – центриране */
+.other-table td:nth-child(4) {
+  /* text-align: center; */
+}
+
+@media (max-width: 918px) {
+  .resident-payments-table td.text-right {
+    padding-right: 20px;
   }
 }
