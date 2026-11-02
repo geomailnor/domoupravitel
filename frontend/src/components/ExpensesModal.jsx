@@ -170,7 +170,7 @@ export default function ExpensesModal({ onClose }) {
                     {expenses.map((e) => (
                       <tr key={e.id}>
                         <td>{new Date(e.date).toLocaleDateString('bg-BG')}</td>
-                        <td className="text-right">{parseFloat(e.amount).toFixed(2)} €</td>
+                        <td className="text-right expense-row">{parseFloat(e.amount).toFixed(2)} €</td>
                         <td>{e.description || '—'}</td>
                         <td className="text-center">
                           <button className="delete-other-btn" onClick={() => setDeleteConfirm(e.id)}>🗑️</button>
