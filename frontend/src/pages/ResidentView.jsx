@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
 import Spinner from '../components/Spinner.jsx';
-import { monthLabel, monthNameOnly } from '../components/i18n/translate.js';
+import { monthLabel } from '../components/i18n/translate.js';
 import ChangePasswordModal from '../components/ChangePasswordModal.jsx';
 import './Dashboard.css';
 import './ResidentView.css';
