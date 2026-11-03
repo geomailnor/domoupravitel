@@ -109,9 +109,41 @@ export default function ExpensesModal({ onClose }) {
           ) : (
             <>
               {/* Поле за начално салдо */}
-              <div className="form-row balance-field">
-                <div className="balance-label-row">
+              <div className="balance-field">
+                <div className="balance-inline-row">
                   <label>Начално салдо от предходната година (€):</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={openingBalance}
+                    disabled={!isEditingBalance}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^0-9.]/g, '');
+                      const parts = val.split('.');
+                      if (parts.length > 2) {
+                        val = parts[0] + '.' + parts.slice(1).join('');
+                      }
+                      if (val === '.') val = '';
+                      setOpeningBalance(val);
+                    }}
+                    onBlur={async (e) => {
+                      const num = parseFloat(e.target.value);
+                      if (!isNaN(num)) {
+                        setOpeningBalance(num.toFixed(2));
+                        try {
+                          await api.put('/settings', { opening_balance: num.toFixed(2) });
+                          toast.success('Началното салдо е запазено');
+                          setIsEditingBalance(false);
+                        } catch {
+                          toast.error('Грешка при запазване');
+                        }
+                      } else {
+                        setOpeningBalance('0.00');
+                      }
+                    }}
+                    placeholder="0.00"
+                    className={isEditingBalance ? 'editable-balance' : 'disabled-balance'}
+                  />
                   <label className="edit-checkbox-label">
                     <input
                       type="checkbox"
@@ -121,38 +153,6 @@ export default function ExpensesModal({ onClose }) {
                     Редактирай
                   </label>
                 </div>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={openingBalance}
-                  disabled={!isEditingBalance}
-                  onChange={(e) => {
-                    let val = e.target.value.replace(/[^0-9.]/g, '');
-                    const parts = val.split('.');
-                    if (parts.length > 2) {
-                      val = parts[0] + '.' + parts.slice(1).join('');
-                    }
-                    if (val === '.') val = '';
-                    setOpeningBalance(val);
-                  }}
-                  onBlur={async (e) => {
-                    const num = parseFloat(e.target.value);
-                    if (!isNaN(num)) {
-                      setOpeningBalance(num.toFixed(2));
-                      try {
-                        await api.put('/settings', { opening_balance: num.toFixed(2) });
-                        toast.success('Началното салдо е запазено');
-                        setIsEditingBalance(false);
-                      } catch {
-                        toast.error('Грешка при запазване');
-                      }
-                    } else {
-                      setOpeningBalance('0.00');
-                    }
-                  }}
-                  placeholder="0.00"
-                  className={isEditingBalance ? 'editable-balance' : 'disabled-balance'}
-                />
               </div>
               {expenses.length === 0 ? (
                 <p className="no-payments">Няма записани разходи</p>
@@ -187,7 +187,7 @@ export default function ExpensesModal({ onClose }) {
                 </button>
               ) : (
                 <div className="add-other-form">
-                  <div className="form-row">
+                  <div className="expenses-form-row">
                     <label>Дата:</label>
                     <input
                       type="date"
@@ -195,7 +195,7 @@ export default function ExpensesModal({ onClose }) {
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     />
                   </div>
-                  <div className="form-row">
+                  <div className="expenses-form-row">
                     <label>Сума (€):</label>
                     <input
                       type="text"
@@ -221,7 +221,7 @@ export default function ExpensesModal({ onClose }) {
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="form-row">
+                  <div className="expenses-form-row">
                     <label>Описание:</label>
                     <input
                       type="text"

@@ -282,12 +282,47 @@ export default function AdminDashboard() {
               <span className="short-text">от <strong>{monthLabel(startMonth)}</strong></span>
             </div>
           )}
-          <input
-            type="month"
-            value={currentMonth}
-            onChange={(e) => setCurrentMonth(e.target.value)}
-            className="month-selector-input"
-          />
+          <div className="month-year-selector">
+            <select
+              value={currentMonth.split('-')[0]}
+              onChange={(e) => {
+                const newYear = e.target.value;
+                const currentYear = new Date().getFullYear();
+                // Ако избираме текущата година, запазваме месеца.
+                // Ако избираме друга година, слагаме януари (или текущия месец, ако е същата).
+                const newMonth = (parseInt(newYear) === currentYear)
+                  ? currentMonth.split('-')[1]
+                  : '01';
+                setCurrentMonth(`${newYear}-${newMonth}`);
+              }}
+              className="year-selector"
+            >
+              {[new Date().getFullYear(), new Date().getFullYear() + 1].map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            <select
+              value={currentMonth.split('-')[1]}
+              onChange={(e) => {
+                const currentYear = currentMonth.split('-')[0];
+                setCurrentMonth(`${currentYear}-${e.target.value}`);
+              }}
+              className="month-selector-input"
+            >
+              <option value="01">Яну.</option>
+              <option value="02">Фев.</option>
+              <option value="03">Мар.</option>
+              <option value="04">Апр.</option>
+              <option value="05">Май</option>
+              <option value="06">Юни</option>
+              <option value="07">Юли</option>
+              <option value="08">Авг.</option>
+              <option value="09">Сеп.</option>
+              <option value="10">Окт.</option>
+              <option value="11">Ное.</option>
+              <option value="12">Дек.</option>
+            </select>
+          </div>
           <button
             type="button"
             className="report-btn"

@@ -19,22 +19,6 @@ router.get('/', requireAuth, async (req, res) => {
         settings[row.name] = parseFloat(row.value);
       }
     }
-
-    // Автоматично превключване на start_month на 1 януари новата година
-    if (settings.start_month) {
-      const currentYear = new Date().getFullYear();
-      const startYear = parseInt(settings.start_month.split('-')[0], 10);
-
-      if (startYear < currentYear) {
-        const newStartMonth = `${currentYear}-01`;
-        await pool.query(
-          'UPDATE block_params SET value = $1 WHERE name = $2',
-          [newStartMonth, 'start_month']
-        );
-        settings.start_month = newStartMonth;
-      }
-    }
-
     res.json(settings);
   } catch (error) {
     console.error('Грешка при взимане на настройки:', error);

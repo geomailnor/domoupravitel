@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import api from '../api.js';
 import Spinner from './Spinner.jsx';
-import { monthLabel, monthNameOnly } from './i18n/translate.js';
+import { monthLabel, shortMonthLabel } from './i18n/translate.js';
 import oko1 from '../assets/oko1.png';
 import oko2 from '../assets/oko2.png';
 import ConfirmModal from './ConfirmModal.jsx';
@@ -89,17 +89,34 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
     }
   };
   const fillMissingMonths = (monthlyData, startMonth) => {
-    if (!startMonth || monthlyData.length === 0) return monthlyData;
+    if (!startMonth) return monthlyData;
 
-    const result = [...monthlyData];
-    const [startYear, startMonthNum] = startMonth.split('-').map(Number);
-    const [endYear, endMonthNum] = monthlyData[0].month.split('-').map(Number);
+    // Текущ месец
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonthNum = now.getMonth() + 1; // 1-12
 
-    let currentYear = startYear;
-    let currentMonth = startMonthNum;
+    // Краен месец: текущия + 3 месеца напред
+    let endYear = currentYear;
+    let endMonthNum = currentMonthNum + 3;
+    if (endMonthNum > 12) {
+      endMonthNum -= 12;
+      endYear += 1;
+    }
+    const endMonth = `${endYear}-${String(endMonthNum).padStart(2, '0')}`;
+    // Начален месец: startMonth (или текущия, ако startMonth е по-късно)
+    const effectiveStart = startMonth > `${currentYear}-${String(currentMonthNum).padStart(2, '0')}`
+      ? startMonth
+      : startMonth; // за сега винаги startMonth
 
-    while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonthNum)) {
-      const monthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+    const result = [...monthlyData.filter(m => m.month >= effectiveStart && m.month <= endMonth)];
+
+    // Генерираме липсващите месеци от effectiveStart до endMonth
+    let [year, month] = effectiveStart.split('-').map(Number);
+    const [endY, endM] = endMonth.split('-').map(Number);
+
+    while (year < endY || (year === endY && month <= endM)) {
+      const monthStr = `${year}-${String(month).padStart(2, '0')}`;
       if (!result.find(m => m.month === monthStr)) {
         result.push({
           id: `empty-${monthStr}`,
@@ -115,14 +132,14 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
           is_empty: true,
         });
       }
-      currentMonth++;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
       }
     }
 
-    return result.sort((a, b) => b.month.localeCompare(a.month));
+    return result.sort((a, b) => a.month.localeCompare(b.month));
   };
   const toggleOtherStatus = (id, currentStatus) => {
     if (currentStatus === 'paid') {
@@ -337,25 +354,28 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                 </tr>
               </thead>
               <tbody>
-                {history.other.map((o) => (
-                  <tr key={o.id}>
-                    <td>{monthLabel(o.month)}</td>
-                    <td>{o.amount.toFixed(2)} €</td>
-                    <td>{o.description || '—'}</td>
-                    <td>
-                      <button
-                        className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
-                        onClick={() => toggleOtherStatus(o.id, o.status)}
-                        style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '60px' }}
-                      >
-                        {o.status === 'paid' ? 'Плат.' : 'Непл.'}
-                      </button>
-                    </td>
-                    <td>
-                      <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
-                    </td>
-                  </tr>
-                ))}
+                {history.other
+                  .slice()
+                  .sort((a, b) => a.month.localeCompare(b.month))
+                  .map((o) => (
+                    <tr key={o.id}>
+                      <td>{monthLabel(o.month)}</td>
+                      <td>{o.amount.toFixed(2)} €</td>
+                      <td>{o.description || '—'}</td>
+                      <td>
+                        <button
+                          className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
+                          onClick={() => toggleOtherStatus(o.id, o.status)}
+                          style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '60px' }}
+                        >
+                          {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                        </button>
+                      </td>
+                      <td>
+                        <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           ) : (
@@ -426,7 +446,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
           )}
           {/* История на месечните такси */}
           <h3 className="modal-section-title">
-            История на месечните такси за {apartmentData?.owner_name || `ап. ${apartment.ap_number || apartment.number}`} {history.monthly.length > 0 && `(${history.monthly[0].month.split('-')[0]})`}
+            История на месечните такси за {apartmentData?.owner_name || `ап. ${apartment.ap_number || apartment.number}`}
           </h3>
           {loading ? (
             <Spinner size="small" />
@@ -451,7 +471,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                 <tbody>
                   {history.monthly.map((m) => (
                     <tr key={m.id}>
-                      <td>{monthNameOnly(m.month)}</td>
+                      <td>{shortMonthLabel(m.month)}</td>
                       <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
                       <td className="text-right">{m.elevator_power.toFixed(2)}</td>
                       <td className="text-right">{m.general_power.toFixed(2)}</td>

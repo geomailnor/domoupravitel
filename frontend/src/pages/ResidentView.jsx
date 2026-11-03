@@ -142,9 +142,7 @@ export default function ResidentView() {
         ) : (
           <>
             {/* Месечни такси */}
-            <h3 className="modal-section-title">
-              Месечни такси {history.monthly.length > 0 && `(${history.monthly[0].month.split('-')[0]})`}
-            </h3>
+            <h3 className="modal-section-title">Месечни такси</h3>
             {history.monthly.length === 0 ? (
               <p className="no-payments">Няма записани месечни такси</p>
             ) : (
@@ -164,21 +162,36 @@ export default function ResidentView() {
                     </tr>
                   </thead>
                   <tbody>
-                    {history.monthly.map((m) => (
-                      <tr key={m.id}>
-                        <td>{monthNameOnly(m.month)}</td>
-                        <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
-                        <td className="text-right">{m.elevator_power.toFixed(2)}</td>
-                        <td className="text-right">{m.general_power.toFixed(2)}</td>
-                        <td className="text-right">{m.fund_ro.toFixed(2)}</td>
-                        <td className="text-right">{m.intercom.toFixed(2)}</td>
-                        <td className="text-right">{m.manager_fee.toFixed(2)}</td>
-                        <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
-                        <td className={`status-${m.status}`}>
-                          {m.status === 'paid' ? 'Плат.' : 'Непл.'}
-                        </td>
-                      </tr>
-                    ))}
+                    {history.monthly
+                      .filter(m => {
+                        const now = new Date();
+                        const currentYear = now.getFullYear();
+                        const currentMonthNum = now.getMonth() + 1;
+                        let endYear = currentYear;
+                        let endMonthNum = currentMonthNum + 3;
+                        if (endMonthNum > 12) {
+                          endMonthNum -= 12;
+                          endYear += 1;
+                        }
+                        const endMonth = `${endYear}-${String(endMonthNum).padStart(2, '0')}`;
+                        return m.month <= endMonth;
+                      })
+                      .sort((a, b) => a.month.localeCompare(b.month))
+                      .map((m) => (
+                        <tr key={m.id}>
+                          <td>{monthLabel(m.month)}</td>
+                          <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
+                          <td className="text-right">{m.elevator_power.toFixed(2)}</td>
+                          <td className="text-right">{m.general_power.toFixed(2)}</td>
+                          <td className="text-right">{m.fund_ro.toFixed(2)}</td>
+                          <td className="text-right">{m.intercom.toFixed(2)}</td>
+                          <td className="text-right">{m.manager_fee.toFixed(2)}</td>
+                          <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
+                          <td className={`status-${m.status}`}>
+                            {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -200,16 +213,19 @@ export default function ResidentView() {
                     </tr>
                   </thead>
                   <tbody>
-                    {history.other.map((o) => (
-                      <tr key={o.id}>
-                        <td>{monthNameOnly(o.month)}</td>
-                        <td>{o.amount.toFixed(2)} €</td> {/* <-- махни className="text-right" */}
-                        <td>{o.description || '—'}</td>
-                        <td className={`status-${o.status}`}>
-                          {o.status === 'paid' ? 'Плат.' : 'Непл.'}
-                        </td>
-                      </tr>
-                    ))}
+                    {history.other
+                      .slice()
+                      .sort((a, b) => a.month.localeCompare(b.month))
+                      .map((o) => (
+                        <tr key={o.id}>
+                          <td>{monthLabel(o.month)}</td>
+                          <td>{o.amount.toFixed(2)} €</td>
+                          <td>{o.description || '—'}</td>
+                          <td className={`status-${o.status}`}>
+                            {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>

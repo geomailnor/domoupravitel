@@ -1,76 +1,99 @@
-/* Стил за полето за начално салдо */
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  margin-bottom: 1rem;
-}
-
-.form-row label {
-  font-weight: 500;
-  color: #34495e;
-  font-size: 1rem;
-  margin-bottom: 3px;
-  min-width: 360px;
-}
-
-.form-row input {
-  padding: 0.5rem;
-  border: 1px solid #d0d0d0;
-  border-radius: 5px;
-  font-size: 1rem;
-  width: 10%;
-}
-
-.form-row input:focus {
-  outline: none;
-  border-color: #2980b9;
-  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
-}
-
-.form-row input:disabled {
-  background: #f5f5f5;
-  color: #95a5a6;
-  cursor: not-allowed;
-}
-
 /* Модален контейнер */
 .expenses-modal-content {
   max-width: 800px;
   height: auto;
 }
 
-/* Поле за начално салдо */
+/* Полета (Начално салдо и форма) */
+.expenses-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.expenses-form-row label {
+  font-weight: 500;
+  color: #34495e;
+  font-size: 1rem;
+  margin-bottom: 3px;
+}
+
+.expenses-form-row input {
+  padding: 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.expenses-form-row input:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+.expenses-form-row input:disabled {
+  background: #f5f5f5;
+  color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Поле за начално салдо (на един ред) */
 .balance-field {
-  margin-bottom: 1.3rem;
-  max-width: 100%;
-  border: 1px solid rgb(218, 116, 116);
-  box-shadow: 0 4px 12px rgba(218, 116, 116, 0.15);
+  margin-bottom: 1.5rem;
+  border: 1px solid #da7474;
+  box-shadow: 0 4px 12px rgba(218, 116, 116, 0.1);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 0.8rem 1rem;
 }
 
-.balance-label-row {
+.balance-inline-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.balance-label-row label {
-  min-width: auto !important;
+.balance-inline-row label:first-child {
   margin: 0;
-  display: flex;
-  align-items: center;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 1rem;
 }
 
+.balance-inline-row input[type="text"] {
+  width: 100px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.balance-inline-row input[type="text"]:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+.balance-inline-row input[type="text"]:disabled {
+  background: #f5f5f5;
+  color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Чекбокс за редактиране */
 .edit-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1rem;
   user-select: none;
+  color: #7f8c8d;
 }
 
 .edit-checkbox-label input[type="checkbox"] {
@@ -96,6 +119,6 @@
   margin-bottom: 1rem;
 }
 
-table.expenses-table td.expense-row {
-  padding-right: 34px;
+.expenses-modal-content .expenses-table td:nth-child(2) {
+  padding-right: 33px;
 }

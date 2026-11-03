@@ -357,23 +357,48 @@
   font-style: italic;
 }
 
-/* Нов стил за избор на месец */
-/* .month-selector-wrapper {
-  margin-left: auto;
-  margin-right: 1rem;
-} */
-
 .month-selector-input {
   padding: 0.5rem;
-  border: 2px solid #d0d0d0;
+  border: 1px solid #d0d0d0;
   border-radius: 5px;
   font-size: 1rem;
   font-weight: 600;
-  color: #7d2313;
-  height: 40px;
   box-sizing: border-box;
+  width: 84px;
+  cursor: pointer;
+}
+
+.month-selector-input:focus {
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+.month-year-selector {
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.3rem;
+  align-items: center;
   margin-left: auto;
   width: 175px;
+  height: 40px;
+}
+
+.year-selector {
+  padding: 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background: white;
+  width: 84px;
+  cursor: pointer;
+}
+
+.year-selector:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
 }
 
 /* Инлайн редактиране */
@@ -670,9 +695,8 @@
     margin-left: 0;
   }
 
-  .month-selector-input {
+  .month-year-selector {
     width: 165px;
-    margin-left: 0;
   }
 
   .action-buttons-group {

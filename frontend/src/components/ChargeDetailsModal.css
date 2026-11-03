@@ -255,7 +255,7 @@
 
 /* Месец */
 .payments-table th:nth-child(1) {
-  width: 14%;
+  width: 16%;
 }
 
 /* Асанс такса */
@@ -302,12 +302,18 @@
 
 /* Статус */
 .payments-table th:nth-child(9) {
-  width: 14%;
+  width: 12%;
   text-align: center;
 }
 
+/* Моноширинен шрифт за колоната с месеци (за да са подравнени) */
+.payments-table td:nth-child(1) {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 1.05rem;
+}
+
 .payments-table td:nth-child(9) {
-  padding-left: 24px;
+  padding-left: 26px;
 }
 
 .payments-table th {
@@ -638,7 +644,7 @@
 /* Таблица Други разходи */
 /* Месец */
 .other-table th:nth-child(1) {
-  width: 23%;
+  width: 28%;
   text-align: left;
 }
 
@@ -651,7 +657,7 @@
 
 /* Описание */
 .other-table th:nth-child(3) {
-  width: 35%;
+  width: 30%;
   text-align: center;
 }
 
