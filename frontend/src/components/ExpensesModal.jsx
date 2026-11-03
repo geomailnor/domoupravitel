@@ -18,11 +18,13 @@ export default function ExpensesModal({ onClose }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [openingBalance, setOpeningBalance] = useState('0.00');
   const [isEditingBalance, setIsEditingBalance] = useState(false);
+  const [originalBalance, setOriginalBalance] = useState('0.00');
+  const [balanceChanged, setBalanceChanged] = useState(false);
   const modalRef = useRef(null);
 
   useFocusTrap(modalRef, !deleteConfirm);
   useScrollLock();
-
+  console.log('originalBalance:', originalBalance)
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 10),
     amount: '',
@@ -39,6 +41,7 @@ export default function ExpensesModal({ onClose }) {
         ]);
         setExpenses(expensesRes.data);
         setOpeningBalance(settingsRes.data.opening_balance || '0.00');
+        setOriginalBalance(parseFloat(settingsRes.data.opening_balance || '0.00').toFixed(2));
       } catch {
         toast.error('Грешка при зареждане на разходите');
       } finally {
@@ -125,25 +128,34 @@ export default function ExpensesModal({ onClose }) {
                       }
                       if (val === '.') val = '';
                       setOpeningBalance(val);
+                      setBalanceChanged(true); // <-- отбелязваме, че има промяна
                     }}
                     onBlur={async (e) => {
                       const num = parseFloat(e.target.value);
-                      if (!isNaN(num)) {
-                        setOpeningBalance(num.toFixed(2));
-                        try {
-                          await api.put('/settings', { opening_balance: num.toFixed(2) });
-                          toast.success('Началното салдо е запазено');
-                          setIsEditingBalance(false);
-                        } catch {
-                          toast.error('Грешка при запазване');
-                        }
-                      } else {
+                      if (isNaN(num)) {
                         setOpeningBalance('0.00');
+                        return;
+                      }
+                      const formatted = num.toFixed(2);
+
+                      if (formatted === originalBalance) {
+                        setIsEditingBalance(false);
+                        return;
+                      }
+
+                      setOpeningBalance(formatted);
+                      try {
+                        await api.put('/settings', { opening_balance: formatted });
+                        toast.success('Началното салдо е запазено');
+                        setOriginalBalance(formatted);
+                        setIsEditingBalance(false);
+                        setBalanceChanged(false);
+                      } catch {
+                        toast.error('Грешка при запазване');
                       }
                     }}
                     placeholder="0.00"
-                    className={isEditingBalance ? 'editable-balance' : 'disabled-balance'}
-                  />
+                    className={`${isEditingBalance ? 'editable-balance' : 'disabled-balance'} ${balanceChanged ? 'changed-balance' : ''}`} />
                   <label className="edit-checkbox-label">
                     <input
                       type="checkbox"

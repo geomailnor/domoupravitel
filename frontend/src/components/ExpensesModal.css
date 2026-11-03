@@ -114,6 +114,11 @@
   cursor: not-allowed;
 }
 
+.changed-balance {
+  background: #fff9e6;
+  border-color: #f39c12;
+}
+
 /* Таблица с разходи */
 .expenses-table {
   margin-bottom: 1rem;
