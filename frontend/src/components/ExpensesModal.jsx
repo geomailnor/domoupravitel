@@ -40,8 +40,9 @@ export default function ExpensesModal({ onClose }) {
           api.get('/settings')
         ]);
         setExpenses(expensesRes.data);
-        setOpeningBalance(settingsRes.data.opening_balance || '0.00');
-        setOriginalBalance(parseFloat(settingsRes.data.opening_balance || '0.00').toFixed(2));
+        const bal = parseFloat(settingsRes.data.opening_balance || '0.00').toFixed(2);
+        setOpeningBalance(bal);
+        setOriginalBalance(bal);
       } catch {
         toast.error('Грешка при зареждане на разходите');
       } finally {
@@ -114,7 +115,7 @@ export default function ExpensesModal({ onClose }) {
               {/* Поле за начално салдо */}
               <div className="balance-field">
                 <div className="balance-inline-row">
-                  <label>Начално салдо от предходната година (€):</label>
+                  <label>Начално салдо (от началото на следенето) (€):</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -138,16 +139,20 @@ export default function ExpensesModal({ onClose }) {
                       }
                       const formatted = num.toFixed(2);
 
+                      // ⭐ Първо форматираме полето
+                      setOpeningBalance(formatted);
+
+                      // ⭐ После проверяваме дали има промяна
                       if (formatted === originalBalance) {
                         setIsEditingBalance(false);
                         return;
                       }
 
-                      setOpeningBalance(formatted);
+                      // Ако има промяна – записваме
                       try {
                         await api.put('/settings', { opening_balance: formatted });
                         toast.success('Началното салдо е запазено');
-                        setOriginalBalance(formatted);
+                        setOriginalBalance(formatted); // обновяваме оригинала СЛЕД успешен запис
                         setIsEditingBalance(false);
                         setBalanceChanged(false);
                       } catch {
@@ -198,7 +203,7 @@ export default function ExpensesModal({ onClose }) {
                   + Добави разход
                 </button>
               ) : (
-                <div className="add-other-form">
+                <div className="expenses-add-form">
                   <div className="expenses-form-row">
                     <label>Дата:</label>
                     <input

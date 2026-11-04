@@ -373,6 +373,7 @@
   padding: 0.6rem 1.2rem;
   background: #7d8692;
   color: white;
+  height: 40px;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
@@ -396,6 +397,7 @@
 .save-btn {
   padding: 0.6rem 1.2rem;
   height: 40px;
+  width: 98px;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
@@ -576,6 +578,7 @@
 .add-other-btn {
   margin-top: 1rem;
   padding: 0.6rem 1.2rem;
+  height: 40px;
   background: #27ae60;
   color: white;
   border: none;
