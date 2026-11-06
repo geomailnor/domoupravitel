@@ -353,7 +353,7 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
               ) : activeTab === 'monthly' ? (
                 `Запази ${selectedCount} като платени`
               ) : (
-                `Добави разход за ${selectedCount} ап.`
+                `Добави такса за ${selectedCount} ап.`
               )}
             </button>
           </div>
