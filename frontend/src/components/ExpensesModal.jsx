@@ -24,7 +24,6 @@ export default function ExpensesModal({ onClose }) {
 
   useFocusTrap(modalRef, !deleteConfirm);
   useScrollLock();
-  console.log('originalBalance:', originalBalance)
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 10),
     amount: '',
@@ -106,7 +105,7 @@ export default function ExpensesModal({ onClose }) {
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">
-          <h2 className="expenses-title">Разходи на блока</h2>
+          <h2 className="expenses-title">Разходи на блока (от вече събраните пари)</h2>
 
           {loading ? (
             <Spinner size="small" />
@@ -129,7 +128,14 @@ export default function ExpensesModal({ onClose }) {
                       }
                       if (val === '.') val = '';
                       setOpeningBalance(val);
-                      setBalanceChanged(true); // <-- отбелязваме, че има промяна
+
+                      // ⭐ Сравняваме с оригинала (форматиран)
+                      const num = parseFloat(val);
+                      if (!isNaN(num)) {
+                        setBalanceChanged(num.toFixed(2) !== originalBalance);
+                      } else {
+                        setBalanceChanged(val !== '');
+                      }
                     }}
                     onBlur={async (e) => {
                       const num = parseFloat(e.target.value);

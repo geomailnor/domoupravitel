@@ -8,6 +8,7 @@ import oko2 from '../assets/oko2.png';
 import ConfirmModal from './ConfirmModal.jsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useScrollLock } from '../hooks/useScrollLock.js';
+import EditableCell from './EditableCell.jsx';
 import '../pages/Dashboard.css';
 import './ChargeDetailsModal.css';
 
@@ -20,9 +21,11 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [newPassword, setNewPassword] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
   const [apartmentData, setApartmentData] = useState(null);
-  const [showAddOther, setShowAddOther] = useState(false);
-  const [deleteOtherConfirm, setDeleteOtherConfirm] = useState(null);
   const [statusConfirm, setStatusConfirm] = useState(null);
+  const [showAddOther, setShowAddOther] = useState(false);
+  const [monthlyStatusConfirm, setMonthlyStatusConfirm] = useState(null);
+  const [startMonth, setStartMonth] = useState('');
+  const [deleteOtherConfirm, setDeleteOtherConfirm] = useState(null);
   const [newOther, setNewOther] = useState({
     month: new Date().toISOString().slice(0, 7),
     amount: '',
@@ -31,7 +34,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [savingOther, setSavingOther] = useState(false);
   const modalRef = useRef(null);
 
-  useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm && !statusConfirm);
+  useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm && !statusConfirm && !monthlyStatusConfirm);
   useScrollLock();
   const handleAddOther = async () => {
     if (!newOther.amount || parseFloat(newOther.amount) <= 0) {
@@ -141,25 +144,73 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
 
     return result.sort((a, b) => a.month.localeCompare(b.month));
   };
+  const handleEditOther = async (id, field, newValue) => {
+    try {
+      const payload = {};
+      if (field === 'amount') {
+        const num = parseFloat(newValue);
+        if (isNaN(num) || num <= 0) {
+          toast.error('Въведете валидна сума');
+          return;
+        }
+        payload.amount = num;
+      } else if (field === 'description') {
+        if (!newValue.trim()) {
+          toast.error('Въведете описание');
+          return;
+        }
+        payload.description = newValue.trim();
+      }
+
+      await api.put(`/payments/${id}`, payload);
+      toast.success('Запазено', { duration: 1000 });
+
+      // Презареждаме историята
+      const res = await api.get(`/charges/history/${apartmentData.id}`);
+      setHistory({ monthly: res.data.monthly, other: res.data.other });
+    } catch {
+      toast.error('Грешка при запазване');
+    }
+  };
   const toggleOtherStatus = (id, currentStatus) => {
     if (currentStatus === 'paid') {
-      // Ако е платено и искаме да го направим неплатено -> питаме
       setStatusConfirm({ id, currentStatus });
     } else {
-      // Ако е неплатено -> направо го правим платено
       performToggleOtherStatus(id, currentStatus);
     }
   };
+  const toggleMonthlyStatus = (id, currentStatus) => {
+    if (currentStatus === 'paid') {
+      setMonthlyStatusConfirm({ id, currentStatus });
+    } else {
+      performToggleMonthlyStatus(id, currentStatus);
+    }
+  };
 
+  const performToggleMonthlyStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+    try {
+      await api.put(`/charges/${id}`, { status: newStatus });
+      toast.success(newStatus === 'paid' ? 'Маркирано като платено' : 'Маркирано като неплатено', { duration: 1000 });
+
+      const res = await api.get(`/charges/history/${apartmentData.id}`);
+      const filledMonthly = fillMissingMonths(res.data.monthly, startMonth);
+      setHistory({ monthly: filledMonthly, other: res.data.other });
+
+      if (onUpdate) onUpdate();
+    } catch {
+      toast.error('Грешка при промяна на статуса');
+    }
+  };
   const performToggleOtherStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
-
     try {
       await api.put(`/payments/${id}`, { status: newStatus });
       toast.success(newStatus === 'paid' ? 'Маркирано като платено' : 'Маркирано като неплатено', { duration: 1000 });
 
       const res = await api.get(`/charges/history/${apartmentData.id}`);
-      setHistory({ monthly: res.data.monthly, other: res.data.other });
+      const filledMonthly = fillMissingMonths(res.data.monthly, startMonth);
+      setHistory({ monthly: filledMonthly, other: res.data.other });
 
       if (onUpdate) onUpdate();
     } catch {
@@ -173,6 +224,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
         // 1. Вземаме настройките (за start_month)
         const settingsRes = await api.get('/settings');
         const startM = settingsRes.data.start_month;
+        setStartMonth(startM);
         // 2. Вземаме данните за апартамента
         const aptRes = await api.get(`/apartments/${apartment.ap_number}`);
         setApartmentData(aptRes.data);
@@ -340,7 +392,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
             </div>
           )}
           {/* Други разходи */}
-          <h3 className="modal-section-title">Други разходи</h3>
+          <h3 className="modal-section-title">Допълнителни такси</h3>
 
           {history.other.length > 0 ? (
             <table className="payments-table other-table">
@@ -360,8 +412,21 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                   .map((o) => (
                     <tr key={o.id}>
                       <td>{monthLabel(o.month)}</td>
-                      <td>{o.amount.toFixed(2)} €</td>
-                      <td>{o.description || '—'}</td>
+                      <td className="text-right">
+                        <EditableCell
+                          value={o.amount.toFixed(2)}
+                          onSave={(val) => handleEditOther(o.id, 'amount', val)}
+                          isNumeric={true}
+                          align="right"
+                        />
+                      </td>
+                      <td>
+                        <EditableCell
+                          value={o.description || ''}
+                          onSave={(val) => handleEditOther(o.id, 'description', val)}
+                          align="center"
+                        />
+                      </td>
                       <td>
                         <button
                           className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
@@ -371,7 +436,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                           {o.status === 'paid' ? 'Плат.' : 'Непл.'}
                         </button>
                       </td>
-                      <td>
+                      <td className="text-center">
                         <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
                       </td>
                     </tr>
@@ -387,7 +452,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
               className="add-other-btn"
               onClick={() => setShowAddOther(true)}
             >
-              + Добави разход
+              + Добави допълнителна такса
             </button>
           ) : (
             <div className="add-other-form">
@@ -479,8 +544,14 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                       <td className="text-right">{m.intercom.toFixed(2)}</td>
                       <td className="text-right">{m.manager_fee.toFixed(2)}</td>
                       <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
-                      <td className={`status-${m.status}`}>
-                        {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                      <td>
+                        <button
+                          className={`status-btn ${m.status === 'paid' ? 'paid' : 'unpaid'}`}
+                          onClick={() => toggleMonthlyStatus(m.id, m.status)}
+                          style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '60px' }}
+                        >
+                          {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -544,7 +615,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
           {statusConfirm && (
             <ConfirmModal
               title="Връщане на статус"
-              message="Сигурни ли сте, че искате да маркирате този разход като НЕПЛАТЕНО?"
+              message="Сигурни ли сте, че искате да маркирате тази такса като НЕПЛАТЕНО?"
               confirmText="Да, върни"
               cancelText="Отказ"
               confirmColor="danger"
@@ -553,6 +624,20 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                 setStatusConfirm(null);
               }}
               onCancel={() => setStatusConfirm(null)}
+            />
+          )}
+          {monthlyStatusConfirm && (
+            <ConfirmModal
+              title="Връщане на статус"
+              message="Сигурни ли сте, че искате да маркирате тази месечна такса като НЕПЛАТЕНО?"
+              confirmText="Да, върни"
+              cancelText="Отказ"
+              confirmColor="danger"
+              onConfirm={() => {
+                performToggleMonthlyStatus(monthlyStatusConfirm.id, monthlyStatusConfirm.currentStatus);
+                setMonthlyStatusConfirm(null);
+              }}
+              onCancel={() => setMonthlyStatusConfirm(null)}
             />
           )}
         </div>

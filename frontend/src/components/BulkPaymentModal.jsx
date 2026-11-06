@@ -189,7 +189,7 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
               className={`profile-tab ${activeTab === 'other' ? 'active' : ''}`}
               onClick={() => setActiveTab('other')}
             >
-              Други разходи
+              Други такси за:
             </button>
           </div>
 

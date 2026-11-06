@@ -47,6 +47,7 @@
   box-shadow: 0 4px 12px rgba(218, 116, 116, 0.1);
   border-radius: 8px;
   padding: 0.8rem 1rem;
+  min-width: 694px;
 }
 
 .balance-inline-row {
@@ -136,6 +137,7 @@
 
 .expenses-add-form {
   margin-top: 1rem;
+  min-width: 694px;
   padding: 1rem;
   background: #fff7ed;
   border: 2px solid #d0d0d0;

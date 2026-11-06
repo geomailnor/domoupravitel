@@ -397,7 +397,7 @@
 .save-btn {
   padding: 0.6rem 1.2rem;
   height: 40px;
-  width: 98px;
+  min-width: 98px;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
@@ -699,7 +699,9 @@
 /* Само за заглавието на модала с разходи */
 .modal-content h2.expenses-title {
   margin-bottom: 1.5rem;
+  min-width: 694px;
 }
+
 
 /* === RESPONSIVE === */
 @media (max-width: 825px) {

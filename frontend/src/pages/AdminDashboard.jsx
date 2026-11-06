@@ -14,64 +14,9 @@ import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
 import SettingsModal from '../components/SettingsModal.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
 import ExpensesModal from '../components/ExpensesModal.jsx';
+import EditableCell from '../components/EditableCell.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
-
-// Компонент за инлайн редактиране на поле
-const EditableCell = ({ value, onSave, type = 'text', disabled = false }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [localValue, setLocalValue] = useState(value);
-  // Ако стойността се промени отвън, я обновяваме
-  if (!isEditing && localValue !== value) {
-    setLocalValue(value);
-  }
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (localValue !== value) {
-      onSave(localValue);
-    }
-  };
-
-  if (disabled) {
-    return <span style={{ color: '#bdc3c7' }}>{value}</span>;
-  }
-
-  if (!isEditing) {
-    return (
-      <span
-        onClick={() => setIsEditing(true)}
-        className="inline-edit-trigger"
-        title="Кликнете за редакция"
-      >
-        {value || '—'}
-      </span>
-    );
-  }
-
-  return (
-    <input
-      type={type}
-      value={localValue}
-      onChange={(e) => {
-        const val = type === 'number' ? e.target.value.replace(/\D/g, '') : e.target.value;
-        setLocalValue(val);
-      }}
-      onBlur={handleBlur}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') e.target.blur();
-        if (e.key === 'Escape') {
-          setLocalValue(value);
-          setIsEditing(false);
-        }
-      }}
-      onFocus={(e) => e.target.select()}
-      // ⭐ Добавяме changed, ако локалната стойност е различна от оригиналната
-      className={`editable-input ${localValue !== value ? 'changed' : ''}`}
-      autoFocus
-    />
-  );
-};
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -381,10 +326,15 @@ export default function AdminDashboard() {
         {!loading && searchTerm && filteredCharges.length === 0 && (
           <div className="no-results">Няма намерени апартаменти</div>
         )}
-
+        {!loading && (
+          <h3 className="current-month-title">
+            Таблица за <strong>{monthLabel(currentMonth)}</strong>
+          </h3>
+        )}
         {loading ? (
           <Spinner />
         ) : (
+
           <div className="table-wrapper">
             <table className="apartments-table">
               <thead>

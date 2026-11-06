@@ -401,20 +401,6 @@
   box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
 }
 
-/* Инлайн редактиране */
-.inline-edit-trigger {
-  cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 3px;
-  display: inline-block;
-  min-width: 30px;
-  transition: background 0.2s;
-}
-
-.inline-edit-trigger:hover {
-  background: #e0e0e0;
-}
-
 .inline-edit-input {
   width: 60px;
   padding: 4px;
@@ -638,6 +624,16 @@
 .apartments-table .cash-amount {
   color: #2980b9;
 }
+
+.current-month-title {
+  font-size: 1.4rem;
+  color: #34495e;
+  margin: 0 0 0.6rem 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 
 @keyframes fadeInTable {
   from {
