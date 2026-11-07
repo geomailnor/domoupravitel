@@ -164,9 +164,10 @@
   white-space: nowrap;
 }
 
-.apartments-table td:nth-child(3) {
-  text-align: left;
-}
+/* .apartments-table td:nth-child(4),
+.apartments-table td:nth-child(5) {
+  text-align: center;
+} */
 
 .apartments-table tbody tr:nth-child(even) {
   background: #f0f2f5;
@@ -190,16 +191,16 @@
 }
 
 .apartments-table th:nth-child(3) {
-  width: 16%;
+  width: 18%;
   text-align: left;
 }
 
 .apartments-table th:nth-child(4) {
-  width: 6%;
+  width: 7%;
 }
 
 .apartments-table th:nth-child(5) {
-  width: 6%;
+  width: 7%;
 }
 
 .apartments-table th:nth-child(6) {
@@ -215,28 +216,24 @@
 }
 
 .apartments-table th:nth-child(9) {
-  width: 6%;
+  width: 7%;
 }
 
 .apartments-table th:nth-child(10) {
-  width: 6%;
+  width: 7%;
 }
 
 .apartments-table th:nth-child(11) {
-  width: 6%;
+  width: 7%;
 }
 
 .apartments-table th:nth-child(12) {
-  width: 8%;
+  width: 9%;
   text-align: right;
 }
 
 .apartments-table th:nth-child(13) {
-  width: 8%;
-}
-
-.apartments-table th:nth-child(14) {
-  width: 8%;
+  width: 9%;
 }
 
 /* Ограничаване на дългите имена на собственици */
@@ -244,6 +241,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 .apartments-table td:nth-child(12) {
@@ -253,13 +251,12 @@
 /* Бутон "Бързо въвеждане" */
 .bulk-btn {
   padding: 0.6rem;
-  min-width: 175px;
-  /* background: #27ae60; */
+  min-width: 180px;
   background: #4f8562;
   color: white;
   border: none;
   border-radius: 5px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
@@ -282,22 +279,22 @@
 }
 
 .expenses-btn {
-  padding: 0.6rem;
+  padding: 0.5rem 1rem;
   min-width: 175px;
+  height: 40px;
   background: #b05b10;
   color: white;
   border: none;
   border-radius: 5px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   white-space: nowrap;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  margin-left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  height: 40px;
 }
 
 .expenses-btn:hover {
@@ -380,7 +377,7 @@
   gap: 0.3rem;
   align-items: center;
   margin-left: auto;
-  width: 175px;
+  width: 180px;
   height: 40px;
 }
 
@@ -441,7 +438,6 @@
 }
 
 .status-btn.paid {
-  /* background: #27ae60; */
   background: #4f8562;
 }
 
@@ -457,7 +453,6 @@
 }
 
 .status-btn.unpaid {
-  /* background: #c0392b; */
   background: #a4534a;
 }
 
@@ -634,6 +629,46 @@
   line-height: 1.5;
 }
 
+.table-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.table-title-row .current-month-title {
+  margin: 0;
+}
+
+.all-other-btn {
+  padding: 0.5rem 1rem;
+  min-width: 175px;
+  height: 40px;
+  background: #2a2773;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  margin-left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.all-other-btn:hover {
+  background: rgb(36, 34, 90);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(36, 34, 90, 0.3);
+}
+
+.all-other-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
 
 @keyframes fadeInTable {
   from {
@@ -648,10 +683,6 @@
 }
 
 @media (max-width: 1030px) {
-  .apartments-table th:nth-child(3) {
-    width: 12%;
-  }
-
   .dashboard main {
     padding: 0.5rem;
   }

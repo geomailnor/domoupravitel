@@ -15,6 +15,7 @@ import SettingsModal from '../components/SettingsModal.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
 import ExpensesModal from '../components/ExpensesModal.jsx';
 import EditableCell from '../components/EditableCell.jsx';
+import AllOtherChargesModal from '../components/AllOtherChargesModal.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
@@ -40,6 +41,7 @@ export default function AdminDashboard() {
   const [unpaidOthers, setUnpaidOthers] = useState([]);
   const [statusConfirm, setStatusConfirm] = useState(null);
   const [showExpensesModal, setShowExpensesModal] = useState(false);
+  const [showAllOther, setShowAllOther] = useState(false);
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -327,9 +329,17 @@ export default function AdminDashboard() {
           <div className="no-results">Няма намерени апартаменти</div>
         )}
         {!loading && (
-          <h3 className="current-month-title">
-            Таблица за <strong>{monthLabel(currentMonth)}</strong>
-          </h3>
+          <div className="table-title-row">
+            <h3 className="current-month-title">
+              Таблица за <strong>{monthLabel(currentMonth)}</strong>
+            </h3>
+            <button
+              className="all-other-btn"
+              onClick={() => setShowAllOther(true)}
+            >
+              Покажи доп. такси
+            </button>
+          </div>
         )}
         {loading ? (
           <Spinner />
@@ -351,7 +361,6 @@ export default function AdminDashboard() {
                   <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'intercom_rate', label: 'Дом. сис. (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
                   <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'manager_fee_rate', label: 'Хонорар (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
                   <th>Всичко</th>
-                  <th>Статус</th>
                   <th>Още</th>
                 </tr>
               </thead>
@@ -360,7 +369,10 @@ export default function AdminDashboard() {
                   <tr key={charge.charge_id}>
                     <td>{charge.floor}</td>
                     <td><strong>{charge.ap_number}</strong></td>
-                    <td title={charge.owner_name || ''}>
+                    <td
+                      title={charge.owner_name || ''}
+                      style={{ color: charge.status === 'unpaid' && !charge.is_vacant ? '#c0392b' : 'inherit' }}
+                    >
                       {charge.is_vacant ? (
                         <em style={{ color: '#7f8c8d' }}>СВОБОДЕН</em>
                       ) : (
@@ -376,6 +388,7 @@ export default function AdminDashboard() {
                         value={charge.residents_count}
                         onSave={(val) => handleInlineSave(charge.charge_id, 'residents_count', val)}
                         disabled={charge.is_vacant || isPastMonth}
+                        align="center"
                       />
                     </td>
 
@@ -384,6 +397,7 @@ export default function AdminDashboard() {
                         value={charge.elevator_payers_count}
                         onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_payers_count', val)}
                         disabled={charge.is_vacant || isPastMonth}
+                        align="center"
                       />
                     </td>
 
@@ -394,16 +408,6 @@ export default function AdminDashboard() {
                     <td className="text-right">{Number(charge.intercom).toFixed(2)}</td>
                     <td className="text-right">{Number(charge.manager_fee).toFixed(2)}</td>
                     <td className="text-right font-bold">{Number(charge.total_amount).toFixed(2)}</td>
-
-                    <td className="text-center">
-                      <button
-                        className={`status-btn ${charge.status === 'paid' ? 'paid' : 'unpaid'}`}
-                        onClick={() => toggleStatus(charge.charge_id, charge.status)}
-                      >
-                        {charge.status === 'paid' ? 'Плат.' : 'Непл.'}
-                      </button>
-                    </td>
-
                     <td className="text-center">
                       <button
                         className={`details-btn ${unpaidOthers.includes(charge.ap_number) ? 'has-debt' : ''}`}
@@ -514,6 +518,9 @@ export default function AdminDashboard() {
         )}
         {showMonthlyReport && (
           <PrintMonthlyReport month={currentMonth} onClose={() => setShowMonthlyReport(false)} />
+        )}
+        {showAllOther && (
+          <AllOtherChargesModal onClose={() => setShowAllOther(false)} />
         )}
         {settingsField && (
           <SettingsModal

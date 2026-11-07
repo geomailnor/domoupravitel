@@ -3,7 +3,6 @@ import { useState } from 'react';
 export default function EditableCell({ value, onSave, type = 'text', disabled = false, isNumeric = false, align = 'left' }) {
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
-
   if (!isEditing && localValue !== value) {
     setLocalValue(value);
   }
@@ -55,7 +54,8 @@ export default function EditableCell({ value, onSave, type = 'text', disabled = 
         }
       }}
       onFocus={(e) => e.target.select()}
-      className={`editable-cell-input ${localValue !== value ? 'changed' : ''}`} style={{ textAlign: align, display: 'inline-block', width: '100%' }}
+      className={`editable-cell-input ${localValue !== value ? 'changed' : ''}`}
+      style={{ textAlign: align, display: 'inline-block', width: '100%' }}
       autoFocus
     />
   );

@@ -8,7 +8,7 @@ const router = express.Router();
 // GET /api/payments – списък с плащания (само админ)
 // Филтри: ?month=  ?apartment_number=  ?status=
 router.get('/', requireAuth, requireAdmin, async (req, res) => {
-  const { month, apartment_number, status } = req.query;
+  const { month, apartment_number, status, type } = req.query;
 
   try {
     // Строим заявката постепенно
@@ -40,6 +40,17 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
       }
       conditions.push(`p.status = $${paramIndex}`);
       values.push(status);
+      paramIndex++;
+    }
+    if (type) {
+      const allowedTypes = ['monthly', 'elevator', 'water', 'cleaning', 'door', 'intercom', 'electricity', 'other'];
+      if (!allowedTypes.includes(type)) {
+        return res.status(400).json({
+          error: `Невалиден вид. Позволени: ${allowedTypes.join(', ')}`
+        });
+      }
+      conditions.push(`p.type = $${paramIndex}`);
+      values.push(type);
       paramIndex++;
     }
     // Ако има филтри → добавяме WHERE

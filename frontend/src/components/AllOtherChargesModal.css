@@ -1,0 +1,63 @@
+.modal-content h2.all-other-title {
+  margin-bottom: 1.4rem;
+}
+
+.all-other-table {
+  min-width: 690px;
+}
+
+/* Ширини и подравняване за всяка колона */
+.all-other-table th:nth-child(1),
+.all-other-table td:nth-child(1) {
+  /* Ап. № */
+  width: 7%;
+  text-align: center;
+}
+
+.all-other-table th:nth-child(2),
+.all-other-table td:nth-child(2) {
+  /* Собственик */
+  width: 25%;
+  text-align: left;
+}
+
+.all-other-table th:nth-child(3) {
+  /* Месец */
+  width: 20%;
+  text-align: center;
+  padding-right: 23px;
+}
+
+.all-other-table td:nth-child(3) {
+  text-align: left;
+}
+
+.all-other-table th:nth-child(4),
+.all-other-table td:nth-child(4) {
+  /* Сума */
+  width: 11%;
+  text-align: right;
+}
+
+.all-other-table th:nth-child(5),
+.all-other-table td:nth-child(5) {
+  /*  Описание*/
+  width: 23%;
+  text-align: center;
+}
+
+.all-other-table th:nth-child(6),
+.all-other-table td:nth-child(6) {
+  /* Статус */
+  width: 14%;
+  text-align: center;
+}
+
+.no-results {
+  padding: 1.25rem;
+  text-align: center;
+  color: #c0392b;
+  background: #fadbd8;
+  border-radius: 5px;
+  font-size: 1.4rem;
+}
