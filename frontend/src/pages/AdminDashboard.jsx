@@ -371,15 +371,16 @@ export default function AdminDashboard() {
                     <td><strong>{charge.ap_number}</strong></td>
                     <td
                       title={charge.owner_name || ''}
-                      style={{ color: charge.status === 'unpaid' && !charge.is_vacant ? '#c0392b' : 'inherit' }}
+                      style={{
+                        color: charge.status === 'unpaid' && !charge.is_vacant ? '#c0392b' : 'inherit',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => setSelectedCharge(charge)}
                     >
                       {charge.is_vacant ? (
                         <em style={{ color: '#7f8c8d' }}>СВОБОДЕН</em>
                       ) : (
-                        <EditableCell
-                          value={charge.owner_name || ''}
-                          onSave={(val) => handleInlineSave(charge.charge_id, 'owner_name', val)}
-                        />
+                        charge.owner_name || '—'
                       )}
                     </td>
 
