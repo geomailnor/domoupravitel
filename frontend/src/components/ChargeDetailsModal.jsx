@@ -10,10 +10,11 @@ import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useScrollLock } from '../hooks/useScrollLock.js';
 import EditableCell from './EditableCell.jsx';
 import { fillMissingMonths } from '../utils/monthUtils.js';
+import PrintReceipt from './PrintReceipt.jsx';
 import '../pages/Dashboard.css';
 import './ChargeDetailsModal.css';
 
-export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
+export default function ChargeDetailsModal({ apartment, currentMonth, onClose, onUpdate }) {
   const [history, setHistory] = useState({ monthly: [], other: [] });
   const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +28,7 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
   const [monthlyStatusConfirm, setMonthlyStatusConfirm] = useState(null);
   const [startMonth, setStartMonth] = useState('');
   const [deleteOtherConfirm, setDeleteOtherConfirm] = useState(null);
+  const [printReceipt, setPrintReceipt] = useState(false);
   const [newOther, setNewOther] = useState({
     month: new Date().toISOString().slice(0, 7),
     amount: '',
@@ -221,6 +223,10 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
     const current = apartmentData?.[field] || '';
     const original = apartment?.[field] || '';
     return current !== original;
+  };
+  const getMonthlyAmount = () => {
+    const m = history.monthly.find(item => item.month === currentMonth);
+    return m ? m.total_amount.toFixed(2) : null;
   };
   return (
     <div className="modal-overlay">
@@ -509,6 +515,12 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
 
           <div className="modal-actions">
             <button className="close-btn" onClick={onClose}>Затвори</button>
+            <button
+              className="print-btn"
+              onClick={() => setPrintReceipt(true)}
+            >
+              🖨️ Разписка
+            </button>
           </div>
 
           {/* Модал за нова парола */}
@@ -585,6 +597,14 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                 setMonthlyStatusConfirm(null);
               }}
               onCancel={() => setMonthlyStatusConfirm(null)}
+            />
+          )}
+          {printReceipt && (
+            <PrintReceipt
+              apartment={apartment}
+              month={currentMonth}
+              amount={getMonthlyAmount()}
+              onClose={() => setPrintReceipt(false)}
             />
           )}
         </div>

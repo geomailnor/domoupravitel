@@ -223,3 +223,7 @@
 .inline-edit-trigger:hover {
   background: #e0e0e0;
 }
+
+.disabled-cell-value {
+  color: #7f8c8d;
+}

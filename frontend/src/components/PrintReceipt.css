@@ -69,19 +69,19 @@
 
 .receipt {
   width: 190mm;
-  height: 92mm;
+  height: 110mm;
   padding: 0 6mm;
   border: 1px dashed #999;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  font-size: 12pt;
+  font-size: 14pt;
   color: #000;
   background: #fff;
 }
 
 .print-area .receipt .receipt-title {
   text-align: center;
-  font-size: 13pt;
+  font-size: 16pt;
   margin: 0 0 2mm 0;
   letter-spacing: 1px;
   border-bottom: 1px solid #000;
@@ -100,7 +100,7 @@
 .receipt-info p,
 .receipt-details p {
   margin: 1.5mm 0;
-  font-size: 13pt;
+  font-size: 15pt;
 }
 
 .receipt-details {
@@ -119,13 +119,13 @@
 
 .receipt-date {
   margin-top: 4mm;
-  font-size: 12pt;
+  font-size: 14pt;
 }
 
 .receipt-signatures {
   display: flex;
   justify-content: space-between;
-  margin-top: 8mm;
+  margin-top: 14mm;
   gap: 4mm;
 }
 
@@ -135,29 +135,30 @@
 
 .receipt-signatures p {
   margin: 0 0 1mm 0;
-  font-size: 12pt;
+  font-size: 14pt;
   letter-spacing: 0.5pt;
 }
 
 .receipt-subtitle {
   text-align: center;
-  font-size: 13pt;
+  font-size: 15pt;
   margin: 0 0 1mm 0;
   font-style: italic;
 }
 
 .receipt-block {
   text-align: center;
-  font-size: 12pt;
+  font-size: 14pt;
   margin: 0 0 2mm 0;
   font-weight: 600;
   border-bottom: 1px solid #000;
   padding-bottom: 2mm;
 }
 
-.signature-line {
+.receipt-signatures .signature-line {
   border-bottom: 1px dashed #aaa;
-  height: 8mm;
+  height: 4mm;
+  margin-top: 4mm;
 }
 
 .line-underline {
@@ -189,6 +190,12 @@
   box-shadow: none;
 }
 
+.name-line {
+  border-bottom: 1px solid #000;
+  width: 150px;
+  margin: 0.5rem 0 0.2rem 0;
+}
+
 @media print {
   body * {
     visibility: hidden;
@@ -202,7 +209,7 @@
   .print-area {
     position: absolute;
     left: 5px;
-    top: 0;
+    top: 10mm;
     width: 100%;
     display: block;
   }

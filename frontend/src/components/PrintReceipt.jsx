@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import './PrintReceipt.css';
 
-export default function PrintReceipt({ apartment, month, onClose }) {
+export default function PrintReceipt({ apartment, month, amount, onClose }) {
   const currentYear = new Date().getFullYear();
   const modalRef = useRef(null);
   useFocusTrap(modalRef, true);
@@ -31,16 +31,16 @@ export default function PrintReceipt({ apartment, month, onClose }) {
 
           <div className="receipt-info">
             <div className='et-ap-wrapper'>
-              <p><strong>Етаж:</strong> {apartment.floor}</p>
-              <p><strong>Апартамент:</strong> {apartment.number}</p>
+              <p><em>Етаж:</em> <strong>{apartment.floor}</strong></p>
+              <p><em>Апартамент:</em> <strong>{apartment.ap_number || apartment.number}</strong></p>
             </div>
 
-            <p><strong>Собственик:</strong> {apartment.owner_name || '—'}</p>
+            <p><em>Собственик:</em> <strong>{apartment.owner_name || '—'}</strong></p>
           </div>
 
           <div className="receipt-details">
-            <p><strong>За месец:</strong> {monthLabel(month)}</p>
-            <p><strong>Сума:</strong> <span className="amount-line"></span> €</p>
+            <p><em>За месец:</em> <strong>{monthLabel(month)}</strong></p>
+            <p><em>Сума:</em> <strong>{amount ? `${amount} €` : <span className="amount-line"></span>}</strong></p>
           </div>
 
           <p className="receipt-date">Дата: <span className="line-underline"></span>.<span className="line-underline"></span>. {currentYear} г.</p>

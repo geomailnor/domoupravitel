@@ -437,6 +437,7 @@ export default function AdminDashboard() {
         {selectedCharge && (
           <ChargeDetailsModal
             apartment={selectedCharge}
+            currentMonth={currentMonth}
             onClose={() => setSelectedCharge(null)}
             onUpdate={async () => {
               // Презареждаме charges

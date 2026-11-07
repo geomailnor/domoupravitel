@@ -15,7 +15,7 @@ export default function EditableCell({ value, onSave, type = 'text', disabled = 
   };
 
   if (disabled) {
-    return <span style={{ color: '#bdc3c7' }}>{value}</span>;
+    return <span className="disabled-cell-value">{value}</span>;
   }
 
   if (!isEditing) {
