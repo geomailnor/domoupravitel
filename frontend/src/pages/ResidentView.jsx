@@ -18,34 +18,79 @@ export default function ResidentView() {
   const [startMonth, setStartMonth] = useState('');
   const [showChangePassword, setShowChangePassword] = useState(false);
 
-  // Зареждане на историята
+  const fillMissingMonths = (monthlyData, startMonth) => {
+    if (!startMonth) return monthlyData;
+
+    // Текущ месец
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonthNum = now.getMonth() + 1; // 1-12
+
+    // Краен месец: текущия + 3 месеца напред
+    let endYear = currentYear;
+    let endMonthNum = currentMonthNum + 3;
+    if (endMonthNum > 12) {
+      endMonthNum -= 12;
+      endYear += 1;
+    }
+    const endMonth = `${endYear}-${String(endMonthNum).padStart(2, '0')}`;
+    // Начален месец: startMonth (или текущия, ако startMonth е по-късно)
+    const effectiveStart = startMonth > `${currentYear}-${String(currentMonthNum).padStart(2, '0')}`
+      ? startMonth
+      : startMonth; // за сега винаги startMonth
+
+    const result = [...monthlyData.filter(m => m.month >= effectiveStart && m.month <= endMonth)];
+
+    // Генерираме липсващите месеци от effectiveStart до endMonth
+    let [year, month] = effectiveStart.split('-').map(Number);
+    const [endY, endM] = endMonth.split('-').map(Number);
+
+    while (year < endY || (year === endY && month <= endM)) {
+      const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+      if (!result.find(m => m.month === monthStr)) {
+        result.push({
+          id: `empty-${monthStr}`,
+          month: monthStr,
+          elevator_fee: 0,
+          elevator_power: 0,
+          general_power: 0,
+          fund_ro: 0,
+          intercom: 0,
+          manager_fee: 0,
+          total_amount: 0,
+          status: 'unpaid',
+          is_empty: true,
+        });
+      }
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
+    }
+
+    return result.sort((a, b) => a.month.localeCompare(b.month));
+  };
+  // Зареждане на историята и
+  // Зареждане на start_month
   useEffect(() => {
-    const loadHistory = async () => {
+    const loadData = async () => {
       try {
-        const res = await api.get('/charges/history/me');
-        setHistory(res.data);
+        const [historyRes, settingsRes] = await Promise.all([
+          api.get('/charges/history/me'),
+          api.get('/settings')
+        ]);
+        const startM = settingsRes.data.start_month;
+        setStartMonth(startM);
+        const filledMonthly = fillMissingMonths(historyRes.data.monthly, startM);
+        setHistory({ monthly: filledMonthly, other: historyRes.data.other });
       } catch (err) {
-        const message = err.response?.data?.error || 'Грешка при зареждане';
-        toast.error(message);
+        toast.error('Грешка при зареждане');
       } finally {
         setLoading(false);
       }
     };
-
-    loadHistory();
-  }, [user]);
-
-  // Зареждане на start_month
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const response = await api.get('/settings');
-        setStartMonth(response.data.start_month || '');
-      } catch {
-        console.error('Грешка при зареждане на настройки');
-      }
-    };
-    loadSettings();
+    loadData();
   }, []);
 
   // Изчисляване на дълга

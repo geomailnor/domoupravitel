@@ -312,10 +312,6 @@
   font-size: 1.05rem;
 }
 
-.payments-table td:nth-child(9) {
-  padding-left: 26px;
-}
-
 .payments-table th {
   padding: 0.6rem 0.75rem;
   text-align: left;
@@ -702,6 +698,13 @@
   min-width: 694px;
 }
 
+/* Статус бутон в модала */
+.modal-body .status-btn {
+  padding: 4px 8px;
+  font-size: 1rem;
+  width: auto;
+  min-width: 60px;
+}
 
 /* === RESPONSIVE === */
 @media (max-width: 825px) {

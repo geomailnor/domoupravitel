@@ -371,14 +371,11 @@ export default function AdminDashboard() {
                     <td><strong>{charge.ap_number}</strong></td>
                     <td
                       title={charge.owner_name || ''}
-                      style={{
-                        color: charge.status === 'unpaid' && !charge.is_vacant ? '#c0392b' : 'inherit',
-                        cursor: 'pointer',
-                      }}
+                      className={`owner-cell ${charge.status === 'unpaid' && !charge.is_vacant ? 'unpaid-name' : ''}`}
                       onClick={() => setSelectedCharge(charge)}
                     >
                       {charge.is_vacant ? (
-                        <em style={{ color: '#7f8c8d' }}>СВОБОДЕН</em>
+                        <em className="vacant-label">СВОБОДЕН</em>
                       ) : (
                         charge.owner_name || '—'
                       )}

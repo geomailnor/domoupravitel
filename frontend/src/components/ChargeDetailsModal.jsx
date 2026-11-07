@@ -431,7 +431,6 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                         <button
                           className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
                           onClick={() => toggleOtherStatus(o.id, o.status)}
-                          style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '60px' }}
                         >
                           {o.status === 'paid' ? 'Плат.' : 'Непл.'}
                         </button>
@@ -548,7 +547,6 @@ export default function ChargeDetailsModal({ apartment, onClose, onUpdate }) {
                         <button
                           className={`status-btn ${m.status === 'paid' ? 'paid' : 'unpaid'}`}
                           onClick={() => toggleMonthlyStatus(m.id, m.status)}
-                          style={{ padding: '4px 8px', fontSize: '0.85rem', width: 'auto', minWidth: '60px' }}
                         >
                           {m.status === 'paid' ? 'Плат.' : 'Непл.'}
                         </button>

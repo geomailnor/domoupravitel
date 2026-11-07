@@ -665,6 +665,18 @@
   box-shadow: none;
 }
 
+.owner-cell {
+  cursor: pointer;
+}
+
+.owner-cell.unpaid-name {
+  color: #c0392b;
+}
+
+.vacant-label {
+  color: #7f8c8d;
+}
+
 @keyframes fadeInTable {
   from {
     opacity: 0;
