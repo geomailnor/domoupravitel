@@ -246,6 +246,7 @@
 
 .apartments-table td:nth-child(12) {
   text-align: right;
+  padding-right: 18px;
 }
 
 /* Бутон "Бързо въвеждане" */
