@@ -327,12 +327,18 @@ export default function AdminDashboard() {
                   <th>Собственик</th>
                   <th>Бр.<br />жив.</th>
                   <th>Плащ.<br />асанс.</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_fee_rate', label: 'Асансьорна такса (€ / човек)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />такса</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_power_rate', label: 'Асансьорен ток (€ / човек)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />ток</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'general_power_rate', label: 'Общ ток (€ / човек)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Общ<br />ток</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'fund_ro_rate', label: 'Фонд Р.О. (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Фонд<br />Р.О.</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'intercom_rate', label: 'Дом. сис. (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
-                  <th className={!isBeforeStartMonth ? "clickable-header" : ""} onClick={!isBeforeStartMonth ? () => setSettingsField({ field: 'manager_fee_rate', label: 'Хонорар (€ / апартамент)' }) : undefined} title={!isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
+                  <th
+                    className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""}
+                    onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_fee_rate', label: 'Асансьорна такса (€ / човек)' }) : undefined}
+                    title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}
+                  >
+                    Асанс.<br />такса
+                  </th>
+                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_power_rate', label: 'Асансьорен ток (€ / човек)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />ток</th>
+                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'general_power_rate', label: 'Общ ток (€ / човек)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Общ<br />ток</th>
+                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'fund_ro_rate', label: 'Фонд Р.О. (€ / апартамент)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Фонд<br />Р.О.</th>
+                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'intercom_rate', label: 'Дом. сис. (€ / апартамент)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
+                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'manager_fee_rate', label: 'Хонорар (€ / апартамент)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
                   <th>Всичко</th>
                   <th>Още</th>
                 </tr>
