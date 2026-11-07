@@ -12,7 +12,6 @@ import HelpModal from '../components/HelpModal.jsx';
 import SetupQuestionModal from '../components/SetupQuestionModal.jsx';
 import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
 import SettingsModal from '../components/SettingsModal.jsx';
-import ConfirmModal from '../components/ConfirmModal.jsx';
 import ExpensesModal from '../components/ExpensesModal.jsx';
 import EditableCell from '../components/EditableCell.jsx';
 import AllOtherChargesModal from '../components/AllOtherChargesModal.jsx';
@@ -39,7 +38,6 @@ export default function AdminDashboard() {
   const isPastMonth = currentMonth < todayMonth;
   const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
   const [unpaidOthers, setUnpaidOthers] = useState([]);
-  const [statusConfirm, setStatusConfirm] = useState(null);
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showAllOther, setShowAllOther] = useState(false);
   const [showSetupQuestion, setShowSetupQuestion] = useState(
@@ -131,31 +129,6 @@ export default function AdminDashboard() {
     } catch {
       setCharges(oldCharges);
       toast.error('Грешка при запазване');
-    }
-  };
-  const toggleStatus = (chargeId, currentStatus) => {
-    if (currentStatus === 'paid') {
-      // Ако е платено и искаме да го направим неплатено -> питаме
-      setStatusConfirm({ chargeId, currentStatus });
-    } else {
-      // Ако е неплатено -> направо го правим платено
-      performToggleStatus(chargeId, currentStatus);
-    }
-  };
-
-  const performToggleStatus = async (chargeId, currentStatus) => {
-    const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
-
-    const oldCharges = [...charges];
-    setCharges((prev) =>
-      prev.map((c) => (c.charge_id === chargeId ? { ...c, status: newStatus } : c))
-    );
-
-    try {
-      await api.put(`/charges/${chargeId}`, { status: newStatus });
-    } catch {
-      setCharges(oldCharges);
-      toast.error('Грешка при промяна на статуса');
     }
   };
   const filteredCharges = charges.filter((charge) => {
@@ -537,20 +510,6 @@ export default function AdminDashboard() {
               }));
               setCharges(updatedCharges);
             }}
-          />
-        )}
-        {statusConfirm && (
-          <ConfirmModal
-            title="Връщане на статус"
-            message="Сигурни ли сте, че искате да маркирате това плащане като НЕПЛАТЕНО?"
-            confirmText="Да, върни"
-            cancelText="Отказ"
-            confirmColor="danger"
-            onConfirm={() => {
-              performToggleStatus(statusConfirm.chargeId, statusConfirm.currentStatus);
-              setStatusConfirm(null);
-            }}
-            onCancel={() => setStatusConfirm(null)}
           />
         )}
         {showExpensesModal && (
