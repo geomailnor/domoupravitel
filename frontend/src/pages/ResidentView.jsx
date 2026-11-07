@@ -84,7 +84,7 @@ export default function ResidentView() {
         setStartMonth(startM);
         const filledMonthly = fillMissingMonths(historyRes.data.monthly, startM);
         setHistory({ monthly: filledMonthly, other: historyRes.data.other });
-      } catch (err) {
+      } catch {
         toast.error('Грешка при зареждане');
       } finally {
         setLoading(false);
