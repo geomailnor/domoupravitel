@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
@@ -131,9 +131,6 @@ export default function Login() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              onInput={(e) => {
-                console.log('INPUT EVENT:', e.target.value);
-              }}
               onFocus={() => setError('')}
               required
             />
