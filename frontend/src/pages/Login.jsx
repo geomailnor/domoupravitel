@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
@@ -31,7 +31,13 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  console.log('REACT USERNAME:', username);
 
+  useEffect(() => {
+    const input = document.getElementById('username');
+
+    console.log('DOM VALUE:', input?.value);
+  }, [username, role]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
