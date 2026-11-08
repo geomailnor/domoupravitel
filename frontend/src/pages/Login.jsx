@@ -21,6 +21,8 @@ export default function Login() {
     if (lastRole === 'admin') return lastUsername || 'admin';
     return '';
   });
+  console.log('ROLE:', role);
+  console.log('USERNAME:', username);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
