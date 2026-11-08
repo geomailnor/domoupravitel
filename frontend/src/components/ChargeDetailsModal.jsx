@@ -240,17 +240,72 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
 
           {/* Информация */}
           {apartmentData && (
-            <div className="apartment-info">
-              <div className="info-row info-row-double">
-                <div className="info-cell">
-                  <span className="info-label">Собственик:</span>
+            <div className="modal-section">
+              <div className="apartment-info">
+                <div className="info-row info-row-double">
+                  <div className="info-cell">
+                    <span className="info-label">Собственик:</span>
+                    <input
+                      type="text"
+                      className={`editable-input ${hasChanged('owner_name') ? 'changed' : ''}`}
+                      value={apartmentData.owner_name || ''}
+                      onChange={(e) => setApartmentData({ ...apartmentData, owner_name: e.target.value })}
+                      onBlur={async () => {
+                        if (!hasChanged('owner_name')) return;
+                        try {
+                          await api.put(`/apartments/${apartment.ap_number}`, {
+                            owner_name: apartmentData.owner_name,
+                            phone: apartmentData.phone,
+                            notes: apartmentData.notes,
+                          });
+                          toast.success('Запазено', { duration: 1000 });
+                          if (onUpdate) onUpdate();
+                        } catch {
+                          toast.error('Грешка при запазване');
+                        }
+                      }}
+                      placeholder="(няма име)"
+                    />
+                  </div>
+                  <div className="info-cell">
+                    <span className="info-label">Парола:</span>
+                    <span className="password-row">
+                      <input
+                        type="text"
+                        className="password-value-input"
+                        value={showPassword ? (apartmentData.password || '') : '••••••••'}
+                        readOnly
+                        tabIndex={-1}
+                      />
+                      <button
+                        type="button"
+                        className="toggle-password-btn"
+                        onClick={() => setShowPassword(!showPassword)}
+                        title={showPassword ? 'Скрий паролата' : 'Покажи паролата'}
+                      >
+                        <img src={showPassword ? oko1 : oko2} alt="" />
+                      </button>
+                      <button
+                        type="button"
+                        className="reset-password-btn"
+                        onClick={handleResetPassword}
+                        disabled={resetting}
+                        title="Нулирай паролата"
+                      >
+                        🔄
+                      </button>
+                    </span>
+                  </div>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Телефон:</span>
                   <input
                     type="text"
-                    className={`editable-input ${hasChanged('owner_name') ? 'changed' : ''}`}
-                    value={apartmentData.owner_name || ''}
-                    onChange={(e) => setApartmentData({ ...apartmentData, owner_name: e.target.value })}
+                    className={`editable-input ${hasChanged('phone') ? 'changed' : ''}`}
+                    value={apartmentData.phone || ''}
+                    onChange={(e) => setApartmentData({ ...apartmentData, phone: e.target.value })}
                     onBlur={async () => {
-                      if (!hasChanged('owner_name')) return;
+                      if (!hasChanged('phone')) return;
                       try {
                         await api.put(`/apartments/${apartment.ap_number}`, {
                           owner_name: apartmentData.owner_name,
@@ -263,255 +318,205 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
                         toast.error('Грешка при запазване');
                       }
                     }}
-                    placeholder="(няма име)"
+                    placeholder="(няма телефон)"
                   />
                 </div>
-                <div className="info-cell">
-                  <span className="info-label">Парола:</span>
-                  <span className="password-row">
-                    <input
-                      type="text"
-                      className="password-value-input"
-                      value={showPassword ? (apartmentData.password || '') : '••••••••'}
-                      readOnly
-                      tabIndex={-1}
-                    />
-                    <button
-                      type="button"
-                      className="toggle-password-btn"
-                      onClick={() => setShowPassword(!showPassword)}
-                      title={showPassword ? 'Скрий паролата' : 'Покажи паролата'}
-                    >
-                      <img src={showPassword ? oko1 : oko2} alt="" />
-                    </button>
-                    <button
-                      type="button"
-                      className="reset-password-btn"
-                      onClick={handleResetPassword}
-                      disabled={resetting}
-                      title="Нулирай паролата"
-                    >
-                      🔄
-                    </button>
-                  </span>
+                <div className="info-row">
+                  <span className="info-label">Бележки:</span>
+                  <input
+                    type="text"
+                    className={`editable-input ${hasChanged('notes') ? 'changed' : ''}`}
+                    value={apartmentData.notes || ''}
+                    onChange={(e) => setApartmentData({ ...apartmentData, notes: e.target.value })}
+                    onBlur={async () => {
+                      if (!hasChanged('notes')) return;
+                      try {
+                        await api.put(`/apartments/${apartment.ap_number}`, {
+                          owner_name: apartmentData.owner_name,
+                          phone: apartmentData.phone,
+                          notes: apartmentData.notes,
+                        });
+                        toast.success('Запазено', { duration: 1000 });
+                        if (onUpdate) onUpdate();
+                      } catch {
+                        toast.error('Грешка при запазване');
+                      }
+                    }}
+                    placeholder="(няма бележки)"
+                  />
                 </div>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Телефон:</span>
-                <input
-                  type="text"
-                  className={`editable-input ${hasChanged('phone') ? 'changed' : ''}`}
-                  value={apartmentData.phone || ''}
-                  onChange={(e) => setApartmentData({ ...apartmentData, phone: e.target.value })}
-                  onBlur={async () => {
-                    if (!hasChanged('phone')) return;
-                    try {
-                      await api.put(`/apartments/${apartment.ap_number}`, {
-                        owner_name: apartmentData.owner_name,
-                        phone: apartmentData.phone,
-                        notes: apartmentData.notes,
-                      });
-                      toast.success('Запазено', { duration: 1000 });
-                      if (onUpdate) onUpdate();
-                    } catch {
-                      toast.error('Грешка при запазване');
-                    }
-                  }}
-                  placeholder="(няма телефон)"
-                />
-              </div>
-              <div className="info-row">
-                <span className="info-label">Бележки:</span>
-                <input
-                  type="text"
-                  className={`editable-input ${hasChanged('notes') ? 'changed' : ''}`}
-                  value={apartmentData.notes || ''}
-                  onChange={(e) => setApartmentData({ ...apartmentData, notes: e.target.value })}
-                  onBlur={async () => {
-                    if (!hasChanged('notes')) return;
-                    try {
-                      await api.put(`/apartments/${apartment.ap_number}`, {
-                        owner_name: apartmentData.owner_name,
-                        phone: apartmentData.phone,
-                        notes: apartmentData.notes,
-                      });
-                      toast.success('Запазено', { duration: 1000 });
-                      if (onUpdate) onUpdate();
-                    } catch {
-                      toast.error('Грешка при запазване');
-                    }
-                  }}
-                  placeholder="(няма бележки)"
-                />
               </div>
             </div>
           )}
           {/* Други разходи */}
-          <h3 className="modal-section-title">Допълнителни такси</h3>
-
-          {history.other.length > 0 ? (
-            <table className="payments-table other-table">
-              <thead>
-                <tr>
-                  <th>Месец</th>
-                  <th>Сума</th>
-                  <th>Описание</th>
-                  <th>Статус</th>
-                  <th>Изтрий</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.other
-                  .slice()
-                  .sort((a, b) => a.month.localeCompare(b.month))
-                  .map((o) => (
-                    <tr key={o.id}>
-                      <td>{monthLabel(o.month)}</td>
-                      <td className="text-right">
-                        <EditableCell
-                          value={o.amount.toFixed(2)}
-                          onSave={(val) => handleEditOther(o.id, 'amount', val)}
-                          isNumeric={true}
-                          align="right"
-                        />
-                      </td>
-                      <td>
-                        <EditableCell
-                          value={o.description || ''}
-                          onSave={(val) => handleEditOther(o.id, 'description', val)}
-                          align="center"
-                        />
-                      </td>
-                      <td>
-                        <button
-                          className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
-                          onClick={() => toggleOtherStatus(o.id, o.status)}
-                        >
-                          {o.status === 'paid' ? 'Плат.' : 'Непл.'}
-                        </button>
-                      </td>
-                      <td className="text-center">
-                        <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="no-payments">Няма други разходи</p>
-          )}
-          {!showAddOther ? (
-            <button
-              type="button"
-              className="add-other-btn"
-              onClick={() => setShowAddOther(true)}
-            >
-              + Добави допълнителна такса
-            </button>
-          ) : (
-            <div className="add-other-form">
-              <div className="form-row">
-                <label>Месец:</label>
-                <input
-                  type="month"
-                  value={newOther.month}
-                  onChange={(e) => setNewOther({ ...newOther, month: e.target.value })}
-                />
-              </div>
-              <div className="form-row">
-                <label>Сума (€):</label>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={newOther.amount}
-                  onChange={(e) => {
-                    let val = e.target.value.replace(/[^0-9.]/g, '');
-                    const parts = val.split('.');
-                    if (parts.length > 2) {
-                      val = parts[0] + '.' + parts.slice(1).join('');
-                    }
-                    // Ако е само точка, я махаме
-                    if (val === '.') val = '';
-                    setNewOther({ ...newOther, amount: val });
-                  }}
-                  onBlur={(e) => {
-                    const num = parseFloat(e.target.value);
-                    if (!isNaN(num)) {
-                      setNewOther({ ...newOther, amount: num.toFixed(2) });
-                    } else {
-                      setNewOther({ ...newOther, amount: '' });
-                    }
-                  }}
-                />
-              </div>
-              <div className="form-row">
-                <label>Описание:</label>
-                <input
-                  type="text"
-                  value={newOther.description}
-                  onChange={(e) => setNewOther({ ...newOther, description: e.target.value })}
-                  placeholder="Напр. Ремонт на асансьор"
-                />
-              </div>
-              <div className="add-other-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowAddOther(false)} disabled={savingOther}>
-                  Отказ
-                </button>
-                <button type="button" className="save-btn" onClick={handleAddOther} disabled={savingOther}>
-                  {savingOther ? 'Запазване...' : 'Запази'}
-                </button>
-              </div>
-            </div>
-          )}
-          {/* История на месечните такси */}
-          <h3 className="modal-section-title">
-            История на месечните такси за {apartmentData?.owner_name || `ап. ${apartment.ap_number || apartment.number}`}
-          </h3>
-          {loading ? (
-            <Spinner size="small" />
-          ) : history.monthly.length === 0 ? (
-            <p className="no-payments">Няма записани месечни такси</p>
-          ) : (
-            <div className="table-wrapper">
-              <table className="payments-table">
+          <div className="modal-section">
+            <h3 className="modal-section-title">Допълнителни такси</h3>
+            {history.other.length > 0 ? (
+              <table className="payments-table other-table">
                 <thead>
                   <tr>
                     <th>Месец</th>
-                    <th>Асанс.<br />такса</th>
-                    <th>Асанс.<br />ток</th>
-                    <th>Общ<br />ток</th>
-                    <th>Фонд<br />Р.О.</th>
-                    <th>Дом.<br />сис.</th>
-                    <th>Хоно-<br />рар</th>
-                    <th>Всичко</th>
+                    <th>Сума</th>
+                    <th>Описание</th>
                     <th>Статус</th>
+                    <th>Изтрий</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {history.monthly.map((m) => (
-                    <tr key={m.id} className={m.month === currentMonth ? 'current-month-row' : ''} >
-                      <td>{shortMonthLabel(m.month)}</td>
-                      <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
-                      <td className="text-right">{m.elevator_power.toFixed(2)}</td>
-                      <td className="text-right">{m.general_power.toFixed(2)}</td>
-                      <td className="text-right">{m.fund_ro.toFixed(2)}</td>
-                      <td className="text-right">{m.intercom.toFixed(2)}</td>
-                      <td className="text-right">{m.manager_fee.toFixed(2)}</td>
-                      <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
-                      <td>
-                        <button
-                          className={`status-btn ${m.status === 'paid' ? 'paid' : 'unpaid'}`}
-                          onClick={() => toggleMonthlyStatus(m.id, m.status)}
-                        >
-                          {m.status === 'paid' ? 'Плат.' : 'Непл.'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {history.other
+                    .slice()
+                    .sort((a, b) => a.month.localeCompare(b.month))
+                    .map((o) => (
+                      <tr key={o.id}>
+                        <td>{monthLabel(o.month)}</td>
+                        <td className="text-right">
+                          <EditableCell
+                            value={o.amount.toFixed(2)}
+                            onSave={(val) => handleEditOther(o.id, 'amount', val)}
+                            isNumeric={true}
+                            align="right"
+                          />
+                        </td>
+                        <td>
+                          <EditableCell
+                            value={o.description || ''}
+                            onSave={(val) => handleEditOther(o.id, 'description', val)}
+                            align="center"
+                          />
+                        </td>
+                        <td>
+                          <button
+                            className={`status-btn ${o.status === 'paid' ? 'paid' : 'unpaid'}`}
+                            onClick={() => toggleOtherStatus(o.id, o.status)}
+                          >
+                            {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                          </button>
+                        </td>
+                        <td className="text-center">
+                          <button className="delete-other-btn" onClick={() => handleDeleteOther(o.id)}>🗑️</button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
-            </div>
-          )}
+            ) : (
+              <p className="no-payments">Няма други разходи</p>
+            )}
+            {!showAddOther ? (
+              <button
+                type="button"
+                className="add-other-btn"
+                onClick={() => setShowAddOther(true)}
+              >
+                + Добави допълнителна такса
+              </button>
+            ) : (
+              <div className="add-other-form">
+                <div className="form-row">
+                  <label>Месец:</label>
+                  <input
+                    type="month"
+                    value={newOther.month}
+                    onChange={(e) => setNewOther({ ...newOther, month: e.target.value })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Сума (€):</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={newOther.amount}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^0-9.]/g, '');
+                      const parts = val.split('.');
+                      if (parts.length > 2) {
+                        val = parts[0] + '.' + parts.slice(1).join('');
+                      }
+                      // Ако е само точка, я махаме
+                      if (val === '.') val = '';
+                      setNewOther({ ...newOther, amount: val });
+                    }}
+                    onBlur={(e) => {
+                      const num = parseFloat(e.target.value);
+                      if (!isNaN(num)) {
+                        setNewOther({ ...newOther, amount: num.toFixed(2) });
+                      } else {
+                        setNewOther({ ...newOther, amount: '' });
+                      }
+                    }}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Описание:</label>
+                  <input
+                    type="text"
+                    value={newOther.description}
+                    onChange={(e) => setNewOther({ ...newOther, description: e.target.value })}
+                    placeholder="Напр. Ремонт на асансьор"
+                  />
+                </div>
+                <div className="add-other-actions">
+                  <button type="button" className="cancel-btn" onClick={() => setShowAddOther(false)} disabled={savingOther}>
+                    Отказ
+                  </button>
+                  <button type="button" className="save-btn" onClick={handleAddOther} disabled={savingOther}>
+                    {savingOther ? 'Запазване...' : 'Запази'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* История на месечните такси */}
+          <div className="modal-section">
+            <h3 className="modal-section-title">
+              История на месечните такси за {apartmentData?.owner_name || `ап. ${apartment.ap_number || apartment.number}`}
+            </h3>
+            {loading ? (
+              <Spinner size="small" />
+            ) : history.monthly.length === 0 ? (
+              <p className="no-payments">Няма записани месечни такси</p>
+            ) : (
+              <div className="table-wrapper">
+                <table className="payments-table">
+                  <thead>
+                    <tr>
+                      <th>Месец</th>
+                      <th>Асанс.<br />такса</th>
+                      <th>Асанс.<br />ток</th>
+                      <th>Общ<br />ток</th>
+                      <th>Фонд<br />Р.О.</th>
+                      <th>Дом.<br />сис.</th>
+                      <th>Хоно-<br />рар</th>
+                      <th>Всичко</th>
+                      <th>Статус</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.monthly.map((m) => (
+                      <tr key={m.id} className={m.month === currentMonth ? 'current-month-row' : ''} >
+                        <td>{shortMonthLabel(m.month)}</td>
+                        <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
+                        <td className="text-right">{m.elevator_power.toFixed(2)}</td>
+                        <td className="text-right">{m.general_power.toFixed(2)}</td>
+                        <td className="text-right">{m.fund_ro.toFixed(2)}</td>
+                        <td className="text-right">{m.intercom.toFixed(2)}</td>
+                        <td className="text-right">{m.manager_fee.toFixed(2)}</td>
+                        <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
+                        <td>
+                          <button
+                            className={`status-btn ${m.status === 'paid' ? 'paid' : 'unpaid'}`}
+                            onClick={() => toggleMonthlyStatus(m.id, m.status)}
+                          >
+                            {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
 
           <div className="modal-actions">
             <button className="close-btn" onClick={onClose}>Затвори</button>
