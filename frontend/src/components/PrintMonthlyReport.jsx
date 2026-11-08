@@ -69,9 +69,8 @@ export default function PrintMonthlyReport({ month, onClose }) {
     if (!startMonth) return [];
     const startYear = parseInt(startMonth.split('-')[0], 10);
     const currentYear = new Date().getFullYear();
-    const endYear = currentYear + 1; // до следващата година
     const years = [];
-    for (let y = startYear; y <= endYear; y++) {
+    for (let y = startYear; y <= currentYear; y++) {
       years.push(y);
     }
     return years;
@@ -80,6 +79,8 @@ export default function PrintMonthlyReport({ month, onClose }) {
     const currentYear = selectedMonth.split('-')[0];
     const startYear = startMonth ? startMonth.split('-')[0] : null;
     const startMonthNum = startMonth ? startMonth.split('-')[1] : null;
+    const now = new Date();
+    const currentMonthNum = String(now.getMonth() + 1).padStart(2, '0');
 
     const months = [
       { value: '01', label: 'Яну.' },
@@ -96,10 +97,14 @@ export default function PrintMonthlyReport({ month, onClose }) {
       { value: '12', label: 'Дек.' },
     ];
 
+    let filtered = months;
     if (currentYear === startYear) {
-      return months.filter(m => m.value >= startMonthNum);
+      filtered = filtered.filter(m => m.value >= startMonthNum);
     }
-    return months;
+    if (currentYear === String(now.getFullYear())) {
+      filtered = filtered.filter(m => m.value <= currentMonthNum);
+    }
+    return filtered;
   };
   return (
     <div className="modal-overlay monthly-report-overlay" style={{ zIndex: 3000 }}> {/* Тук оставяме само zIndex, защото е специфичен */}

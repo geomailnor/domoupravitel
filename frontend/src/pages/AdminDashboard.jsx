@@ -495,7 +495,12 @@ export default function AdminDashboard() {
           />
         )}
         {showMonthlyReport && (
-          <PrintMonthlyReport month={currentMonth} onClose={() => setShowMonthlyReport(false)} />
+          <PrintMonthlyReport
+            month={currentMonth > new Date().toISOString().slice(0, 7)
+              ? new Date().toISOString().slice(0, 7)
+              : currentMonth}
+            onClose={() => setShowMonthlyReport(false)}
+          />
         )}
         {showAllOther && (
           <AllOtherChargesModal onClose={() => setShowAllOther(false)} />

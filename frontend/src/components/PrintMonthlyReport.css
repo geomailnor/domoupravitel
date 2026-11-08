@@ -11,7 +11,7 @@
 .monthly-report-content {
   max-width: 800px;
   height: auto;
-  padding: 2rem;
+  padding: 0 2rem;
   margin-top: 0;
 }
 
@@ -177,7 +177,7 @@
     left: 0;
     top: 0;
     width: 100%;
-    padding: 16mm;
+    padding: 8mm 15mm;
     background: white;
   }
 
@@ -185,6 +185,46 @@
   .print-controls {
     display: none;
   }
+
+  .monthly-report {
+    font-size: 11pt;
+    /* вместо 12pt */
+  }
+
+  .report-title {
+    font-size: 18pt;
+    /* вместо 22pt */
+    margin-bottom: 2mm;
+  }
+
+  .report-month {
+    font-size: 16pt;
+    /* вместо 18pt */
+    margin-bottom: 5mm;
+  }
+
+  .report-subtitle {
+    font-size: 14pt;
+    /* вместо 16pt */
+    margin: 4mm 0 2mm 0;
+  }
+
+  .report-section p {
+    font-size: 12pt;
+    /* вместо 14pt */
+  }
+
+  .report-total {
+    font-size: 14pt;
+    /* вместо 16pt */
+
+  }
+
+  .report-date {
+    font-size: 10pt;
+    /* вместо 12pt */
+  }
+
 
   /* 8. A4 формат */
   @page {
