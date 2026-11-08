@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
@@ -30,14 +30,7 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  // useEffect(() => {
-  //   if (role === 'resident') {
-  //     setUsername('');
-  //   } else if (role === 'admin') {
-  //     const lastUsername = localStorage.getItem('domoupravitel_last_username');
-  //     setUsername(lastUsername || 'admin');
-  //   }
-  // }, [role]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
