@@ -31,8 +31,8 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  console.log('REACT USERNAME:', username);
 
+  console.log('REACT USERNAME:', username);
   useEffect(() => {
     const input = document.getElementById('username');
 
