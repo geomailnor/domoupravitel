@@ -9,7 +9,23 @@ export default function PrintMonthlyReport({ month, onClose }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(month);
+  const [startMonth, setStartMonth] = useState('');
+
   useScrollLock();
+
+  // 1. Зареждане на startMonth
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await api.get('/settings');
+        setStartMonth(res.data.start_month || '');
+      } catch {
+        // игнорираме
+      }
+    };
+    loadSettings();
+  }, []);
+
   useEffect(() => {
     const loadReport = async () => {
       setLoading(true);
@@ -49,19 +65,89 @@ export default function PrintMonthlyReport({ month, onClose }) {
       </div>
     );
   }
+  const generateYears = () => {
+    if (!startMonth) return [];
+    const startYear = parseInt(startMonth.split('-')[0], 10);
+    const currentYear = new Date().getFullYear();
+    const endYear = currentYear + 1; // до следващата година
+    const years = [];
+    for (let y = startYear; y <= endYear; y++) {
+      years.push(y);
+    }
+    return years;
+  };
+  const getAvailableMonths = () => {
+    const currentYear = selectedMonth.split('-')[0];
+    const startYear = startMonth ? startMonth.split('-')[0] : null;
+    const startMonthNum = startMonth ? startMonth.split('-')[1] : null;
 
+    const months = [
+      { value: '01', label: 'Яну.' },
+      { value: '02', label: 'Фев.' },
+      { value: '03', label: 'Март' },
+      { value: '04', label: 'Апр.' },
+      { value: '05', label: 'Май' },
+      { value: '06', label: 'Юни' },
+      { value: '07', label: 'Юли' },
+      { value: '08', label: 'Авг.' },
+      { value: '09', label: 'Сеп.' },
+      { value: '10', label: 'Окт.' },
+      { value: '11', label: 'Ное.' },
+      { value: '12', label: 'Дек.' },
+    ];
+
+    if (currentYear === startYear) {
+      return months.filter(m => m.value >= startMonthNum);
+    }
+    return months;
+  };
   return (
     <div className="modal-overlay monthly-report-overlay" style={{ zIndex: 3000 }}> {/* Тук оставяме само zIndex, защото е специфичен */}
       <div className="print-controls">
-        <label className="month-picker">
-          Месец:
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            title="Избор на месец"
-          />
-        </label>
+        <div className="month-picker">
+          <label>
+            Година:
+            <select
+              value={selectedMonth.split('-')[0]}
+              onChange={(e) => {
+                const newYear = e.target.value;
+                const currentYear = new Date().getFullYear();
+                const oldYear = selectedMonth.split('-')[0];
+
+                let newMonth;
+                if (newYear === oldYear) {
+                  newMonth = selectedMonth.split('-')[1]; // запазваме месеца
+                } else if (parseInt(newYear) === currentYear && startMonth) {
+                  // Ако се връщаме на текущата година, задаваме startMonth (октомври)
+                  newMonth = startMonth.split('-')[1];
+                } else {
+                  // Ако отиваме на друга година, задаваме януари
+                  newMonth = '01';
+                }
+
+                setSelectedMonth(`${newYear}-${newMonth}`);
+              }}
+            >
+              {generateYears().map(year => (
+                <option key={year} value={year}>{year} г.</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Месец:
+            <select
+              value={selectedMonth.split('-')[1]}
+              onChange={(e) => {
+                const currentYear = selectedMonth.split('-')[0];
+                setSelectedMonth(`${currentYear}-${e.target.value}`);
+              }}
+            >
+              {getAvailableMonths().map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
         <button className="save-btn" onClick={() => window.print()}>🖨️ Разпечатай</button>
         <button className="cancel-btn close-report-btn" onClick={onClose}>✕ Затвори</button>
       </div>
