@@ -130,7 +130,7 @@ export default function Login() {
               name="username"
               type="text"
               value={username}
-              placeholder={role === 'admin' ? 'admin' : 'Номер на апартамент'}
+              placeholder={role === 'admin' ? 'admin' : ''}
               readOnly={usernameReadOnly}
               onFocus={() => {
                 setUsernameReadOnly(false);
