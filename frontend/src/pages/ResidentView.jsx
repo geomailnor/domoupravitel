@@ -134,95 +134,98 @@ export default function ResidentView() {
           <Spinner />
         ) : (
           <>
-            {/* Месечни такси */}
-            <h3 className="modal-section-title">Месечни такси</h3>
-            {history.monthly.length === 0 ? (
-              <p className="no-payments">Няма записани месечни такси</p>
-            ) : (
-              <div className="table-wrapper">
-                <table className="resident-payments-table">
-                  <thead>
-                    <tr>
-                      <th>Месец</th>
-                      <th>Асанс.<br />такса</th>
-                      <th>Асанс.<br />ток</th>
-                      <th>Общ<br />ток</th>
-                      <th>Фонд<br />Р.О.</th>
-                      <th>Дом.<br />сис.</th>
-                      <th>Хоно-<br />рар</th>
-                      <th>Всич-<br />ко</th>
-                      <th>Ста-<br />тус</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.monthly
-                      .filter(m => {
-                        const now = new Date();
-                        const currentYear = now.getFullYear();
-                        const currentMonthNum = now.getMonth() + 1;
-                        let endYear = currentYear;
-                        let endMonthNum = currentMonthNum + 3;
-                        if (endMonthNum > 12) {
-                          endMonthNum -= 12;
-                          endYear += 1;
-                        }
-                        const endMonth = `${endYear}-${String(endMonthNum).padStart(2, '0')}`;
-                        return m.month <= endMonth;
-                      })
-                      .sort((a, b) => a.month.localeCompare(b.month))
-                      .map((m) => (
-                        <tr key={m.id}>
-                          <td>{monthLabel(m.month)}</td>
-                          <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
-                          <td className="text-right">{m.elevator_power.toFixed(2)}</td>
-                          <td className="text-right">{m.general_power.toFixed(2)}</td>
-                          <td className="text-right">{m.fund_ro.toFixed(2)}</td>
-                          <td className="text-right">{m.intercom.toFixed(2)}</td>
-                          <td className="text-right">{m.manager_fee.toFixed(2)}</td>
-                          <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
-                          <td className={`status-${m.status}`}>
-                            {m.status === 'paid' ? 'Плат.' : 'Непл.'}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="modal-section">
+              <h3 className="modal-section-title">Месечни такси</h3>
+              {history.monthly.length === 0 ? (
+                <p className="no-payments">Няма записани месечни такси</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table className="resident-payments-table">
+                    <thead>
+                      <tr>
+                        <th>Месец</th>
+                        <th>Асанс.<br />такса</th>
+                        <th>Асанс.<br />ток</th>
+                        <th>Общ<br />ток</th>
+                        <th>Фонд<br />Р.О.</th>
+                        <th>Дом.<br />сис.</th>
+                        <th>Хоно-<br />рар</th>
+                        <th>Всич-<br />ко</th>
+                        <th>Ста-<br />тус</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.monthly
+                        .filter(m => {
+                          const now = new Date();
+                          const currentYear = now.getFullYear();
+                          const currentMonthNum = now.getMonth() + 1;
+                          let endYear = currentYear;
+                          let endMonthNum = currentMonthNum + 3;
+                          if (endMonthNum > 12) {
+                            endMonthNum -= 12;
+                            endYear += 1;
+                          }
+                          const endMonth = `${endYear}-${String(endMonthNum).padStart(2, '0')}`;
+                          return m.month <= endMonth;
+                        })
+                        .sort((a, b) => a.month.localeCompare(b.month))
+                        .map((m) => (
+                          <tr key={m.id}>
+                            <td>{monthLabel(m.month)}</td>
+                            <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
+                            <td className="text-right">{m.elevator_power.toFixed(2)}</td>
+                            <td className="text-right">{m.general_power.toFixed(2)}</td>
+                            <td className="text-right">{m.fund_ro.toFixed(2)}</td>
+                            <td className="text-right">{m.intercom.toFixed(2)}</td>
+                            <td className="text-right">{m.manager_fee.toFixed(2)}</td>
+                            <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
+                            <td className={`status-${m.status}`}>
+                              {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
 
             {/* Други разходи */}
-            <h3 className="modal-section-title" style={{ marginTop: '2rem' }}>Други разходи</h3>
-            {history.other.length === 0 ? (
-              <p className="no-payments">Няма други разходи</p>
-            ) : (
-              <div className="table-wrapper">
-                <table className="resident-payments-table other-table">
-                  <thead>
-                    <tr>
-                      <th>Месец</th>
-                      <th>Сума</th>
-                      <th>Описание</th>
-                      <th>Статус</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.other
-                      .slice()
-                      .sort((a, b) => a.month.localeCompare(b.month))
-                      .map((o) => (
-                        <tr key={o.id}>
-                          <td>{monthLabel(o.month)}</td>
-                          <td>{o.amount.toFixed(2)} €</td>
-                          <td>{o.description || '—'}</td>
-                          <td className={`status-${o.status}`}>
-                            {o.status === 'paid' ? 'Плат.' : 'Непл.'}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="modal-section">
+              <h3 className="modal-section-title" style={{ marginTop: '2rem' }}>Други разходи</h3>
+              {history.other.length === 0 ? (
+                <p className="no-payments">Няма други разходи</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table className="resident-payments-table other-table">
+                    <thead>
+                      <tr>
+                        <th>Месец</th>
+                        <th>Сума</th>
+                        <th>Описание</th>
+                        <th>Статус</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.other
+                        .slice()
+                        .sort((a, b) => a.month.localeCompare(b.month))
+                        .map((o) => (
+                          <tr key={o.id}>
+                            <td>{monthLabel(o.month)}</td>
+                            <td>{o.amount.toFixed(2)} €</td>
+                            <td>{o.description || '—'}</td>
+                            <td className={`status-${o.status}`}>
+                              {o.status === 'paid' ? 'Плат.' : 'Непл.'}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </>
         )}
 

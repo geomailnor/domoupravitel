@@ -711,20 +711,6 @@
 
 }
 
-/* Карти за секциите в модала */
-.modal-section {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Махаме горния margin на заглавията в секциите, за да не е двойно */
-.modal-section .modal-section-title {
-  margin-top: 0;
-}
-
 /* === RESPONSIVE === */
 @media (max-width: 825px) {
 
