@@ -9,6 +9,8 @@ import ForgotPasswordModal from '../components/ForgotPasswordModal.jsx';
 import './Login.css';
 
 export default function Login() {
+  console.log('Login се монтира. lastRole:', localStorage.getItem('domoupravitel_last_role'));
+  console.log('Login се монтира. lastUsername:', localStorage.getItem('domoupravitel_last_username'));
   const [role, setRole] = useState(() => {
     const lastRole = localStorage.getItem('domoupravitel_last_role');
     return lastRole === 'resident' ? 'resident' : 'admin';
