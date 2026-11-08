@@ -21,8 +21,7 @@ export default function Login() {
     if (lastRole === 'admin') return lastUsername || 'admin';
     return '';
   });
-  console.log('ROLE:', role);
-  console.log('USERNAME:', username);
+
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,7 +31,10 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-
+  console.log('ROLE:', role);
+  console.log('USERNAME:', username);
+  console.log('LAST ROLE:', localStorage.getItem('domoupravitel_last_role'));
+  console.log('LAST USERNAME:', localStorage.getItem('domoupravitel_last_username'));
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
