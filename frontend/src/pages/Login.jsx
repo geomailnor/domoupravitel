@@ -129,7 +129,6 @@ export default function Login() {
               name="username"
               type="text"
               value={username}
-              placeholder="Тук трябва да е празно"
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
               required
