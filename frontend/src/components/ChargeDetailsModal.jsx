@@ -489,7 +489,7 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
                 </thead>
                 <tbody>
                   {history.monthly.map((m) => (
-                    <tr key={m.id}>
+                    <tr key={m.id} className={m.month === currentMonth ? 'current-month-row' : ''} >
                       <td>{shortMonthLabel(m.month)}</td>
                       <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
                       <td className="text-right">{m.elevator_power.toFixed(2)}</td>
@@ -519,7 +519,7 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
               className="print-btn"
               onClick={() => setPrintReceipt(true)}
             >
-              🖨️ Разписка
+              🖨️ Разписка за {monthLabel(currentMonth)}
             </button>
           </div>
 

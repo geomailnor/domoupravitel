@@ -706,6 +706,13 @@
   min-width: 60px;
 }
 
+.payments-table tbody tr.current-month-row {
+  outline: 2px solid #e67e22;
+  outline-offset: -2px;
+  background-color: #fef9e7;
+
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 825px) {
 
