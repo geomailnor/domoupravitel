@@ -37,6 +37,11 @@ export default function Login() {
     const input = document.getElementById('username');
 
     console.log('DOM VALUE:', input?.value);
+
+    setTimeout(() => {
+      console.log('DOM VALUE AFTER 1 SECOND:', input?.value);
+    }, 1000);
+
   }, [username, role]);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -134,7 +139,6 @@ export default function Login() {
               id="username"
               name="username"
               type="text"
-              autoComplete='off'
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
