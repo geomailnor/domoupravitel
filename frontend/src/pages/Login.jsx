@@ -126,13 +126,20 @@ export default function Login() {
               {role === 'admin' ? 'Потребителско име:' : 'Номер на апартамент:'}
             </label>
             <input
+              // id="username"
+              // name="username"
+              // type="text"
+              // value={username}
+              // onChange={(e) => setUsername(e.target.value)}
+              // onFocus={() => setError('')}
+              // required
               id="username"
-              name="username"
+              name="apartment-number"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
-              autoComplete="new-password"
+              autoComplete="off"
               required
             />
           </div>
@@ -147,6 +154,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={() => setError('')}
+                autoComplete="current-password"
                 required
               />
               <button
