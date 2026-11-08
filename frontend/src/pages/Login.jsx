@@ -128,6 +128,7 @@ export default function Login() {
               id="username"
               name="username"
               type="text"
+              autoComplete='off'
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
