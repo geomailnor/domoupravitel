@@ -28,7 +28,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-
+  const [usernameReadOnly, setUsernameReadOnly] = useState(true);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -131,8 +131,12 @@ export default function Login() {
               type="text"
               value={username}
               placeholder={role === 'admin' ? 'admin' : 'Номер на апартамент'}
+              readOnly={usernameReadOnly}
+              onFocus={() => {
+                setUsernameReadOnly(false);
+                setError('');
+              }}
               onChange={(e) => setUsername(e.target.value)}
-              onFocus={() => setError('')}
               required
             />
           </div>
