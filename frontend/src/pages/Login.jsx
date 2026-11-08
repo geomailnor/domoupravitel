@@ -61,7 +61,6 @@ export default function Login() {
       });
 
       const { token, user, has_security_question } = response.data;
-      if (user.username) { localStorage.setItem('domoupravitel_last_username', user.username); }
       login(user, token, rememberMe);
 
       if (user.role === 'admin' && user.username) {
