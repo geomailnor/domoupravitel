@@ -130,6 +130,7 @@ export default function Login() {
               name="username"
               type="text"
               value={username}
+              placeholder={role === 'admin' ? 'admin' : 'Номер на апартамент'}
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
               required
