@@ -31,10 +31,7 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-  console.log('ROLE:', role);
-  console.log('USERNAME:', username);
-  console.log('LAST ROLE:', localStorage.getItem('domoupravitel_last_role'));
-  console.log('LAST USERNAME:', localStorage.getItem('domoupravitel_last_username'));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -132,6 +129,7 @@ export default function Login() {
               name="username"
               type="text"
               value={username}
+              placeholder="Тук трябва да е празно"
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
               required
