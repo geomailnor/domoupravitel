@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api.js';
 import { useAuth } from '../useAuth.js';
@@ -30,11 +30,17 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { login } = useAuth();
-
+  // useEffect(() => {
+  //   if (role === 'resident') {
+  //     setUsername('');
+  //   } else if (role === 'admin') {
+  //     const lastUsername = localStorage.getItem('domoupravitel_last_username');
+  //     setUsername(lastUsername || 'admin');
+  //   }
+  // }, [role]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     // Провери дали вече има логнат потребител
     const existingToken = localStorage.getItem('domoupravitel_token');
     const existingUser = localStorage.getItem('domoupravitel_user');
@@ -65,6 +71,9 @@ export default function Login() {
       if (user.username) { localStorage.setItem('domoupravitel_last_username', user.username); }
       login(user, token, rememberMe);
 
+      if (user.role === 'admin' && user.username) {
+        localStorage.setItem('domoupravitel_last_username', user.username);
+      }
       if (user.role === 'admin' && !has_security_question) {
         localStorage.setItem('domoupravitel_needs_question', 'true');
       }
