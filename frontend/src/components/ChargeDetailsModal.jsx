@@ -228,6 +228,16 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
     const m = history.monthly.find(item => item.month === currentMonth);
     return m ? m.total_amount.toFixed(2) : null;
   };
+  if (printReceipt) {
+    return (
+      <PrintReceipt
+        apartment={apartment}
+        month={currentMonth}
+        amount={getMonthlyAmount()}
+        onClose={() => setPrintReceipt(false)}
+      />
+    );
+  }
   return (
     <div className="modal-overlay">
       <div className="modal-content" ref={modalRef} style={{ maxWidth: '800px' }}>
@@ -602,14 +612,6 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
                 setMonthlyStatusConfirm(null);
               }}
               onCancel={() => setMonthlyStatusConfirm(null)}
-            />
-          )}
-          {printReceipt && (
-            <PrintReceipt
-              apartment={apartment}
-              month={currentMonth}
-              amount={getMonthlyAmount()}
-              onClose={() => setPrintReceipt(false)}
             />
           )}
         </div>

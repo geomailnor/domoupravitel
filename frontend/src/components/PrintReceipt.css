@@ -208,7 +208,8 @@
 
   .print-area {
     position: absolute;
-    left: 5px;
+    left: 0;
+    /* вместо 5px, за да е центрирано */
     top: 10mm;
     width: 100%;
     display: block;
@@ -230,12 +231,13 @@
 
   .receipt {
     border: 1px dashed #ccc;
-    margin: 0;
+    margin: 0 auto;
+    /* центриране */
     page-break-inside: avoid;
   }
 
   @page {
     size: A4;
-    margin: 3mm;
+    margin: 10mm;
   }
 }
