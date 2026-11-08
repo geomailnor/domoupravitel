@@ -304,7 +304,7 @@ export default function AdminDashboard() {
         {!loading && (
           <div className="table-title-row">
             <h3 className="current-month-title">
-              Таблица за <strong>{monthLabel(currentMonth)}</strong>
+              Таблица за <span className="highlighted-month"><strong>{monthLabel(currentMonth)}</strong></span>
             </h3>
             <button
               className="all-other-btn"

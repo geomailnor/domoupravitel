@@ -677,6 +677,13 @@
   color: #7f8c8d;
 }
 
+.highlighted-month {
+  border: 2px solid #e67e22;
+  border-radius: 5px;
+  padding: 1px 8px 3px 8px;
+  background-color: #fef9e7;
+}
+
 @keyframes fadeInTable {
   from {
     opacity: 0;
