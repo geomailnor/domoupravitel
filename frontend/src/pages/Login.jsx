@@ -127,12 +127,12 @@ export default function Login() {
             </label>
             <input
               id="username"
-              name="login-username"
+              name="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setError('')}
-              autoComplete="off"
+              autoComplete="new-password"
               required
             />
           </div>
