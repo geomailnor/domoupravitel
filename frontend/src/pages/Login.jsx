@@ -32,17 +32,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  console.log('REACT USERNAME:', username);
-  useEffect(() => {
-    const input = document.getElementById('username');
 
-    console.log('DOM VALUE:', input?.value);
-
-    setTimeout(() => {
-      console.log('DOM VALUE AFTER 1 SECOND:', input?.value);
-    }, 1000);
-
-  }, [username, role]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -141,6 +131,9 @@ export default function Login() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onInput={(e) => {
+                console.log('INPUT EVENT:', e.target.value);
+              }}
               onFocus={() => setError('')}
               required
             />
