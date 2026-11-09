@@ -167,7 +167,7 @@ export default function PrintMonthlyReport({ month, onClose }) {
             <p><strong>Платили месечна такса:</strong> {data.paid_monthly}</p>
             <p><strong>Неплатили:</strong> {data.unpaid_monthly}</p>
             {data.other_paid_count > 0 && (
-              <p><strong>Платени доп. разходи:</strong> {data.other_paid_count} бр.</p>
+              <p><strong>Платили допълнителни такси:</strong> {data.other_paid_count} бр.</p>
             )}
           </div>
 
@@ -180,27 +180,27 @@ export default function PrintMonthlyReport({ month, onClose }) {
             <p>Дом. сис.: <span className="amount">{data.income.intercom} €</span></p>
             <p>Хонорар: <span className="amount">{data.income.manager_fee} €</span></p>
             {parseFloat(data.income.other_paid) > 0 && (
-              <p>Други разходи: <span className="amount">{data.income.other_paid} €</span></p>
+              <p>Допълнителни такси: <span className="amount">{data.income.other_paid} €</span></p>
             )}
             <p className="report-total">Общо приходи: <span className="amount">{data.income.total} €</span></p>
           </div>
 
-          <h3 className="report-subtitle">РАЗПРЕДЕЛЕНИЕ</h3>
+          <h3 className="report-subtitle">РАЗПРЕДЕЛЕНИЕ (приходи в касата)</h3>
           <div className="report-section">
-            <p>В касата на блока (без хонорар): <span className="amount">{data.to_fund} €</span></p>
+            <p>Месечни такси (без хонорар): <span className="amount">{data.to_fund} €</span></p>
             {parseFloat(data.income.other_paid) > 0 && (
-              <p>Други разходи (в касата): <span className="amount">{data.income.other_paid} €</span></p>
+              <p>Допълнителни такси: <span className="amount">{data.income.other_paid} €</span></p>
             )}
-            <p className="report-total">Общо в касата: <span className="amount">{data.balance} €</span></p>
+            <p className="report-total">Общо приходи в касата: <span className="amount">{(parseFloat(data.to_fund) + parseFloat(data.income.other_paid)).toFixed(2)} €</span></p>
           </div>
           <h3 className="report-subtitle">САЛДО</h3>
           <div className="report-section">
             <p>Салдо от предходния месец: <span className="amount">{data.prev_balance} €</span></p>
             <p>Приходи за месеца (в касата): <span className="amount">{data.to_fund} €</span></p>
             {parseFloat(data.income.other_paid) > 0 && (
-              <p>Други приходи: <span className="amount">{data.income.other_paid} €</span></p>
+              <p>Приход от допълнителни такси: <span className="amount">{data.income.other_paid} €</span></p>
             )}
-            <p>Разходи за месеца: <span className="amount">{data.expenses.total} €</span></p>
+            <p>Разходи на блока за месеца: <span className="amount">{data.expenses.total} €</span></p>
             <p className="report-total">Салдо към края на месеца: <span className="amount">{data.balance} €</span></p>
           </div>
           <h3 className="report-subtitle">РАЗХОДИ</h3>
@@ -210,11 +210,9 @@ export default function PrintMonthlyReport({ month, onClose }) {
             ) : (
               <>
                 {data.expenses.by_type.map((e, idx) => (
-                  <p key={idx}>
-                    {e.type === 'other' ? 'Други разходи' : e.type}: <span className="amount">{e.total} €</span>
-                  </p>
+                  <p key={idx}>Разходи на блока за месеца: <span className="amount">{e.total} €</span></p>
                 ))}
-                <p className="report-total">Общо разходи: <span className="amount">{data.expenses.total} €</span></p>
+                <p className="report-total">Общо разходи (изхарчено от касата): <span className="amount">{data.expenses.total} €</span></p>
               </>
             )}
           </div>
@@ -223,7 +221,7 @@ export default function PrintMonthlyReport({ month, onClose }) {
           <div className="report-section">
             <p>Неплатени месечни такси: <span className="amount">{data.unpaid.monthly} €</span></p>
             {parseFloat(data.unpaid.other) > 0 && (
-              <p>Неплатени други разходи: <span className="amount">{data.unpaid.other} €</span></p>
+              <p>Неплатени допълнителни такси: <span className="amount">{data.unpaid.other} €</span></p>
             )}
             <p className="report-total">Общо неплатено: <span className="amount">{data.unpaid.total} €</span></p>
           </div>

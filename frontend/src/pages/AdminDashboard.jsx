@@ -503,7 +503,10 @@ export default function AdminDashboard() {
           />
         )}
         {showAllOther && (
-          <AllOtherChargesModal onClose={() => setShowAllOther(false)} />
+          <AllOtherChargesModal
+            currentMonth={currentMonth}
+            onClose={() => setShowAllOther(false)}
+          />
         )}
         {settingsField && (
           <SettingsModal

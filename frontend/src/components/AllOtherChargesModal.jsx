@@ -9,10 +9,10 @@ import '../pages/Dashboard.css';
 import './ChargeDetailsModal.css';
 import './AllOtherChargesModal.css';
 
-export default function AllOtherChargesModal({ onClose }) {
+export default function AllOtherChargesModal({ currentMonth, onClose }) {
   const [charges, setCharges] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterMonth, setFilterMonth] = useState('');
+  const [filterMonth, setFilterMonth] = useState(currentMonth);
   const [filterStatus, setFilterStatus] = useState('');
   const [startMonth, setStartMonth] = useState('');
   const modalRef = useRef(null);
@@ -23,12 +23,12 @@ export default function AllOtherChargesModal({ onClose }) {
   useEffect(() => {
     const loadCharges = async () => {
       try {
-        const [chargesRes, settingsRes] = await Promise.all([
-          api.get('/payments?type=other'),
-          api.get('/settings')
-        ]);
-        setCharges(chargesRes.data);
-        setStartMonth(settingsRes.data.start_month || '');
+        setLoading(true);
+        const url = filterMonth
+          ? `/payments?type=other&month=${filterMonth}`
+          : `/payments?type=other`;
+        const res = await api.get(url);
+        setCharges(res.data);
       } catch {
         toast.error('Грешка при зареждане на таксите');
       } finally {
@@ -36,7 +36,20 @@ export default function AllOtherChargesModal({ onClose }) {
       }
     };
     loadCharges();
+  }, [filterMonth]);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await api.get('/settings');
+        setStartMonth(res.data.start_month || '');
+      } catch {
+        // игнорираме
+      }
+    };
+    loadSettings();
   }, []);
+
   const filteredCharges = charges.filter(c => {
     if (filterMonth && c.month !== filterMonth) return false;
     if (filterStatus && c.status !== filterStatus) return false;
@@ -88,7 +101,13 @@ export default function AllOtherChargesModal({ onClose }) {
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">
-          <h2 className="all-other-title">Всички допълнителни такси</h2>
+          <h2 className="all-other-title">
+            {filterMonth
+              ? `Допълнителни такси за ${monthLabel(filterMonth)}`
+              : 'Всички допълнителни такси'}
+            {filterStatus === 'paid' && ' (платени)'}
+            {filterStatus === 'unpaid' && ' (неплатени)'}
+          </h2>
 
           <div className="filters-row" style={{ marginBottom: '1rem' }}>
             <select
