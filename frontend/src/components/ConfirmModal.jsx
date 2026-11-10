@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
-import { useScrollLock } from '../hooks/useScrollLock.js';
 import './ConfirmModal.css';
 
 export default function ConfirmModal({
@@ -14,7 +13,6 @@ export default function ConfirmModal({
 }) {
   const modalRef = useRef(null);
   useFocusTrap(modalRef, true);
-  useScrollLock();
 
   // ESC за отказ
   useEffect(() => {
