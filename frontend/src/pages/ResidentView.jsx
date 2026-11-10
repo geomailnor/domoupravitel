@@ -43,23 +43,21 @@ export default function ResidentView() {
 
   // Изчисляване на дълга
   const unpaidStats = useMemo(() => {
-    // Месечни такси: неплатени
-    const unpaidMonthly = history.monthly.filter(m => m.status === 'unpaid');
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    const unpaidMonthly = history.monthly.filter(m =>
+      m.status === 'unpaid' && m.month <= currentMonth
+    );
     const unpaidCount = unpaidMonthly.length;
     const unpaidDue = unpaidMonthly.reduce((sum, m) => sum + m.total_amount, 0);
 
-    // Други разходи: неплатени
     const unpaidOther = history.other.filter(o => o.status === 'unpaid');
     const otherCount = unpaidOther.length;
     const otherDue = unpaidOther.reduce((sum, o) => sum + o.amount, 0);
 
     const totalDue = unpaidDue + otherDue;
 
-    return {
-      unpaidCount, unpaidDue,
-      otherCount, otherDue,
-      totalDue,
-    };
+    return { unpaidCount, unpaidDue, otherCount, otherDue, totalDue };
   }, [history]);
 
   const handleLogout = () => {
@@ -193,7 +191,7 @@ export default function ResidentView() {
 
             {/* Други разходи */}
             <div className="modal-section">
-              <h3 className="modal-section-title" style={{ marginTop: '2rem' }}>Други разходи</h3>
+              <h3 className="modal-section-title" >Други разходи</h3>
               {history.other.length === 0 ? (
                 <p className="no-payments">Няма други разходи</p>
               ) : (
