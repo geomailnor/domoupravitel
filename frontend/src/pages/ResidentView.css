@@ -26,6 +26,12 @@
   font-style: italic;
 }
 
+.resident-dashboard .change-password-btn,
+.resident-dashboard .logout-btn {
+  min-width: 160px;
+  text-align: center;
+}
+
 /* Таблица с плащания */
 .resident-payments-table {
   width: 100%;

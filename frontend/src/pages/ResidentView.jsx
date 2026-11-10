@@ -81,7 +81,7 @@ export default function ResidentView() {
           >
             Смяна на парола
           </button>
-          <button onClick={handleLogout} title="Излизане от системата">Изход</button>
+          <button onClick={handleLogout} className="logout-btn" title="Излизане от системата">Изход</button>
         </div>
       </header>
 
