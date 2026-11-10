@@ -5,6 +5,7 @@ import Spinner from './Spinner.jsx';
 import { monthLabel } from './i18n/translate.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useScrollLock } from '../hooks/useScrollLock.js';
+import ConfirmModal from './ConfirmModal.jsx';
 import '../pages/Dashboard.css';
 import './ChargeDetailsModal.css';
 import './AllOtherChargesModal.css';
@@ -15,6 +16,9 @@ export default function AllOtherChargesModal({ currentMonth, onClose }) {
   const [filterMonth, setFilterMonth] = useState(currentMonth);
   const [filterStatus, setFilterStatus] = useState('');
   const [startMonth, setStartMonth] = useState('');
+  const [selectedCharges, setSelectedCharges] = useState({});
+  const [statusConfirm, setStatusConfirm] = useState(null);
+
   const modalRef = useRef(null);
 
   useFocusTrap(modalRef, !loading);
@@ -94,9 +98,57 @@ export default function AllOtherChargesModal({ currentMonth, onClose }) {
     return months;
   };
 
+  const toggleStatus = (id, currentStatus) => {
+    if (currentStatus === 'paid') {
+      setStatusConfirm({ id, currentStatus });
+    } else {
+      performToggleStatus(id, currentStatus);
+    }
+  };
+
+  const performToggleStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+    try {
+      await api.put(`/payments/${id}`, { status: newStatus });
+      toast.success(newStatus === 'paid' ? 'Маркирано като платено' : 'Маркирано като неплатено', { duration: 1000 });
+
+      const url = filterMonth
+        ? `/payments?type=other&month=${filterMonth}`
+        : `/payments?type=other`;
+      const res = await api.get(url);
+      setCharges(res.data);
+    } catch {
+      toast.error('Грешка при промяна на статуса');
+    }
+  };
+
+  const markSelectedAsPaid = async () => {
+    const ids = Object.keys(selectedCharges).filter(id => selectedCharges[id]);
+    if (ids.length === 0) {
+      toast.error('Не сте избрали такси');
+      return;
+    }
+
+    try {
+      for (const id of ids) {
+        await api.put(`/payments/${id}`, { status: 'paid' });
+      }
+      toast.success(`Маркирани ${ids.length} такси като платени`);
+      setSelectedCharges({});
+
+      const url = filterMonth
+        ? `/payments?type=other&month=${filterMonth}`
+        : `/payments?type=other`;
+      const res = await api.get(url);
+      setCharges(res.data);
+    } catch {
+      toast.error('Грешка при маркиране');
+    }
+  };
+
   return (
     <div className="modal-overlay">
-      <div className="modal-content" ref={modalRef} style={{ maxWidth: '800px' }}>
+      <div className="modal-content all-other-modal-content" ref={modalRef}>
         <div className="modal-header">
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
@@ -147,6 +199,23 @@ export default function AllOtherChargesModal({ currentMonth, onClose }) {
               <table className="payments-table other-table all-other-table">
                 <thead>
                   <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const newSelected = {};
+                            filteredCharges.forEach(c => {
+                              if (c.status === 'unpaid') newSelected[c.id] = true;
+                            });
+                            setSelectedCharges(newSelected);
+                          } else {
+                            setSelectedCharges({});
+                          }
+                        }}
+                        title="Маркирай всички"
+                      />
+                    </th>
                     <th>Ап. №</th>
                     <th>Собственик</th>
                     <th>Месец</th>
@@ -158,13 +227,32 @@ export default function AllOtherChargesModal({ currentMonth, onClose }) {
                 <tbody>
                   {filteredCharges.map((c) => (
                     <tr key={c.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={!!selectedCharges[c.id]}
+                          disabled={c.status === 'paid'}
+                          onChange={(e) => {
+                            setSelectedCharges(prev => ({
+                              ...prev,
+                              [c.id]: e.target.checked
+                            }));
+                          }}
+                        />
+                      </td>
                       <td>{c.apartment_number}</td>
-                      <td>{c.owner_name || '—'}</td>
-                      <td>{monthLabel(c.month)}</td>
-                      <td className="text-right">{parseFloat(c.amount).toFixed(2)} €</td>
-                      <td>{c.description || '—'}</td>
-                      <td className={`status-${c.status}`}>
-                        {c.status === 'paid' ? 'Плат.' : 'Непл.'}
+                      <td title={c.owner_name || ''}>{c.owner_name || '—'}</td>
+                      <td title={monthLabel(c.month)}>{monthLabel(c.month)}</td>
+                      <td className="text-right" title={`${parseFloat(c.amount).toFixed(2)} €`}>{parseFloat(c.amount).toFixed(2)} €</td>
+                      <td title={c.description || ''}>{c.description || '—'}</td>
+                      <td>
+                        <button
+                          className={`status-btn ${c.status === 'paid' ? 'paid' : 'unpaid'}`}
+                          onClick={() => toggleStatus(c.id, c.status)}
+                          title={c.status === 'paid' ? 'Маркирай като неплатено' : 'Маркирай като платено'}
+                        >
+                          {c.status === 'paid' ? 'Плат.' : 'Непл.'}
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -175,7 +263,28 @@ export default function AllOtherChargesModal({ currentMonth, onClose }) {
 
           <div className="modal-actions">
             <button className="close-btn" onClick={onClose}>Затвори</button>
+            <button
+              className="save-btn"
+              onClick={markSelectedAsPaid}
+              disabled={Object.keys(selectedCharges).filter(id => selectedCharges[id]).length === 0}
+            >
+              Маркирай избраните като платени
+            </button>
           </div>
+          {statusConfirm && (
+            <ConfirmModal
+              title="Връщане на статус"
+              message="Сигурни ли сте, че искате да маркирате тази такса като НЕПЛАТЕНО?"
+              confirmText="Да, върни"
+              cancelText="Отказ"
+              confirmColor="danger"
+              onConfirm={() => {
+                performToggleStatus(statusConfirm.id, statusConfirm.currentStatus);
+                setStatusConfirm(null);
+              }}
+              onCancel={() => setStatusConfirm(null)}
+            />
+          )}
         </div>
       </div>
     </div>
