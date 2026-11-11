@@ -209,3 +209,10 @@
 .forgot-password-link:hover {
   color: #21618c;
 }
+
+@media(max-width: 390px) {
+  .login-logo img {
+    width: 240px;
+    height: auto;
+  }
+}
