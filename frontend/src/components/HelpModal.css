@@ -1,6 +1,6 @@
 .help-modal {
   max-width: 900px;
-  min-width: 380px;
+  min-width: 370px;
   height: auto;
   max-height: 95vh;
   animation: fadeIn 0.4s ease-out;

@@ -1,6 +1,6 @@
 /* Стилове за AdminDashboard */
 .admin-dashboard {
-  min-width: 580px;
+  min-width: 400px;
 }
 
 .main-header {
@@ -100,7 +100,7 @@
   transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
   white-space: nowrap;
   height: 40px;
-  width: 180px;
+  width: 175px;
 }
 
 .clear-filters-btn:hover {
@@ -397,6 +397,13 @@
   outline: none;
   border-color: #2980b9;
   box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+}
+
+.header-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: auto;
 }
 
 .inline-edit-input {
@@ -696,6 +703,13 @@
   }
 }
 
+@media (max-width: 1090px) {
+  .action-buttons-group {
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+}
+
 @media (max-width: 980px) {
   .dashboard main {
     padding: 0.6rem;
@@ -755,10 +769,6 @@
     /* Центрира всички елементи */
   }
 
-  .report-btn .btn-text {
-    display: none;
-  }
-
   .report-btn {
     min-width: auto;
     padding: 0.6rem 0.75rem;
@@ -793,5 +803,28 @@
 
   .table-title-row {
     margin-bottom: 1.25rem;
+  }
+}
+
+@media (max-width: 688px) {
+  .main-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-around;
+  }
+
+  .header-controls {
+    flex-basis: 100%;
+    justify-content: center;
+    margin-left: 0;
+    gap: 0.5rem 1rem;
+  }
+
+  .month-year-selector {
+    margin-left: 0;
+  }
+
+  .report-btn {
+    margin-left: 0;
   }
 }
