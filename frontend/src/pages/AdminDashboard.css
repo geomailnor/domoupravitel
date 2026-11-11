@@ -696,9 +696,9 @@
   }
 }
 
-@media (max-width: 1030px) {
+@media (max-width: 980px) {
   .dashboard main {
-    padding: 0.5rem;
+    padding: 0.6rem;
   }
 
   /* Намаляваме отстъпите в клетките, за да спечелим място */
@@ -706,9 +706,7 @@
   .apartments-table th {
     padding: 0.5rem 2px;
   }
-}
 
-@media (max-width: 980px) {
   .table-wrapper {
     overflow-x: auto;
   }
@@ -791,5 +789,9 @@
     flex-basis: 100%;
     text-align: center;
     margin-bottom: 0.5rem;
+  }
+
+  .table-title-row {
+    margin-bottom: 1.25rem;
   }
 }
