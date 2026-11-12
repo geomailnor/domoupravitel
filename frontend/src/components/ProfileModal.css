@@ -1,5 +1,5 @@
 .profile-modal {
-  max-width: 720px;
+  max-width: 640px;
   min-width: 450px;
   height: auto;
   max-height: 92vh;
@@ -188,6 +188,7 @@
 
 .passwords-table-wrapper {
   max-height: 400px;
+  overflow-x: auto;
   overflow-y: auto;
   border: 1px solid #e0e0e0;
   border-radius: 5px;
@@ -195,6 +196,7 @@
 
 .passwords-table {
   width: 100%;
+  min-width: 500px;
   border-collapse: collapse;
   font-size: 1rem;
 }
@@ -211,11 +213,40 @@
   padding: 0.5rem 0.75rem;
   text-align: left;
   font-weight: 600;
+  vertical-align: top;
 }
 
 .passwords-table td {
   padding: 0.4rem 0.75rem;
   border-bottom: 1px solid #f0f0f0;
+}
+
+/* Ап. № */
+.passwords-table th:nth-child(1),
+.passwords-table td:nth-child(1) {
+  width: 10%;
+  text-align: center;
+}
+
+/* Етаж */
+.passwords-table th:nth-child(2),
+.passwords-table td:nth-child(2) {
+  width: 10%;
+  text-align: center;
+}
+
+/* Собственик */
+.passwords-table th:nth-child(3),
+.passwords-table td:nth-child(3) {
+  width: 50%;
+  text-align: left;
+}
+
+/* Парола */
+.passwords-table th:nth-child(4),
+.passwords-table td:nth-child(4) {
+  width: 30%;
+  text-align: left;
 }
 
 .passwords-table tbody tr:nth-child(even) {
@@ -231,6 +262,14 @@
   color: #2980b9;
   font-weight: 600;
   letter-spacing: 0.05rem;
+}
+
+.passwords-table thead th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.passwords-table thead th:last-child {
+  border-top-right-radius: 6px;
 }
 
 .current-question-info {

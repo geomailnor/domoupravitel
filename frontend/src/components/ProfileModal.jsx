@@ -387,7 +387,7 @@ export default function ProfileModal({ onClose }) {
                   <table className="passwords-table">
                     <thead>
                       <tr>
-                        <th>Ап.№</th>
+                        <th>Ап.<br />№</th>
                         <th>Етаж</th>
                         <th>Собственик</th>
                         <th>Парола</th>
