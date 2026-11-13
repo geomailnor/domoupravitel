@@ -369,16 +369,18 @@ export default function AdminDashboard() {
                         align="center"
                       />
                     </td>
-
                     <td className="text-center">
-                      <EditableCell
-                        value={charge.elevator_payers_count}
-                        onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_payers_count', val)}
-                        disabled={charge.is_vacant || isPastMonth}
-                        align="center"
-                      />
+                      {charge.residents_count === 0 ? (
+                        <span style={{ color: '#bdc3c7' }}>—</span>
+                      ) : (
+                        <EditableCell
+                          value={charge.elevator_payers_count}
+                          onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_payers_count', val)}
+                          disabled={isPastMonth}
+                          align="center"
+                        />
+                      )}
                     </td>
-
                     <td className="text-right">{Number(charge.elevator_fee).toFixed(2)}</td>
                     <td className="text-right">{Number(charge.elevator_power).toFixed(2)}</td>
                     <td className="text-right">{Number(charge.general_power).toFixed(2)}</td>

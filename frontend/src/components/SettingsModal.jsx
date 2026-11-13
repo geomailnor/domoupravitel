@@ -34,8 +34,8 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
       // Вземаме всички текущи rates, за да не загубим другите
       const settingsRes = await api.get('/settings');
       const currentRates = {
-        elevator_fee_rate: parseFloat(settingsRes.data.elevator_fee_rate) || 1.13,
-        elevator_power_rate: parseFloat(settingsRes.data.elevator_power_rate) || 0.82,
+        elevator_fee_rate: parseFloat(settingsRes.data.elevator_fee_rate) || 1.10,
+        elevator_power_rate: parseFloat(settingsRes.data.elevator_power_rate) || 0.85,
         general_power_rate: parseFloat(settingsRes.data.general_power_rate) || 0.65,
         fund_ro_rate: parseFloat(settingsRes.data.fund_ro_rate) || 3.00,
         intercom_rate: parseFloat(settingsRes.data.intercom_rate) || 1.00,
@@ -48,10 +48,7 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
       // 1. Записваме всички rates (за да е сигурно)
       await api.put('/settings', newRates);
 
-      // 2. Преизчисляваме неплатените с новите rates
-      await api.post('/charges/recalculate-unpaid', { rates: newRates, month: currentMonth });
-
-      toast.success('Промяната е запазена');
+      toast.success('Цената е запазена. Ще важи за следващия месец.');
       if (onSave) onSave();
       onClose();
     } catch {
@@ -65,7 +62,7 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
     <div className="modal-overlay">
       <div className="modal-content" style={{ maxWidth: '400px', height: 'auto' }}>
         <div className="modal-header">
-          <button className="modal-close settings-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose} disabled={saving}>×</button>
         </div>
         <div className="modal-body">
           <h2 className="settings-title">Промяна на такса</h2>
@@ -104,7 +101,7 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
           )}
 
           <p className="settings-note">
-            Промяната ще важи за всички неплатени такси в текущия месец.
+            Промяната ще важи за следващия месец. Текущият месец остава така.
           </p>
 
           <div className="modal-actions">
@@ -112,7 +109,14 @@ export default function SettingsModal({ field, label, currentMonth, onClose, onS
               Отказ
             </button>
             <button type="button" className="save-btn settings-action-btn" onClick={handleSave} disabled={saving || loading}>
-              {saving ? 'Запазване...' : 'Запази'}
+              {saving ? (
+                <>
+                  <span className="spinner-button"></span>
+                  Запазване...
+                </>
+              ) : (
+                'Запази'
+              )}
             </button>
           </div>
         </div>

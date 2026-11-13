@@ -10,20 +10,21 @@ const round2 = (num) => Math.round(num * 100) / 100;
 
 // Помощна функция за изчисляване на сумите за един апартамент
 function calculateCharges(ap, rates, residentsCount, elevatorPayersCount) {
-  // Ако е свободен, всичко е 0, освен фиксираните
-  if (ap.is_vacant) {
+  // Ако е свободен (0 живущи), асансьорният ток и общият ток са 0.
+  if (residentsCount === 0) {
+    const elevatorFee = (ap.floor >= 3) ? rates.elevator_fee_rate : 0;
     return {
-      elevator_fee: 0,
+      elevator_fee: elevatorFee,
       elevator_power: 0,
       general_power: 0,
       fund_ro: rates.fund_ro_rate,
       intercom: rates.intercom_rate,
       manager_fee: rates.manager_fee_rate,
-      total_amount: rates.fund_ro_rate + rates.intercom_rate + rates.manager_fee_rate
+      total_amount: round2(elevatorFee + rates.fund_ro_rate + rates.intercom_rate + rates.manager_fee_rate)
     };
   }
 
-  // Изчисляване
+  // Изчисляване за апартаменти с живущи
   const elevator_fee = round2(elevatorPayersCount * rates.elevator_fee_rate);
   const elevator_power = round2(elevatorPayersCount * rates.elevator_power_rate);
   const general_power = round2(residentsCount * rates.general_power_rate);
@@ -66,7 +67,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 
     // Ако някои липсват, слагаме default (за сигурност)
     const defaultRates = {
-      elevator_fee_rate: 1.13, elevator_power_rate: 0.82, general_power_rate: 0.65,
+      elevator_fee_rate: 1.10, elevator_power_rate: 0.85, general_power_rate: 0.65,
       fund_ro_rate: 3.00, intercom_rate: 1.00, manager_fee_rate: 3.00
     };
     Object.assign(rates, defaultRates, rates);
@@ -109,6 +110,10 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
         } else {
           // Ако няма предишен месец (първи месец), взимаме от apartments
           if (ap.is_vacant) elevatorPayers = 0;
+        }
+
+        if (ap.floor <= 2 && !ap.default_pays_elevator) {
+          elevatorPayers = 0;
         }
 
         const calc = calculateCharges(ap, rates, residentsCount, elevatorPayers);
@@ -164,14 +169,14 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     });
 
     const defaultRates = {
-      elevator_fee_rate: 1.13, elevator_power_rate: 0.82, general_power_rate: 0.65,
+      elevator_fee_rate: 1.10, elevator_power_rate: 0.85, general_power_rate: 0.65,
       fund_ro_rate: 3.00, intercom_rate: 1.00, manager_fee_rate: 3.00
     };
     Object.assign(rates, defaultRates, rates);
 
     // 2. Вземаме данните за апартамента и текущия запис
     const chargeRes = await pool.query(`
-      SELECT m.*, a.is_vacant as ap_is_vacant, a.default_pays_elevator
+      SELECT m.*, a.is_vacant as ap_is_vacant, a.default_pays_elevator, a.floor
       FROM monthly_charges m
       JOIN apartments a ON m.ap_id = a.id
       WHERE m.id = $1
@@ -197,10 +202,13 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     // Ако е маркиран като свободен, принудително нулираме живущите
     const isVacant = is_vacant !== undefined ? is_vacant : charge.ap_is_vacant;
     const finalResidents = isVacant ? 0 : newResidents;
-    const finalElevatorPayers = isVacant ? 0 : newElevatorPayers;
+    let finalElevatorPayers = isVacant ? 0 : newElevatorPayers;
+    if (finalResidents === 0) {
+      finalElevatorPayers = 0;
+    }
 
     // 4. Преизчисляваме сумите
-    const fakeAp = { is_vacant: isVacant }; // За функцията
+    const fakeAp = { is_vacant: isVacant, floor: charge.floor };
     const calc = calculateCharges(fakeAp, rates, finalResidents, finalElevatorPayers);
 
     // 5. Обновяваме записа

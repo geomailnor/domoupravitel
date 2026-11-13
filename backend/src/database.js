@@ -109,8 +109,8 @@ async function createTables() {
     // Начални стойности за новите цени (ако липсват)
     await pool.query(`
       INSERT INTO block_params (name, value) VALUES 
-      ('elevator_fee_rate', '1.13'),
-      ('elevator_power_rate', '0.82'),
+      ('elevator_fee_rate', '1.10'),
+      ('elevator_power_rate', '0.85'),
       ('general_power_rate', '0.65'),
       ('fund_ro_rate', '3.00'),
       ('intercom_rate', '1.00'),
