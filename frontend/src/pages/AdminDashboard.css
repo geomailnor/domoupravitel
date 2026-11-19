@@ -191,7 +191,7 @@
 }
 
 .apartments-table th:nth-child(3) {
-  width: 18%;
+  width: 19%;
   text-align: left;
 }
 
@@ -201,10 +201,12 @@
 
 .apartments-table th:nth-child(5) {
   width: 7%;
+  padding-left: 22px;
 }
 
 .apartments-table th:nth-child(6) {
   width: 7%;
+  padding-left: 22px;
 }
 
 .apartments-table th:nth-child(7) {
@@ -228,7 +230,7 @@
 }
 
 .apartments-table th:nth-child(12) {
-  width: 9%;
+  width: 8%;
   text-align: right;
 }
 
@@ -244,9 +246,19 @@
   text-align: left;
 }
 
+.apartments-table td:nth-child(5),
+.apartments-table td:nth-child(6) {
+  padding-left: 8px;
+}
+
+.apartments-table td:nth-child(n+7):nth-child(-n+11) {
+  padding-left: 0;
+  padding-right: 22px;
+}
+
 .apartments-table td:nth-child(12) {
   text-align: right;
-  padding-right: 18px;
+  padding-right: 22px;
 }
 
 /* Бутон "Бързо въвеждане" */
@@ -422,7 +434,12 @@
   text-align: center;
 }
 
+.apartments-table td.text-right {
+  text-align: right;
+}
+
 .apartments-table tfoot td.text-right {
+  padding-right: 22px;
   text-align: right;
 }
 

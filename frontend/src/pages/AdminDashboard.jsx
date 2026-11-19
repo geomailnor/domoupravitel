@@ -119,7 +119,8 @@ export default function AdminDashboard() {
       if (field === 'residents_count') payload.residents_count = newValue;
       if (field === 'elevator_payers_count') payload.elevator_payers_count = newValue;
       if (field === 'owner_name') payload.owner_name = newValue; // <-- Ново
-
+      if (field === 'elevator_fee') payload.elevator_fee = newValue;
+      if (field === 'elevator_power') payload.elevator_power = newValue;
       const res = await api.put(`/charges/${chargeId}`, payload);
 
       setCharges((prev) =>
@@ -327,21 +328,15 @@ export default function AdminDashboard() {
                   <th>Ап.№</th>
                   <th>Собственик</th>
                   <th>Бр.<br />жив.</th>
-                  <th>Плащ.<br />асанс.</th>
-                  <th
-                    className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""}
-                    onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_fee_rate', label: 'Асансьорна такса (€ / човек)' }) : undefined}
-                    title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}
-                  >
-                    Асанс.<br />такса
-                  </th>
-                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'elevator_power_rate', label: 'Асансьорен ток (€ / човек)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Асанс.<br />ток</th>
-                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'general_power_rate', label: 'Общ ток (€ / човек)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Общ<br />ток</th>
-                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'fund_ro_rate', label: 'Фонд Р.О. (€ / апартамент)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Фонд<br />Р.О.</th>
-                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'intercom_rate', label: 'Дом. сис. (€ / апартамент)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Дом.<br />сис.</th>
-                  <th className={!isPastMonth && !isBeforeStartMonth ? "clickable-header" : ""} onClick={!isPastMonth && !isBeforeStartMonth ? () => setSettingsField({ field: 'manager_fee_rate', label: 'Хонорар (€ / апартамент)' }) : undefined} title={!isPastMonth && !isBeforeStartMonth ? "Кликнете за промяна" : ""}>Хоно-<br />рар</th>
+                  <th>Асанс.<br />такса</th>
+                  <th>Асанс.<br />ток</th>
+                  <th>Общ<br />ток</th>
+                  <th>Фонд<br />Р.О.</th>
+                  <th>Дом.<br />сис.</th>
+                  <th>Хоно-<br />рар</th>
+                  <th>Доп. такси</th>
                   <th>Всичко</th>
-                  <th>Още</th>
+                  <th>Още</th> {/* <-- преместено тук */}
                 </tr>
               </thead>
               <tbody>
@@ -365,35 +360,76 @@ export default function AdminDashboard() {
                       <EditableCell
                         value={charge.residents_count}
                         onSave={(val) => handleInlineSave(charge.charge_id, 'residents_count', val)}
-                        disabled={charge.is_vacant || isPastMonth}
+                        // disabled={charge.is_vacant || isPastMonth}
+                        disabled={charge.is_vacant}
                         align="center"
                       />
                     </td>
-                    <td className="text-center">
-                      {charge.residents_count === 0 ? (
-                        <span style={{ color: '#bdc3c7' }}>—</span>
+
+                    {/* <td className="text-right">
+                      {isPastMonth ? (
+                        <span>{Number(charge.elevator_fee).toFixed(2)}</span>
                       ) : (
                         <EditableCell
-                          value={charge.elevator_payers_count}
-                          onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_payers_count', val)}
-                          disabled={isPastMonth}
-                          align="center"
+                          value={Number(charge.elevator_fee).toFixed(2)}
+                          onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_fee', val)}
+                          isNumeric={true}
+                          align="right"
                         />
                       )}
                     </td>
-                    <td className="text-right">{Number(charge.elevator_fee).toFixed(2)}</td>
-                    <td className="text-right">{Number(charge.elevator_power).toFixed(2)}</td>
+
+                    <td className="text-right">
+                      {isPastMonth ? (
+                        <span>{Number(charge.elevator_power).toFixed(2)}</span>
+                      ) : (
+                        <EditableCell
+                          value={Number(charge.elevator_power).toFixed(2)}
+                          onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_power', val)}
+                          isNumeric={true}
+                          align="right"
+                        />
+                      )}
+                    </td> */}
+
+                    <td className="text-right">
+                      <EditableCell
+                        value={Number(charge.elevator_fee).toFixed(2)}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_fee', val)}
+                        isNumeric={true}
+                        align="right"
+                      />
+                    </td>
+
+                    <td className="text-right">
+                      <EditableCell
+                        value={Number(charge.elevator_power).toFixed(2)}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_power', val)}
+                        isNumeric={true}
+                        align="right"
+                      />
+                    </td>
+
                     <td className="text-right">{Number(charge.general_power).toFixed(2)}</td>
                     <td className="text-right">{Number(charge.fund_ro).toFixed(2)}</td>
                     <td className="text-right">{Number(charge.intercom).toFixed(2)}</td>
                     <td className="text-right">{Number(charge.manager_fee).toFixed(2)}</td>
+
+                    {/* 1. Доп. такси (празно за сега) */}
+                    <td className="text-right">—</td>
+
+                    {/* 2. Всичко */}
                     <td className="text-right font-bold">{Number(charge.total_amount).toFixed(2)}</td>
+
+                    {/* 3. Още (бутон Подр.) - вече накрая */}
                     <td className="text-center">
                       <button
                         className={`details-btn ${unpaidOthers.includes(charge.ap_number) ? 'has-debt' : ''}`}
                         onClick={() => setSelectedCharge(charge)}
                         title="Виж парола и история"
-                      >Подр.{unpaidOthers.includes(charge.ap_number) && <span className="debt-indicator">!</span>}
+                      >
+                        Подр.
+                        {unpaidOthers.includes(charge.ap_number) && <span className="debt-indicator">!</span>}
                       </button>
                     </td>
                   </tr>
@@ -401,36 +437,40 @@ export default function AdminDashboard() {
               </tbody>
               <tfoot>
                 <tr className="totals-row">
-                  <td colSpan="5" className="totals-label">Общо (за плащане):</td>
+                  <td colSpan="4" className="totals-label">Общо (за плащане):</td>
                   <td className="text-right font-bold">{calculateTotals().elevator_fee.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().elevator_power.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().general_power.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().fund_ro.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().intercom.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().manager_fee.toFixed(2)}</td>
+                  <td></td> {/* Доп. такси */}
                   <td className="text-right font-bold">{calculateTotals().total_amount.toFixed(2)}</td>
-                  <td colSpan="2"></td>
+                  <td></td> {/* Още */}
                 </tr>
+
                 <tr className="totals-row revenue-row">
                   <td colSpan="11" className="revenue-label">Очакван приход за блока (без хонорар):</td>
                   <td className="text-right font-bold revenue-amount">
                     {(calculateTotals().total_amount - calculateTotals().manager_fee).toFixed(2)}
                   </td>
-                  <td colSpan="2"></td>
+                  <td></td>
                 </tr>
+
                 <tr className="totals-row paid-row">
                   <td colSpan="11" className="paid-label">Реално платено:</td>
                   <td className="text-right font-bold paid-amount">
                     {calculatePaidTotals().total_amount.toFixed(2)}
                   </td>
-                  <td colSpan="2"></td>
+                  <td></td>
                 </tr>
+
                 <tr className="totals-row cash-row">
                   <td colSpan="11" className="cash-label">В касата (реално събрано, без хонорар):</td>
                   <td className="text-right font-bold cash-amount">
                     {(calculatePaidTotals().total_amount - calculatePaidManagerFee()).toFixed(2)}
                   </td>
-                  <td colSpan="2"></td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>

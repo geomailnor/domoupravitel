@@ -158,7 +158,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 // PUT /api/charges/:id (Инлайн редакция)
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { residents_count, elevator_payers_count, is_vacant, owner_name, status } = req.body;
+  const { residents_count, elevator_payers_count, is_vacant, owner_name, status, elevator_fee, elevator_power } = req.body;
 
   try {
     // 1. Вземаме текущите цени
@@ -211,6 +211,19 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     const fakeAp = { is_vacant: isVacant, floor: charge.floor };
     const calc = calculateCharges(fakeAp, rates, finalResidents, finalElevatorPayers);
 
+    // ⭐ Взимаме старите стойности и ги правим на числа
+    let finalElevatorFee = (elevator_fee !== undefined)
+      ? parseFloat(elevator_fee)
+      : parseFloat(charge.elevator_fee || 0);
+
+    let finalElevatorPower = (elevator_power !== undefined)
+      ? parseFloat(elevator_power)
+      : parseFloat(charge.elevator_power || 0);
+
+    // ⭐ Преизчисляваме total_amount, като се уверяваме, че всичко е число
+    const finalTotalAmount = Math.round(
+      (Number(finalElevatorFee) + Number(finalElevatorPower) + Number(calc.general_power) + Number(calc.fund_ro) + Number(calc.intercom) + Number(calc.manager_fee)) * 100
+    ) / 100;
     // 5. Обновяваме записа
     const updateRes = await pool.query(`
       UPDATE monthly_charges SET
@@ -227,8 +240,8 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       RETURNING *
     `, [
       finalResidents, finalElevatorPayers,
-      calc.elevator_fee, calc.elevator_power, calc.general_power,
-      calc.fund_ro, calc.intercom, calc.manager_fee, calc.total_amount,
+      finalElevatorFee, finalElevatorPower, calc.general_power,
+      calc.fund_ro, calc.intercom, calc.manager_fee, finalTotalAmount,
       id
     ]);
 
