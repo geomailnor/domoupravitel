@@ -191,7 +191,7 @@
 }
 
 .apartments-table th:nth-child(3) {
-  width: 19%;
+  width: 15%;
   text-align: left;
 }
 
@@ -230,12 +230,12 @@
 }
 
 .apartments-table th:nth-child(12) {
-  width: 8%;
-  text-align: right;
+  width: 9%;
+  text-align: center;
 }
 
 .apartments-table th:nth-child(13) {
-  width: 9%;
+  width: 12%;
 }
 
 /* Ограничаване на дългите имена на собственици */

@@ -34,9 +34,9 @@ export default function AdminDashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [settingsField, setSettingsField] = useState(null);
-  const todayMonth = new Date().toISOString().slice(0, 7);
-  const isPastMonth = currentMonth < todayMonth;
-  const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
+  // const todayMonth = new Date().toISOString().slice(0, 7);
+  // const isPastMonth = currentMonth < todayMonth;
+  // const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
   const [unpaidOthers, setUnpaidOthers] = useState([]);
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showAllOther, setShowAllOther] = useState(false);
@@ -121,6 +121,9 @@ export default function AdminDashboard() {
       if (field === 'owner_name') payload.owner_name = newValue; // <-- Ново
       if (field === 'elevator_fee') payload.elevator_fee = newValue;
       if (field === 'elevator_power') payload.elevator_power = newValue;
+      if (field === 'fund_ro') payload.fund_ro = newValue;
+      if (field === 'intercom') payload.intercom = newValue;
+      if (field === 'manager_fee') payload.manager_fee = newValue;
       const res = await api.put(`/charges/${chargeId}`, payload);
 
       setCharges((prev) =>
@@ -334,9 +337,9 @@ export default function AdminDashboard() {
                   <th>Фонд<br />Р.О.</th>
                   <th>Дом.<br />сис.</th>
                   <th>Хоно-<br />рар</th>
-                  <th>Доп. такси</th>
                   <th>Всичко</th>
-                  <th>Още</th> {/* <-- преместено тук */}
+                  <th>Още</th>
+                  <th>Бележки</th>
                 </tr>
               </thead>
               <tbody>
@@ -411,17 +414,36 @@ export default function AdminDashboard() {
                     </td>
 
                     <td className="text-right">{Number(charge.general_power).toFixed(2)}</td>
-                    <td className="text-right">{Number(charge.fund_ro).toFixed(2)}</td>
-                    <td className="text-right">{Number(charge.intercom).toFixed(2)}</td>
-                    <td className="text-right">{Number(charge.manager_fee).toFixed(2)}</td>
 
-                    {/* 1. Доп. такси (празно за сега) */}
-                    <td className="text-right">—</td>
+                    <td className="text-right">
+                      <EditableCell
+                        value={Number(charge.fund_ro).toFixed(2)}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'fund_ro', val)}
+                        isNumeric={true}
+                        align="right"
+                      />
+                    </td>
+                    <td className="text-right">
+                      <EditableCell
+                        value={Number(charge.intercom).toFixed(2)}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'intercom', val)}
+                        isNumeric={true}
+                        align="right"
+                      />
+                    </td>
+                    <td className="text-right">
+                      <EditableCell
+                        value={Number(charge.manager_fee).toFixed(2)}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'manager_fee', val)}
+                        isNumeric={true}
+                        align="right"
+                      />
+                    </td>
 
-                    {/* 2. Всичко */}
+                    {/* 1. Всичко */}
                     <td className="text-right font-bold">{Number(charge.total_amount).toFixed(2)}</td>
 
-                    {/* 3. Още (бутон Подр.) - вече накрая */}
+                    {/* 2. Още (бутон Подр.) */}
                     <td className="text-center">
                       <button
                         className={`details-btn ${unpaidOthers.includes(charge.ap_number) ? 'has-debt' : ''}`}
@@ -431,6 +453,11 @@ export default function AdminDashboard() {
                         Подр.
                         {unpaidOthers.includes(charge.ap_number) && <span className="debt-indicator">!</span>}
                       </button>
+                    </td>
+
+                    {/* 3. Бележки (вместо Доп. такси) */}
+                    <td className="notes-cell" title={charge.notes || ''}>
+                      {charge.notes || '—'}
                     </td>
                   </tr>
                 ))}
@@ -444,32 +471,35 @@ export default function AdminDashboard() {
                   <td className="text-right font-bold">{calculateTotals().fund_ro.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().intercom.toFixed(2)}</td>
                   <td className="text-right font-bold">{calculateTotals().manager_fee.toFixed(2)}</td>
-                  <td></td> {/* Доп. такси */}
                   <td className="text-right font-bold">{calculateTotals().total_amount.toFixed(2)}</td>
                   <td></td> {/* Още */}
+                  <td></td> {/* Бележки */}
                 </tr>
 
                 <tr className="totals-row revenue-row">
-                  <td colSpan="11" className="revenue-label">Очакван приход за блока (без хонорар):</td>
+                  <td colSpan="10" className="revenue-label">Очакван приход за блока (без хонорар):</td>
                   <td className="text-right font-bold revenue-amount">
                     {(calculateTotals().total_amount - calculateTotals().manager_fee).toFixed(2)}
                   </td>
                   <td></td>
+                  <td></td>
                 </tr>
 
                 <tr className="totals-row paid-row">
-                  <td colSpan="11" className="paid-label">Реално платено:</td>
+                  <td colSpan="10" className="paid-label">Реално платено:</td>
                   <td className="text-right font-bold paid-amount">
                     {calculatePaidTotals().total_amount.toFixed(2)}
                   </td>
                   <td></td>
+                  <td></td>
                 </tr>
 
                 <tr className="totals-row cash-row">
-                  <td colSpan="11" className="cash-label">В касата (реално събрано, без хонорар):</td>
+                  <td colSpan="10" className="cash-label">В касата (реално събрано, без хонорар):</td>
                   <td className="text-right font-bold cash-amount">
                     {(calculatePaidTotals().total_amount - calculatePaidManagerFee()).toFixed(2)}
                   </td>
+                  <td></td>
                   <td></td>
                 </tr>
               </tfoot>
