@@ -31,7 +31,7 @@ async function createTables() {
       );
     `);
 
-    // 3. monthly_charges (нова таблица)
+    // 3. monthly_charges
     await pool.query(`
       CREATE TABLE IF NOT EXISTS monthly_charges (
         id                    SERIAL PRIMARY KEY,
@@ -53,7 +53,21 @@ async function createTables() {
       );
     `);
 
-    // 4. payments (остава за 'other' разходи)
+    // 4. expenses (С НОВИТЕ КОЛОНИ)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS expenses (
+        id            SERIAL PRIMARY KEY,
+        date          DATE NOT NULL,
+        amount        NUMERIC(10,2) NOT NULL,
+        type          VARCHAR(30) NOT NULL,
+        description   VARCHAR(300),
+        cash_box      VARCHAR(5) DEFAULT 'K1',  -- НОВО
+        category      VARCHAR(30),              -- НОВО
+        created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // 5. payments (за other разходи)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS payments (
         id            SERIAL PRIMARY KEY,
@@ -64,18 +78,6 @@ async function createTables() {
         description   VARCHAR(300),
         status        VARCHAR(15) NOT NULL DEFAULT 'unpaid',
         confirmed_at  TIMESTAMPTZ,
-        created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-
-    // 5. expenses
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS expenses (
-        id            SERIAL PRIMARY KEY,
-        date          DATE NOT NULL,
-        amount        NUMERIC(10,2) NOT NULL,
-        type          VARCHAR(30) NOT NULL,
-        description   VARCHAR(300),
         created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -93,12 +95,25 @@ async function createTables() {
       );
     `);
 
+    // 7. manual_incomes (НОВА ТАБЛИЦА)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS manual_incomes (
+        id SERIAL PRIMARY KEY,
+        month CHAR(7) NOT NULL,
+        amount NUMERIC(10,2) NOT NULL,
+        category VARCHAR(30) NOT NULL,
+        description VARCHAR(300),
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Индекси
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_payments_apartment ON payments(ap_id);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_payments_month ON payments(month);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_monthly_charges_month ON monthly_charges(month);`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_monthly_charges_ap ON monthly_charges(ap_id);`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_manual_incomes_month ON manual_incomes(month);`);
 
     await pool.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_unique 
@@ -106,7 +121,7 @@ async function createTables() {
         WHERE type != 'other';
     `);
 
-    // Начални стойности за новите цени (ако липсват)
+    // Начални стойности (цени и салда)
     await pool.query(`
       INSERT INTO block_params (name, value) VALUES 
       ('elevator_fee_rate', '1.10'),
@@ -115,11 +130,12 @@ async function createTables() {
       ('fund_ro_rate', '3.00'),
       ('intercom_rate', '1.00'),
       ('manager_fee_rate', '3.00'),
-      ('opening_balance', '0.00')
+      ('opening_balance_k1', '350.00'),
+      ('opening_balance_k2', '0.00')
       ON CONFLICT (name) DO NOTHING;
     `);
 
-    // По подразбиране 1 и 2 етаж не плащат асансьор (само ако имат TRUE, го правим FALSE)
+    // По подразбиране 1 и 2 етаж не плащат асансьор
     await pool.query(`
       UPDATE apartments 
       SET default_pays_elevator = FALSE 

@@ -60,6 +60,7 @@
 .balance-inline-row label:first-child {
   margin: 0;
   font-weight: 500;
+  min-width: 260px;
   color: #2c3e50;
   font-size: 1rem;
 }
@@ -126,13 +127,51 @@
 }
 
 /* Връщаме нормалния шрифт за таблицата с разходи */
-.expenses-modal-content .expenses-table td:nth-child(1) {
+/* Ширини на колоните за таблицата с разходи */
+.expenses-modal-content .expenses-table th:nth-child(1) {
   font-family: inherit;
   font-size: inherit;
+  width: 23%;
+}
+
+.expenses-modal-content .expenses-table th:nth-child(2) {
+  width: 15%;
+  padding-right: 24px;
+}
+
+.expenses-modal-content .expenses-table th:nth-child(3) {
+  width: 10%;
+  text-align: center;
+}
+
+.expenses-modal-content .expenses-table th:nth-child(4) {
+  width: 40%;
+}
+
+.expenses-modal-content .expenses-table th:nth-child(5) {
+  width: 12%;
+  text-align: center;
+}
+
+/* Подравняване на текста в клетките */
+.expenses-modal-content .expenses-table td:nth-child(1) {
+  text-align: left;
 }
 
 .expenses-modal-content .expenses-table td:nth-child(2) {
-  padding-right: 3px;
+  text-align: right;
+}
+
+.expenses-modal-content .expenses-table td:nth-child(3) {
+  text-align: center;
+}
+
+.expenses-modal-content .expenses-table td:nth-child(4) {
+  text-align: left;
+}
+
+.expenses-modal-content .expenses-table td:nth-child(5) {
+  text-align: center;
 }
 
 .expenses-add-form {
@@ -146,4 +185,33 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.balances-toggle-container {
+  margin-bottom: 1rem;
+}
+
+.toggle-balances-btn {
+  padding: 0.6rem 1.2rem;
+  height: 40px;
+  background: #7d8692;
+  /* Сив цвят като другите второстепенни бутони */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.toggle-balances-btn:hover {
+  background: #6e7680;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(125, 134, 146, 0.3);
+}
+
+.toggle-balances-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
 }
