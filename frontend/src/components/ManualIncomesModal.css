@@ -1,0 +1,86 @@
+/* Стилове за таблицата в ManualIncomesModal */
+.manual-incomes-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Колона 1: Месец (20%) */
+.manual-incomes-table th:nth-child(1),
+.manual-incomes-table td:nth-child(1) {
+  width: 21%;
+  text-align: left;
+}
+
+/* Колона 2: Сума (15%) */
+.manual-incomes-table th:nth-child(2) {
+  width: 16%;
+  text-align: right;
+  padding: 8px 18px 8px 8px;
+}
+
+.manual-incomes-table td:nth-child(2) {
+  text-align: right;
+}
+
+/* Колона 3: Категория (20%) */
+.manual-incomes-table th:nth-child(3),
+.manual-incomes-table td:nth-child(3) {
+  width: 20%;
+  text-align: center;
+}
+
+/* Колона 4: Описание (35%) */
+.manual-incomes-table th:nth-child(4),
+.manual-incomes-table td:nth-child(4) {
+  width: 31%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Колона 5: Изтрий (10%) */
+.manual-incomes-table th:nth-child(5),
+.manual-incomes-table td:nth-child(5) {
+  width: 12%;
+  text-align: center;
+
+}
+
+/* Малка корекция за хедъра на таблицата */
+.manual-incomes-table thead th {
+  padding: 0.6rem 0.75rem;
+  background: #34495e;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  vertical-align: top;
+}
+
+/* Заоблени ъгли на хедъра */
+.manual-incomes-table th:first-child {
+  border-top-left-radius: 6px;
+}
+
+.manual-incomes-table th:last-child {
+  border-top-right-radius: 6px;
+}
+
+.manual-incomes-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.manual-incomes-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Клетки */
+.manual-incomes-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+}

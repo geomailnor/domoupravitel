@@ -4,6 +4,7 @@ import api from '../api.js';
 import Spinner from './Spinner.jsx';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { useScrollLock } from '../hooks/useScrollLock.js';
+import { monthLabel } from './i18n/translate.js';
 import './BulkPaymentModal.css';
 
 const getCurrentMonth = () => {
@@ -13,8 +14,9 @@ const getCurrentMonth = () => {
   return `${year}-${month}`;
 };
 
-export default function BulkPaymentModal({ onClose, onUpdate }) {
+export default function BulkPaymentModal({ currentMonth, onClose, onUpdate }) {
   const [apartments, setApartments] = useState([]);
+  const monthInputRef = useRef(null);
   const [selected, setSelected] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -110,10 +112,10 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
         .filter(apt => selected[apt.id])
         .map(apt => apt.number);
 
-      // Изпращаме към новия endpoint (ще го добавим в backend-а)
+      // Изпращаме към новия endpoint
       await api.post('/charges/bulk-mark-paid', {
         apartment_numbers: apartmentNumbers,
-        month: getCurrentMonth(), // или избрания месец, ако има поле
+        month: currentMonth,
       });
 
       toast.success(`Маркирани ${apartmentNumbers.length} апартамента като платени`);
@@ -164,6 +166,14 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
       onClose();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Грешка при запазване');
+      // Изчистваме полетата и връщаме фокуса към месеца
+      setOtherData({
+        month: getCurrentMonth(),
+        amount: '',
+        description: '',
+        status: 'unpaid',
+      });
+      setTimeout(() => monthInputRef.current?.focus(), 100);
     } finally {
       setSaving(false);
     }
@@ -195,7 +205,7 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
 
           {activeTab === 'monthly' ? (
             <p className="modal-subtitle">
-              Маркирайте апартаментите, които са платили, и натиснете „Запази като платено“.
+              Маркирайте апартаментите, които са платили за <strong>{monthLabel(currentMonth)}</strong>, и натиснете „Запази като платено“.
             </p>
           ) : (
             <div className="bulk-form">
@@ -204,6 +214,7 @@ export default function BulkPaymentModal({ onClose, onUpdate }) {
                   <label>Месец:</label>
                   <input
                     type="month"
+                    ref={monthInputRef}
                     value={otherData.month}
                     onChange={(e) => setOtherData({ ...otherData, month: e.target.value })}
                   />

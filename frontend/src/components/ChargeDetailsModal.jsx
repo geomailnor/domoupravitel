@@ -36,6 +36,7 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
   });
   const [savingOther, setSavingOther] = useState(false);
   const modalRef = useRef(null);
+  const monthInputRef = useRef(null); // <-- НОВО
 
   useFocusTrap(modalRef, !showResetConfirm && !deleteOtherConfirm && !statusConfirm && !monthlyStatusConfirm);
   useScrollLock();
@@ -67,8 +68,15 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
       // Презареждаме историята
       const res = await api.get(`/charges/history/${apartmentData.id}`);
       setHistory({ monthly: res.data.monthly, other: res.data.other });
-    } catch {
-      toast.error('Грешка при добавяне');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Грешка при добавяне');
+      // Изчистваме полетата и връщаме фокуса към месеца
+      setNewOther({
+        month: new Date().toISOString().slice(0, 7),
+        amount: '',
+        description: '',
+      });
+      setTimeout(() => monthInputRef.current?.focus(), 100);
     } finally {
       setSavingOther(false);
     }
@@ -89,7 +97,7 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
       const res = await api.get(`/charges/history/${apartmentData.id}`);
       setHistory({ monthly: res.data.monthly, other: res.data.other });
 
-      if (onUpdate) onUpdate(); // <-- ТОВА ЛИПСВА
+      if (onUpdate) onUpdate();
     } catch {
       toast.error('Грешка при изтриване');
     }
@@ -426,6 +434,7 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
                   <label>Месец:</label>
                   <input
                     type="month"
+                    ref={monthInputRef}
                     value={newOther.month}
                     onChange={(e) => setNewOther({ ...newOther, month: e.target.value })}
                   />

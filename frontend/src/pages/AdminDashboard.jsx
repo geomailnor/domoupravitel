@@ -15,6 +15,7 @@ import SettingsModal from '../components/SettingsModal.jsx';
 import ExpensesModal from '../components/ExpensesModal.jsx';
 import EditableCell from '../components/EditableCell.jsx';
 import AllOtherChargesModal from '../components/AllOtherChargesModal.jsx';
+import ManualIncomesModal from '../components/ManualIncomesModal.jsx';
 import './Dashboard.css';
 import './AdminDashboard.css';
 
@@ -40,6 +41,7 @@ export default function AdminDashboard() {
   const [unpaidOthers, setUnpaidOthers] = useState([]);
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showAllOther, setShowAllOther] = useState(false);
+  const [showManualIncomes, setShowManualIncomes] = useState(false); // <-- НОВО
   const [showSetupQuestion, setShowSetupQuestion] = useState(
     () => localStorage.getItem('domoupravitel_needs_question') === 'true'
   );
@@ -311,12 +313,20 @@ export default function AdminDashboard() {
             <h3 className="current-month-title">
               Таблица за <span className="highlighted-month"><strong>{monthLabel(currentMonth)}</strong></span>
             </h3>
-            <button
-              className="all-other-btn"
-              onClick={() => setShowAllOther(true)}
-            >
-              Покажи доп. такси
-            </button>
+            <div className="title-buttons-group">
+              <button
+                className="all-other-btn"
+                onClick={() => setShowAllOther(true)}
+              >
+                Покажи доп. такси
+              </button>
+              <button
+                className="incomes-btn"
+                onClick={() => setShowManualIncomes(true)}
+              >
+                Приходи
+              </button>
+            </div>
           </div>
         )}
         {loading ? (
@@ -538,6 +548,7 @@ export default function AdminDashboard() {
         )}
         {showBulkModal && (
           <BulkPaymentModal
+            currentMonth={currentMonth}
             onClose={() => setShowBulkModal(false)}
             onUpdate={async () => {
               // Презареждаме charges
@@ -602,6 +613,9 @@ export default function AdminDashboard() {
         )}
         {showExpensesModal && (
           <ExpensesModal onClose={() => setShowExpensesModal(false)} />
+        )}
+        {showManualIncomes && (
+          <ManualIncomesModal onClose={() => setShowManualIncomes(false)} />
         )}
       </main>
     </div>

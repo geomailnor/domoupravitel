@@ -5,6 +5,34 @@ import { requireAuth, requireAdmin } from '../jwt.js';
 
 const router = express.Router();
 
+// Помощна функция за проверка на месеца спрямо текущата дата
+function isMonthInvalid(month) {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const currentMonthStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+
+  // 1. Проверка за минал месец
+  if (month < currentMonthStr) {
+    return 'Не може да се добавят плащания за минал месец.';
+  }
+
+  // 2. Проверка за повече от 3 месеца напред
+  let maxYear = currentYear;
+  let maxMonth = currentMonth + 3;
+  if (maxMonth > 12) {
+    maxMonth -= 12;
+    maxYear += 1;
+  }
+  const maxMonthStr = `${maxYear}-${String(maxMonth).padStart(2, '0')}`;
+
+  if (month > maxMonthStr) {
+    return 'Не може да се добавят плащания за повече от 3 месеца напред.';
+  }
+
+  return null; // Всичко е наред
+}
+
 // GET /api/payments – списък с плащания (само админ)
 // Филтри: ?month=  ?apartment_number=  ?status=
 router.get('/', requireAuth, requireAdmin, async (req, res) => {
@@ -160,6 +188,12 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     return res.status(400).json({
       error: 'Невалиден формат на месеца. Трябва да е ГГГГ-ММ (напр. 2025-01)'
     });
+  }
+
+  // НОВО: Проверка за минал месец или твърде далечно бъдеще
+  const monthError = isMonthInvalid(month);
+  if (monthError) {
+    return res.status(400).json({ error: monthError });
   }
 
   const [yearStr, monthStr] = month.split('-');
@@ -358,6 +392,13 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
           error: 'Невалиден формат на месеца. Трябва да е ГГГГ-ММ'
         });
       }
+
+      // НОВО: Проверка за минал месец или твърде далечно бъдеще
+      const monthError = isMonthInvalid(month);
+      if (monthError) {
+        return res.status(400).json({ error: monthError });
+      }
+
       updates.push(`month = $${paramIndex}`);
       values.push(month);
       paramIndex++;
@@ -469,6 +510,12 @@ router.post('/bulk', requireAuth, requireAdmin, async (req, res) => {
 
     if (!/^\d{4}-\d{2}$/.test(p.month)) {
       return res.status(400).json({ error: `Невалиден месец: ${p.month}` });
+    }
+
+    // НОВО: Проверка за минал месец или твърде далечно бъдеще
+    const monthError = isMonthInvalid(p.month);
+    if (monthError) {
+      return res.status(400).json({ error: `Ап. ${p.apartment_number}: ${monthError}` });
     }
 
     const amountNum = parseFloat(p.amount);

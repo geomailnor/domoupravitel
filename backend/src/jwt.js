@@ -1,4 +1,4 @@
-// backend/src/auth.js
+// backend/src/jwt.js
 import jwt from 'jsonwebtoken';
 
 // Създава JWT токен от подадените данни

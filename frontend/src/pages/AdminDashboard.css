@@ -655,13 +655,20 @@
   margin-bottom: 0.75rem;
 }
 
+.title-buttons-group {
+  display: flex;
+  gap: 15px;
+  /* разстояние между бутоните */
+  align-items: center;
+}
+
 .table-title-row .current-month-title {
   margin: 0;
 }
 
 .all-other-btn {
   padding: 0.5rem 1rem;
-  min-width: 175px;
+  min-width: 181px;
   height: 40px;
   background: #2a2773;
   color: white;
@@ -685,6 +692,36 @@
 }
 
 .all-other-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* Бутон „Приходи“ – наситено синьо */
+.incomes-btn {
+  padding: 0.5rem 1rem;
+  min-width: 175px;
+  height: 40px;
+  background: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.incomes-btn:hover {
+  background: #1f6391;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(31, 99, 145, 0.3);
+}
+
+.incomes-btn:active {
   transform: scale(0.97);
   box-shadow: none;
 }
