@@ -65,6 +65,7 @@ export default function PrintMonthlyReport({ month, onClose }) {
       </div>
     );
   }
+
   const generateYears = () => {
     if (!startMonth) return [];
     const startYear = parseInt(startMonth.split('-')[0], 10);
@@ -75,6 +76,7 @@ export default function PrintMonthlyReport({ month, onClose }) {
     }
     return years;
   };
+
   const getAvailableMonths = () => {
     const currentYear = selectedMonth.split('-')[0];
     const startYear = startMonth ? startMonth.split('-')[0] : null;
@@ -106,8 +108,9 @@ export default function PrintMonthlyReport({ month, onClose }) {
     }
     return filtered;
   };
+
   return (
-    <div className="modal-overlay monthly-report-overlay" style={{ zIndex: 3000 }}> {/* Тук оставяме само zIndex, защото е специфичен */}
+    <div className="modal-overlay monthly-report-overlay" style={{ zIndex: 3000 }}>
       <div className="print-controls">
         <div className="month-picker">
           <label>
@@ -121,15 +124,12 @@ export default function PrintMonthlyReport({ month, onClose }) {
 
                 let newMonth;
                 if (newYear === oldYear) {
-                  newMonth = selectedMonth.split('-')[1]; // запазваме месеца
+                  newMonth = selectedMonth.split('-')[1];
                 } else if (parseInt(newYear) === currentYear && startMonth) {
-                  // Ако се връщаме на текущата година, задаваме startMonth (октомври)
                   newMonth = startMonth.split('-')[1];
                 } else {
-                  // Ако отиваме на друга година, задаваме януари
                   newMonth = '01';
                 }
-
                 setSelectedMonth(`${newYear}-${newMonth}`);
               }}
             >
@@ -159,70 +159,63 @@ export default function PrintMonthlyReport({ month, onClose }) {
 
       <div className="modal-content monthly-report-content print-area-monthly">
         <div className="modal-body">
-          <h2 className="report-title">МЕСЕЧЕН ОТЧЕТ</h2>
+          <h2 className="report-title">МЕСЕЧЕН ОТЧЕТ за блока</h2>
           <p className="report-month">{monthLabel(data.month)}</p>
 
-          <div className="report-section">
-            <p><strong>Общо апартаменти:</strong> {data.total_apartments}</p>
-            <p><strong>Платили месечна такса:</strong> {data.paid_monthly}</p>
-            <p><strong>Неплатили:</strong> {data.unpaid_monthly}</p>
-            {data.other_paid_count > 0 && (
-              <p><strong>Платили допълнителни такси:</strong> {data.other_paid_count} бр.</p>
-            )}
+          {/* Статистика */}
+          <div className="report-section report-spaced-lines">
+            <p><strong>Общо апартаменти:</strong> {data.stats.total}</p>
+            <p><strong>Платили месечна такса:</strong> {data.stats.paid}</p>
+            <p><strong>Неплатили:</strong> {data.stats.unpaid}</p>
           </div>
 
-          <h3 className="report-subtitle">ПРИХОДИ ПО ПЕРА (платени)</h3>
-          <div className="report-section">
-            <p>Асансьорна такса: <span className="amount">{data.income.elevator_fee} €</span></p>
-            <p>Асансьорен ток: <span className="amount">{data.income.elevator_power} €</span></p>
-            <p>Общ ток: <span className="amount">{data.income.general_power} €</span></p>
-            <p>Фонд Р.О.: <span className="amount">{data.income.fund_ro} €</span></p>
-            <p>Дом. сис.: <span className="amount">{data.income.intercom} €</span></p>
-            <p>Хонорар: <span className="amount">{data.income.manager_fee} €</span></p>
-            {parseFloat(data.income.other_paid) > 0 && (
-              <p>Допълнителни такси: <span className="amount">{data.income.other_paid} €</span></p>
-            )}
-            <p className="report-total">Общо приходи: <span className="amount">{data.income.total} €</span></p>
-          </div>
+          {/* КАСА 1 */}
+          <h3 className="report-subtitle kasa1">КАСА 1 (ПОДДРЪЖКА)</h3>
+          <table className="report-table">
+            <tbody>
+              <tr><td>Салдо от предходен месец:</td><td className="amount">{data.k1.prev_balance} €</td></tr>
+              <tr><td colSpan="2"><strong>Приходи:</strong></td></tr>
+              <tr><td className="indent">Асансьорна такса:</td><td className="amount">{data.k1.income.elevator_fee} €</td></tr>
+              <tr><td className="indent">Ток асансьор:</td><td className="amount">{data.k1.income.elevator_power} €</td></tr>
+              <tr><td className="indent">Общ ток:</td><td className="amount">{data.k1.income.general_power} €</td></tr>
+              <tr><td className="indent">Дом. сис.:</td><td className="amount">{data.k1.income.intercom} €</td></tr>
+              <tr><td className="indent">Хонорар:</td><td className="amount">{data.k1.income.manager_fee} €</td></tr>
+              <tr className="total-row"><td>Общо приходи:</td><td className="amount">{data.k1.income.total} €</td></tr>
 
-          <h3 className="report-subtitle">РАЗПРЕДЕЛЕНИЕ (приходи в касата)</h3>
-          <div className="report-section">
-            <p>Месечни такси (без хонорар): <span className="amount">{data.to_fund} €</span></p>
-            {parseFloat(data.income.other_paid) > 0 && (
-              <p>Допълнителни такси: <span className="amount">{data.income.other_paid} €</span></p>
-            )}
-            <p className="report-total">Общо приходи в касата: <span className="amount">{(parseFloat(data.to_fund) + parseFloat(data.income.other_paid)).toFixed(2)} €</span></p>
-          </div>
-          <h3 className="report-subtitle">САЛДО</h3>
-          <div className="report-section">
-            <p>Салдо от предходния месец: <span className="amount">{data.prev_balance} €</span></p>
-            <p>Приходи за месеца (в касата): <span className="amount">{data.to_fund} €</span></p>
-            {parseFloat(data.income.other_paid) > 0 && (
-              <p>Приход от допълнителни такси: <span className="amount">{data.income.other_paid} €</span></p>
-            )}
-            <p>Разходи на блока за месеца: <span className="amount">{data.expenses.total} €</span></p>
-            <p className="report-total">Салдо към края на месеца: <span className="amount">{data.balance} €</span></p>
-          </div>
-          <h3 className="report-subtitle">РАЗХОДИ</h3>
-          <div className="report-section">
-            {data.expenses.by_type.length === 0 ? (
-              <p>Няма разходи за този месец.</p>
-            ) : (
-              <>
-                {data.expenses.by_type.map((e, idx) => (
-                  <p key={idx}>Разходи на блока за месеца: <span className="amount">{e.total} €</span></p>
-                ))}
-                <p className="report-total">Общо разходи (изхарчено от касата): <span className="amount">{data.expenses.total} €</span></p>
-              </>
-            )}
-          </div>
+              <tr><td colSpan="2"><strong>Разходи:</strong></td></tr>
+              {Object.entries(data.k1.expenses.by_category).map(([cat, amt]) => (
+                <tr key={cat}><td className="indent">{cat === 'null' ? 'Други' : cat}:</td><td className="amount">{Number(amt).toFixed(2)} €</td></tr>
+              ))}
+              <tr className="total-row"><td>Общо разходи:</td><td className="amount">{data.k1.expenses.total} €</td></tr>
+              <tr className="total-row highlight"><td>Остатък за следващ месец (К1):</td><td className="amount">{data.k1.balance} €</td></tr>
+            </tbody>
+          </table>
 
-          <h3 className="report-subtitle">НЕПЛАТЕНИ</h3>
-          <div className="report-section">
+          {/* КАСА 2 */}
+          <h3 className="report-subtitle kasa2" style={{ marginTop: '2rem' }}>КАСА 2 (РЕМОНТИ)</h3>
+          <table className="report-table">
+            <tbody>
+              <tr><td>Салдо от предходен месец:</td><td className="amount">{data.k2.prev_balance} €</td></tr>
+              <tr><td colSpan="2"><strong>Приходи:</strong></td></tr>
+              <tr><td className="indent">Фонд Р.О.:</td><td className="amount">{data.k2.income.fund_ro} €</td></tr>
+              <tr><td className="indent">От наеми:</td><td className="amount">{data.k2.income.manual} €</td></tr>
+              <tr><td className="indent">От допълнителни такси:</td><td className="amount">{data.k2.income.other} €</td></tr>
+              <tr className="total-row"><td>Общо приходи:</td><td className="amount">{data.k2.income.total} €</td></tr>
+
+              <tr><td colSpan="2"><strong>Разходи:</strong></td></tr>
+              {Object.entries(data.k2.expenses.by_category).map(([cat, amt]) => (
+                <tr key={cat}><td className="indent">{cat === 'null' ? 'Други' : cat}:</td><td className="amount">{Number(amt).toFixed(2)} €</td></tr>
+              ))}
+              <tr className="total-row"><td>Общо разходи:</td><td className="amount">{data.k2.expenses.total} €</td></tr>
+              <tr className="total-row highlight"><td>Остатък за следващ месец (К2):</td><td className="amount">{data.k2.balance} €</td></tr>
+            </tbody>
+          </table>
+
+          {/* Неплатени */}
+          <h3 className="report-subtitle" style={{ marginTop: '2rem' }}>НЕПЛАТЕНИ ЗА МЕСЕЦА</h3>
+          <div className="report-section report-spaced-lines">
             <p>Неплатени месечни такси: <span className="amount">{data.unpaid.monthly} €</span></p>
-            {parseFloat(data.unpaid.other) > 0 && (
-              <p>Неплатени допълнителни такси: <span className="amount">{data.unpaid.other} €</span></p>
-            )}
+            <p>Неплатени допълнителни такси: <span className="amount">{data.unpaid.other} €</span></p>
             <p className="report-total">Общо неплатено: <span className="amount">{data.unpaid.total} €</span></p>
           </div>
 

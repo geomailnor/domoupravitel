@@ -80,9 +80,11 @@
   font-size: 22pt;
   margin: 0 0 2mm 0;
   letter-spacing: 1px;
-  border-bottom: 1px solid #000;
+  border-bottom: 2px solid #2c3e50;
   padding: 2mm 0;
   background-color: #e5f5ff;
+  color: #1a5276;
+  /* Тъмносин текст */
 }
 
 .report-month {
@@ -90,29 +92,30 @@
   font-size: 18pt;
   margin: 0 0 8mm 0;
   font-weight: 600;
+  background-color: #f0f4f8;
+  /* Лек фон за месеца */
+  padding: 2mm;
+  border-radius: 5px;
 }
 
 .report-subtitle {
   font-size: 16pt;
   margin: 6mm 0 3mm 0;
-  border-bottom: 1px solid #999;
+  border-bottom: 2px solid #999;
   padding-bottom: 1mm;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
-.report-section p {
-  margin: 2mm 0;
-  font-size: 14pt;
-  display: flex;
-  justify-content: space-between;
+/* Специфични цветове за Каса 1 и Каса 2 */
+.report-subtitle.kasa1 {
+  color: #0d3b59;
+  border-bottom-color: #0d3b59;
 }
 
-.report-total {
-  border-top: 1px solid #000;
-  padding-top: 2mm;
-  margin-top: 3mm;
-  font-weight: 600;
-  font-size: 16pt;
+.report-subtitle.kasa2 {
+  color: #12542d;
+  border-bottom-color: #12542d;
 }
 
 .report-date {
@@ -122,9 +125,48 @@
   font-style: italic;
 }
 
-.amount {
+/* === ТАБЛИЦИ ЗА ОТЧЕТА (К1 и К2) === */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.report-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px dashed #ddd;
+}
+
+.report-table .indent {
+  padding-left: 1.5rem;
+}
+
+.report-table .amount {
+  text-align: right;
+  font-family: 'Consolas', 'Courier New', monospace;
   font-weight: 600;
-  margin-left: auto;
+}
+
+.report-table .total-row td {
+  border-top: 1px solid #999;
+  font-weight: bold;
+  padding-top: 0.6rem;
+}
+
+.report-table .highlight td {
+  background-color: #e8f4f8;
+  color: #1a5276;
+  font-size: 1.05rem;
+  font-weight: bold;
+}
+
+/* Увеличен интервал за текстовите секции */
+.report-spaced-lines p {
+  margin: 6px 0;
+  /* Увеличава разстоянието между редовете */
+  line-height: 1.5;
+  /* По-добро междуредие */
 }
 
 /* === ПРИНТИРАНЕ === */
@@ -186,47 +228,45 @@
     display: none;
   }
 
+  /* 8. Намаляваме шрифтовете за А4 */
   .monthly-report {
-    font-size: 11pt;
-    /* вместо 12pt */
+    font-size: 12pt;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .report-title {
     font-size: 18pt;
-    /* вместо 22pt */
     margin-bottom: 2mm;
   }
 
   .report-month {
     font-size: 16pt;
-    /* вместо 18pt */
     margin-bottom: 5mm;
   }
 
   .report-subtitle {
     font-size: 14pt;
-    /* вместо 16pt */
     margin: 4mm 0 2mm 0;
   }
 
-  .report-section p {
+  .report-table {
     font-size: 12pt;
-    /* вместо 14pt */
   }
 
-  .report-total {
-    font-size: 14pt;
-    /* вместо 16pt */
-
+  .report-table td {
+    padding: 0.2rem 0.3rem;
   }
 
   .report-date {
     font-size: 11pt;
-    /* вместо 12pt */
+    margin-top: 2mm;
   }
 
-
-  /* 8. A4 формат */
+  /* 9. A4 формат */
   @page {
     size: A4;
     margin: 0mm;

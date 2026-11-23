@@ -143,7 +143,7 @@ router.get('/apartment/:number', requireAuth, requireAdmin, async (req, res) => 
     res.status(500).json({ error: 'Сървърна грешка' });
   }
 });
-// GET /api/reports/monthly?month=YYYY-MM – общ отчет за месец
+// GET /api/reports/monthly?month=YYYY-MM – общ отчет за месец (К1 и К2)
 router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
   const { month } = req.query;
 
@@ -152,82 +152,100 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
   }
 
   try {
-    // 1. Вземаме началното салдо (ако има) и start_month
+    // 1. Вземаме началните салда и start_month
     const settingsRes = await pool.query(
-      "SELECT name, value FROM block_params WHERE name IN ('start_month', 'opening_balance')"
+      "SELECT name, value FROM block_params WHERE name IN ('start_month', 'opening_balance_k1', 'opening_balance_k2')"
     );
     const settings = {};
     settingsRes.rows.forEach(r => { settings[r.name] = r.value; });
+
     const startMonth = settings.start_month;
-    const openingBalance = parseFloat(settings.opening_balance) || 0;
+    const openingBalanceK1 = parseFloat(settings.opening_balance_k1) || 0;
+    const openingBalanceK2 = parseFloat(settings.opening_balance_k2) || 0;
 
-    // 2. Общ брой апартаменти
-    const aptCountRes = await pool.query('SELECT COUNT(*)::int AS count FROM apartments');
-    const totalApartments = aptCountRes.rows[0].count;
-
-    // 3. Месечни такси за този месец
-    const monthlyRes = await pool.query(`
+    // 2. Статистика за апартаментите (за месеца)
+    const statsRes = await pool.query(`
       SELECT 
-        COUNT(*) FILTER (WHERE status = 'paid')::int AS paid_count,
-        COUNT(*) FILTER (WHERE status = 'unpaid')::int AS unpaid_count,
-        SUM(total_amount) FILTER (WHERE status = 'paid')::numeric AS paid_sum,
-        SUM(elevator_fee) FILTER (WHERE status = 'paid')::numeric AS elevator_fee_sum,
-        SUM(elevator_power) FILTER (WHERE status = 'paid')::numeric AS elevator_power_sum,
-        SUM(general_power) FILTER (WHERE status = 'paid')::numeric AS general_power_sum,
-        SUM(fund_ro) FILTER (WHERE status = 'paid')::numeric AS fund_ro_sum,
-        SUM(intercom) FILTER (WHERE status = 'paid')::numeric AS intercom_sum,
-        SUM(manager_fee) FILTER (WHERE status = 'paid')::numeric AS manager_fee_sum,
-        SUM(total_amount) FILTER (WHERE status = 'unpaid')::numeric AS unpaid_sum
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status = 'paid')::int AS paid,
+        COUNT(*) FILTER (WHERE status = 'unpaid')::int AS unpaid
       FROM monthly_charges
       WHERE month = $1
     `, [month]);
+    const stats = statsRes.rows[0];
 
-    const m = monthlyRes.rows[0];
-    const paidCount = m.paid_count || 0;
-    const unpaidCount = m.unpaid_count || 0;
-    const paidSum = parseFloat(m.paid_sum) || 0;
-    const unpaidSum = parseFloat(m.unpaid_sum) || 0;
-    const managerFeeSum = parseFloat(m.manager_fee_sum) || 0;
-
-    // 4. Други разходи за този месец (от payments)
-    const otherRes = await pool.query(`
+    // 3. Месечни такси (приходи) за месеца (само платени)
+    const monthlyRes = await pool.query(`
       SELECT 
-        COUNT(*) FILTER (WHERE status = 'paid')::int AS paid_count,
-        COUNT(*) FILTER (WHERE status = 'unpaid')::int AS unpaid_count,
-        SUM(amount) FILTER (WHERE status = 'paid')::numeric AS paid_sum,
-        SUM(amount) FILTER (WHERE status = 'unpaid')::numeric AS unpaid_sum
-      FROM payments
-      WHERE type = 'other' AND month = $1
+        SUM(elevator_fee)::numeric AS elevator_fee,
+        SUM(elevator_power)::numeric AS elevator_power,
+        SUM(general_power)::numeric AS general_power,
+        SUM(fund_ro)::numeric AS fund_ro,
+        SUM(intercom)::numeric AS intercom,
+        SUM(manager_fee)::numeric AS manager_fee,
+        SUM(total_amount)::numeric AS total
+      FROM monthly_charges
+      WHERE month = $1 AND status = 'paid'
     `, [month]);
+    const m = monthlyRes.rows[0];
 
-    const o = otherRes.rows[0];
-    const otherPaidCount = o.paid_count || 0;
-    const otherUnpaidCount = o.unpaid_count || 0;
-    const otherPaidSum = parseFloat(o.paid_sum) || 0;
-    const otherUnpaidSum = parseFloat(o.unpaid_sum) || 0;
+    // Приходи К1 (без фонд Р.О.)
+    const k1Income = {
+      elevator_fee: parseFloat(m.elevator_fee) || 0,
+      elevator_power: parseFloat(m.elevator_power) || 0,
+      general_power: parseFloat(m.general_power) || 0,
+      intercom: parseFloat(m.intercom) || 0,
+      manager_fee: parseFloat(m.manager_fee) || 0,
+    };
+    k1Income.total = k1Income.elevator_fee + k1Income.elevator_power + k1Income.general_power + k1Income.intercom + k1Income.manager_fee;
 
-    // 5. Разходи за месеца (от expenses)
+    // Приходи К2 (само фонд Р.О. от месечните такси)
+    const k2IncomeFund = parseFloat(m.fund_ro) || 0;
+
+    // 4. Други приходи (other плащания) за месеца
+    const otherRes = await pool.query(`
+      SELECT SUM(amount)::numeric AS total
+      FROM payments
+      WHERE type = 'other' AND status = 'paid' AND month = $1
+    `, [month]);
+    const otherIncome = parseFloat(otherRes.rows[0]?.total) || 0;
+
+    // Обикновено other отиват в К2 (ремонти), но ако имаш логика за К1, може да се раздели
+    const k2IncomeOther = otherIncome;
+
+    // 5. Ръчни приходи (наеми и др.) за месеца – отиват в К2
+    const manualRes = await pool.query(`
+      SELECT SUM(amount)::numeric AS total
+      FROM manual_incomes
+      WHERE month = $1
+    `, [month]);
+    const manualIncome = parseFloat(manualRes.rows[0]?.total) || 0;
+
+    // 6. Разходи за месеца (разделени по каси)
     const expensesRes = await pool.query(`
-      SELECT type, SUM(amount)::numeric AS total, COUNT(*)::int AS count
+      SELECT cash_box, category, SUM(amount)::numeric AS total
       FROM expenses
       WHERE to_char(date, 'YYYY-MM') = $1
-      GROUP BY type
+      GROUP BY cash_box, category
     `, [month]);
 
-    const expensesByType = expensesRes.rows.map(r => ({
-      type: r.type,
-      total: parseFloat(r.total).toFixed(2),
-      count: r.count,
-    }));
-    const totalExpenses = expensesRes.rows.reduce((sum, r) => sum + parseFloat(r.total), 0);
+    const expensesK1 = {};
+    const expensesK2 = {};
+    let totalExpensesK1 = 0;
+    let totalExpensesK2 = 0;
 
-    // 6. Приходи в касата (без хонорар)
-    const toFund = paidSum - managerFeeSum;
-    const totalIncome = paidSum + otherPaidSum; // всички платени (месечни + други)
-    const balance = toFund + otherPaidSum - totalExpenses;
+    expensesRes.rows.forEach(r => {
+      const amount = parseFloat(r.total);
+      if (r.cash_box === 'K1') {
+        expensesK1[r.category] = (expensesK1[r.category] || 0) + amount;
+        totalExpensesK1 += amount;
+      } else {
+        expensesK2[r.category] = (expensesK2[r.category] || 0) + amount;
+        totalExpensesK2 += amount;
+      }
+    });
 
-    // 7. Салдо от предходния месец
-    // 7. Салдо от предходния месец
+    // 7. Изчисляване на салда от предходния месец (за всяка каса)
     const [yearStr, monthStr] = month.split('-');
     let prevYear = parseInt(yearStr, 10);
     let prevMonthNum = parseInt(monthStr, 10) - 1;
@@ -237,74 +255,116 @@ router.get('/monthly', requireAuth, requireAdmin, async (req, res) => {
     }
     const prevMonthStr = `${prevYear}-${String(prevMonthNum).padStart(2, '0')}`;
 
-    let prevBalance = openingBalance;
-    console.log('startMonth:', startMonth, 'prevMonthStr:', prevMonthStr)
+    let prevBalanceK1 = openingBalanceK1;
+    let prevBalanceK2 = openingBalanceK2;
+
     if (prevMonthStr >= startMonth) {
-      // Вземаме всички платени месечни такси от startMonth до prevMonth
-      const monthlyIncomeRes = await pool.query(`
-        SELECT SUM(total_amount)::numeric AS total, SUM(manager_fee)::numeric AS manager
+      // Приходи К1 от началото до предходния месец
+      const prevMonthlyRes = await pool.query(`
+        SELECT 
+          SUM(elevator_fee + elevator_power + general_power + intercom + manager_fee)::numeric AS k1_income,
+          SUM(fund_ro)::numeric AS k2_income
         FROM monthly_charges
         WHERE month >= $1 AND month <= $2 AND status = 'paid'
       `, [startMonth, prevMonthStr]);
 
-      const monthlyIncome = parseFloat(monthlyIncomeRes.rows[0]?.total) || 0;
-      const monthlyManager = parseFloat(monthlyIncomeRes.rows[0]?.manager) || 0;
-      const monthlyToFund = monthlyIncome - monthlyManager;
+      const prevK1Income = parseFloat(prevMonthlyRes.rows[0]?.k1_income) || 0;
+      const prevK2Income = parseFloat(prevMonthlyRes.rows[0]?.k2_income) || 0;
 
-      // Вземаме всички платени other разходи от startMonth до prevMonth
-      const otherIncomeRes = await pool.query(`
+      // Other приходи до предходния месец
+      const prevOtherRes = await pool.query(`
         SELECT SUM(amount)::numeric AS total
         FROM payments
         WHERE type = 'other' AND status = 'paid' AND month >= $1 AND month <= $2
       `, [startMonth, prevMonthStr]);
-      const otherIncome = parseFloat(otherIncomeRes.rows[0]?.total) || 0;
+      const prevOtherIncome = parseFloat(prevOtherRes.rows[0]?.total) || 0;
 
-      // Вземаме всички разходи (expenses) от startMonth до prevMonth
-      const prevExpensesRes = await pool.query(`
+      // Ръчни приходи до предходния месец
+      const prevManualRes = await pool.query(`
         SELECT SUM(amount)::numeric AS total
+        FROM manual_incomes
+        WHERE month >= $1 AND month <= $2
+      `, [startMonth, prevMonthStr]);
+      const prevManualIncome = parseFloat(prevManualRes.rows[0]?.total) || 0;
+
+      // Разходи до предходния месец
+      const prevExpensesRes = await pool.query(`
+        SELECT cash_box, SUM(amount)::numeric AS total
         FROM expenses
         WHERE to_char(date, 'YYYY-MM') >= $1 AND to_char(date, 'YYYY-MM') <= $2
+        GROUP BY cash_box
       `, [startMonth, prevMonthStr]);
-      const prevExpenses = parseFloat(prevExpensesRes.rows[0]?.total) || 0;
 
-      prevBalance = openingBalance + monthlyToFund + otherIncome - prevExpenses;
+      let prevExpK1 = 0;
+      let prevExpK2 = 0;
+      prevExpensesRes.rows.forEach(r => {
+        if (r.cash_box === 'K1') prevExpK1 = parseFloat(r.total);
+        else prevExpK2 = parseFloat(r.total);
+      });
+
+      prevBalanceK1 = openingBalanceK1 + prevK1Income - prevExpK1;
+      prevBalanceK2 = openingBalanceK2 + prevK2Income + prevOtherIncome + prevManualIncome - prevExpK2;
     }
 
-    // 8. Текущо салдо
-    const currentBalance = prevBalance + toFund + otherPaidSum - totalExpenses;
+    // 8. Текущи салда
+    const currentBalanceK1 = prevBalanceK1 + k1Income.total - totalExpensesK1;
+    const currentBalanceK2 = prevBalanceK2 + k2IncomeFund + k2IncomeOther + manualIncome - totalExpensesK2;
 
+    // 9. Неплатени (за информация)
+    const unpaidRes = await pool.query(`
+      SELECT 
+        SUM(total_amount)::numeric AS monthly,
+        (SELECT SUM(amount) FROM payments WHERE type = 'other' AND status = 'unpaid' AND month = $1)::numeric AS other
+      FROM monthly_charges
+      WHERE month = $1 AND status = 'unpaid'
+    `, [month]);
+    const unpaidMonthly = parseFloat(unpaidRes.rows[0]?.monthly) || 0;
+    const unpaidOther = parseFloat(unpaidRes.rows[0]?.other) || 0;
+
+    // 10. Форматиране на отговора
     res.json({
       month,
       start_month: startMonth,
-      opening_balance: openingBalance.toFixed(2),
-      prev_balance: prevBalance.toFixed(2),
-      total_apartments: totalApartments,
-      paid_monthly: paidCount,
-      unpaid_monthly: unpaidCount,
-      other_paid_count: otherPaidCount,
-      other_unpaid_count: otherUnpaidCount,
-      income: {
-        monthly_paid: paidSum.toFixed(2),
-        elevator_fee: parseFloat(m.elevator_fee_sum || 0).toFixed(2),
-        elevator_power: parseFloat(m.elevator_power_sum || 0).toFixed(2),
-        general_power: parseFloat(m.general_power_sum || 0).toFixed(2),
-        fund_ro: parseFloat(m.fund_ro_sum || 0).toFixed(2),
-        intercom: parseFloat(m.intercom_sum || 0).toFixed(2),
-        manager_fee: managerFeeSum.toFixed(2),
-        other_paid: otherPaidSum.toFixed(2),
-        total: totalIncome.toFixed(2),
+      stats: {
+        total: stats.total,
+        paid: stats.paid,
+        unpaid: stats.unpaid,
       },
-      expenses: {
-        by_type: expensesByType,
-        total: totalExpenses.toFixed(2),
+      k1: {
+        prev_balance: prevBalanceK1.toFixed(2),
+        income: {
+          elevator_fee: k1Income.elevator_fee.toFixed(2),
+          elevator_power: k1Income.elevator_power.toFixed(2),
+          general_power: k1Income.general_power.toFixed(2),
+          intercom: k1Income.intercom.toFixed(2),
+          manager_fee: k1Income.manager_fee.toFixed(2),
+          total: k1Income.total.toFixed(2),
+        },
+        expenses: {
+          by_category: expensesK1,
+          total: totalExpensesK1.toFixed(2),
+        },
+        balance: currentBalanceK1.toFixed(2),
       },
-      to_fund: toFund.toFixed(2),
-      balance: currentBalance.toFixed(2), // <-- тук вече е currentBalance
+      k2: {
+        prev_balance: prevBalanceK2.toFixed(2),
+        income: {
+          fund_ro: k2IncomeFund.toFixed(2),
+          other: k2IncomeOther.toFixed(2),
+          manual: manualIncome.toFixed(2),
+          total: (k2IncomeFund + k2IncomeOther + manualIncome).toFixed(2),
+        },
+        expenses: {
+          by_category: expensesK2,
+          total: totalExpensesK2.toFixed(2),
+        },
+        balance: currentBalanceK2.toFixed(2),
+      },
       unpaid: {
-        monthly: unpaidSum.toFixed(2),
-        other: otherUnpaidSum.toFixed(2),
-        total: (unpaidSum + otherUnpaidSum).toFixed(2),
-      },
+        monthly: unpaidMonthly.toFixed(2),
+        other: unpaidOther.toFixed(2),
+        total: (unpaidMonthly + unpaidOther).toFixed(2),
+      }
     });
 
   } catch (error) {
