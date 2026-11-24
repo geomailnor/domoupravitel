@@ -138,7 +138,7 @@ export default function ManualIncomesModal({ onClose }) {
                         <td className="text-center">
                           {inc.category === 'rent' ? 'Наем' : 'Друго'}
                         </td>
-                        <td>{inc.description || '—'}</td>
+                        <td title={inc.description || ''}>{inc.description || '—'}</td>
                         <td className="text-center">
                           <button className="delete-other-btn" onClick={() => setDeleteConfirm(inc.id)}>🗑️</button>
                         </td>
