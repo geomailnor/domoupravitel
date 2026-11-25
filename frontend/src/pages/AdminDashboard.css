@@ -742,6 +742,26 @@
   background-color: #fef9e7;
 }
 
+/* Скриване на стрелкичката на datalist в Chrome/Edge/Safari */
+.editable-cell-input::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+/* Скриване на стрелките за число (ако се появи) */
+.editable-cell-input::-webkit-inner-spin-button,
+.editable-cell-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* За по-сигурно – премахваме appearance */
+.editable-cell-input {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
 @keyframes fadeInTable {
   from {
     opacity: 0;
@@ -760,9 +780,6 @@
     margin-left: auto;
   }
 }
-
-
-
 
 
 @media (max-width: 870px) {

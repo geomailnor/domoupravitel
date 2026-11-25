@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [floorFilter, setFloorFilter] = useState('');
   const [selectedCharge, setSelectedCharge] = useState(null);
   const [startMonth, setStartMonth] = useState('');
+  const [rates, setRates] = useState({ elevator_fee_rate: 1.10, elevator_power_rate: 0.85, });
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7));
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -92,15 +93,19 @@ export default function AdminDashboard() {
   }, [currentMonth]); // или без зависимост, ако искаш да се зарежда веднъж
   // Зареждане на start_month
   useEffect(() => {
-    const loadStartMonth = async () => {
+    const loadSettings = async () => {
       try {
         const response = await api.get('/settings');
         setStartMonth(response.data.start_month || '');
+        setRates({
+          elevator_fee_rate: response.data.elevator_fee_rate || 1.10,
+          elevator_power_rate: response.data.elevator_power_rate || 0.85,
+        });
       } catch {
-        console.error('Грешка при зареждане на start_month');
+        console.error('Грешка при зареждане на настройки');
       }
     };
-    loadStartMonth();
+    loadSettings();
   }, []);
 
   const handleLogout = () => {
@@ -177,11 +182,7 @@ export default function AdminDashboard() {
         total_amount: acc.total_amount + Number(charge.total_amount || 0),
       }), { total_amount: 0 });
   };
-  const calculatePaidManagerFee = () => {
-    return filteredCharges
-      .filter(c => c.status === 'paid')
-      .reduce((acc, charge) => acc + Number(charge.manager_fee || 0), 0);
-  };
+
   return (
     <div className="dashboard admin-dashboard">
       <header>
@@ -412,6 +413,12 @@ export default function AdminDashboard() {
                         onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_fee', val)}
                         isNumeric={true}
                         align="right"
+                        suggestions={[
+                          rates.elevator_fee_rate.toFixed(2),
+                          (rates.elevator_fee_rate * 2).toFixed(2),
+                          (rates.elevator_fee_rate * 3).toFixed(2),
+                          (rates.elevator_fee_rate * 4).toFixed(2)
+                        ]}
                       />
                     </td>
 
@@ -421,6 +428,12 @@ export default function AdminDashboard() {
                         onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_power', val)}
                         isNumeric={true}
                         align="right"
+                        suggestions={[
+                          rates.elevator_power_rate.toFixed(2),
+                          (rates.elevator_power_rate * 2).toFixed(2),
+                          (rates.elevator_power_rate * 3).toFixed(2),
+                          (rates.elevator_power_rate * 4).toFixed(2)
+                        ]}
                       />
                     </td>
 
