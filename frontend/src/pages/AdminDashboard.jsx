@@ -124,6 +124,7 @@ export default function AdminDashboard() {
       if (field === 'elevator_fee') payload.elevator_fee = newValue;
       if (field === 'elevator_power') payload.elevator_power = newValue;
       if (field === 'fund_ro') payload.fund_ro = newValue;
+      if (field === 'general_power') payload.general_power = newValue;
       if (field === 'intercom') payload.intercom = newValue;
       if (field === 'manager_fee') payload.manager_fee = newValue;
       const res = await api.put(`/charges/${chargeId}`, payload);
@@ -423,7 +424,15 @@ export default function AdminDashboard() {
                       />
                     </td>
 
-                    <td className="text-right">{Number(charge.general_power).toFixed(2)}</td>
+                    <td className="text-right">
+                      <EditableCell
+                        value={Number(charge.general_power).toFixed(2)}
+                        onSave={(val) => handleInlineSave(charge.charge_id, 'general_power', val)}
+                        isNumeric={true}
+                        align="right"
+                        requireDoubleClick={true}
+                      />
+                    </td>
 
                     <td className="text-right">
                       <EditableCell
@@ -486,28 +495,10 @@ export default function AdminDashboard() {
                   <td></td> {/* Бележки */}
                 </tr>
 
-                <tr className="totals-row revenue-row">
-                  <td colSpan="10" className="revenue-label">Очакван приход за блока (без хонорар):</td>
-                  <td className="text-right font-bold revenue-amount">
-                    {(calculateTotals().total_amount - calculateTotals().manager_fee).toFixed(2)}
-                  </td>
-                  <td></td>
-                  <td></td>
-                </tr>
-
                 <tr className="totals-row paid-row">
                   <td colSpan="10" className="paid-label">Реално платено:</td>
                   <td className="text-right font-bold paid-amount">
                     {calculatePaidTotals().total_amount.toFixed(2)}
-                  </td>
-                  <td></td>
-                  <td></td>
-                </tr>
-
-                <tr className="totals-row cash-row">
-                  <td colSpan="10" className="cash-label">В касата (реално събрано, без хонорар):</td>
-                  <td className="text-right font-bold cash-amount">
-                    {(calculatePaidTotals().total_amount - calculatePaidManagerFee()).toFixed(2)}
                   </td>
                   <td></td>
                   <td></td>

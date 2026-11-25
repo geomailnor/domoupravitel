@@ -1,6 +1,14 @@
 import { useState } from 'react';
 
-export default function EditableCell({ value, onSave, type = 'text', disabled = false, isNumeric = false, align = 'left' }) {
+export default function EditableCell({
+  value,
+  onSave,
+  type = 'text',
+  disabled = false,
+  isNumeric = false,
+  align = 'left',
+  requireDoubleClick = false // <-- НОВО
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
   if (!isEditing && localValue !== value) {
@@ -21,10 +29,24 @@ export default function EditableCell({ value, onSave, type = 'text', disabled = 
   if (!isEditing) {
     return (
       <span
-        onClick={() => setIsEditing(true)}
+        onClick={() => {
+          if (!requireDoubleClick) {
+            setIsEditing(true);
+          }
+        }}
+        onDoubleClick={() => {
+          if (requireDoubleClick) {
+            setIsEditing(true);
+          }
+        }}
         className="inline-edit-trigger"
-        title="Кликнете за редакция"
-        style={{ textAlign: align, display: 'inline-block', width: '100%' }}
+        title={requireDoubleClick ? "Кликнете два пъти за редакция" : "Кликнете за редакция"}
+        style={{
+          textAlign: align,
+          display: 'inline-block',
+          width: '100%',
+          cursor: 'pointer'
+        }}
       >
         {value || '—'}
       </span>

@@ -158,7 +158,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 // PUT /api/charges/:id (Инлайн редакция)
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { residents_count, elevator_payers_count, is_vacant, owner_name, status, elevator_fee, elevator_power, fund_ro, intercom, manager_fee } = req.body;
+  const { residents_count, elevator_payers_count, is_vacant, owner_name, status, elevator_fee, elevator_power, fund_ro, intercom, manager_fee, general_power } = req.body;
 
   try {
     // 1. Вземаме текущите цени
@@ -224,9 +224,10 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     let finalFundRo = (fund_ro !== undefined) ? parseFloat(fund_ro) : parseFloat(charge.fund_ro || 0);
     let finalIntercom = (intercom !== undefined) ? parseFloat(intercom) : parseFloat(charge.intercom || 0);
     let finalManagerFee = (manager_fee !== undefined) ? parseFloat(manager_fee) : parseFloat(charge.manager_fee || 0);
+    let finalGeneralPower = (general_power !== undefined) ? parseFloat(general_power) : calc.general_power;
     // ⭐ Преизчисляваме total_amount, като се уверяваме, че всичко е число
     const finalTotalAmount = Math.round(
-      (finalElevatorFee + finalElevatorPower + calc.general_power + finalFundRo + finalIntercom + finalManagerFee) * 100
+      (finalElevatorFee + finalElevatorPower + finalGeneralPower + finalFundRo + finalIntercom + finalManagerFee) * 100
     ) / 100;
 
 
@@ -246,7 +247,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       RETURNING *
     `, [
       finalResidents, finalElevatorPayers,
-      finalElevatorFee, finalElevatorPower, calc.general_power,
+      finalElevatorFee, finalElevatorPower, finalGeneralPower,
       finalFundRo, finalIntercom, finalManagerFee, finalTotalAmount,
       id
     ]);
