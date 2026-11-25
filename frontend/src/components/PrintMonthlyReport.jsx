@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api.js';
 import Spinner from './Spinner.jsx';
-import { monthLabel } from './i18n/translate.js';
+import { monthLabel, expenseCategoryLabel } from './i18n/translate.js';
 import { useScrollLock } from '../hooks/useScrollLock.js';
 import './PrintMonthlyReport.css';
 
@@ -183,8 +183,18 @@ export default function PrintMonthlyReport({ month, onClose }) {
               <tr className="total-row"><td>Общо приходи:</td><td className="amount">{data.k1.income.total} €</td></tr>
 
               <tr><td colSpan="2"><strong>Разходи:</strong></td></tr>
-              {Object.entries(data.k1.expenses.by_category).map(([cat, amt]) => (
-                <tr key={cat}><td className="indent">{cat === 'null' ? 'Други' : cat}:</td><td className="amount">{Number(amt).toFixed(2)} €</td></tr>
+              {Object.entries(
+                Object.entries(data.k1.expenses.by_category).reduce((acc, [cat, amt]) => {
+                  // Обединяваме 'other' и 'null' в общ ключ 'other'
+                  const key = (cat === 'null' || cat === 'other') ? 'other' : cat;
+                  acc[key] = (acc[key] || 0) + Number(amt);
+                  return acc;
+                }, {})
+              ).map(([cat, amt]) => (
+                <tr key={cat}>
+                  <td className="indent">{expenseCategoryLabel(cat)}:</td>
+                  <td className="amount">{Number(amt).toFixed(2)} €</td>
+                </tr>
               ))}
               <tr className="total-row"><td>Общо разходи:</td><td className="amount">{data.k1.expenses.total} €</td></tr>
               <tr className="total-row highlight"><td>Остатък за следващ месец (К1):</td><td className="amount">{data.k1.balance} €</td></tr>
@@ -203,8 +213,17 @@ export default function PrintMonthlyReport({ month, onClose }) {
               <tr className="total-row"><td>Общо приходи:</td><td className="amount">{data.k2.income.total} €</td></tr>
 
               <tr><td colSpan="2"><strong>Разходи:</strong></td></tr>
-              {Object.entries(data.k2.expenses.by_category).map(([cat, amt]) => (
-                <tr key={cat}><td className="indent">{cat === 'null' ? 'Други' : cat}:</td><td className="amount">{Number(amt).toFixed(2)} €</td></tr>
+              {Object.entries(
+                Object.entries(data.k2.expenses.by_category).reduce((acc, [cat, amt]) => {
+                  const key = (cat === 'null' || cat === 'other') ? 'other' : cat;
+                  acc[key] = (acc[key] || 0) + Number(amt);
+                  return acc;
+                }, {})
+              ).map(([cat, amt]) => (
+                <tr key={cat}>
+                  <td className="indent">{expenseCategoryLabel(cat)}:</td>
+                  <td className="amount">{Number(amt).toFixed(2)} €</td>
+                </tr>
               ))}
               <tr className="total-row"><td>Общо разходи:</td><td className="amount">{data.k2.expenses.total} €</td></tr>
               <tr className="total-row highlight"><td>Остатък за следващ месец (К2):</td><td className="amount">{data.k2.balance} €</td></tr>

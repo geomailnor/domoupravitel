@@ -47,5 +47,16 @@ export const bg = {
     '10': 'окт.',
     '11': 'ное.',
     '12': 'дек.'
+  },
+
+  // Категории разходи
+  expenseCategories: {
+    elevator_maintenance: 'Асансьорна такса',
+    elevator_power: 'Ток асансьор',
+    general_power: 'Общ ток',
+    manager_fee: 'Хонорар',
+    intercom: 'Дом. сис.',
+    other: 'Друго',
+    null: 'Друго',
   }
 };

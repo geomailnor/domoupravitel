@@ -32,3 +32,8 @@ export function shortMonthLabel(monthStr) {
   const [year, month] = monthStr.split('-');
   return `${bg.shortMonths[month]} ${year}`;
 }
+
+// Превод на категория разход
+export function expenseCategoryLabel(category) {
+  return bg.expenseCategories[category] || category;
+}
