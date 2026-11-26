@@ -11,7 +11,6 @@ import ProfileModal from '../components/ProfileModal.jsx';
 import HelpModal from '../components/HelpModal.jsx';
 import SetupQuestionModal from '../components/SetupQuestionModal.jsx';
 import PrintMonthlyReport from '../components/PrintMonthlyReport.jsx';
-import SettingsModal from '../components/SettingsModal.jsx';
 import ExpensesModal from '../components/ExpensesModal.jsx';
 import EditableCell from '../components/EditableCell.jsx';
 import AllOtherChargesModal from '../components/AllOtherChargesModal.jsx';
@@ -35,7 +34,6 @@ export default function AdminDashboard() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [settingsField, setSettingsField] = useState(null);
   // const todayMonth = new Date().toISOString().slice(0, 7);
   // const isPastMonth = currentMonth < todayMonth;
   // const isBeforeStartMonth = startMonth ? currentMonth < startMonth : false;
@@ -594,25 +592,6 @@ export default function AdminDashboard() {
           <AllOtherChargesModal
             currentMonth={currentMonth}
             onClose={() => setShowAllOther(false)}
-          />
-        )}
-        {settingsField && (
-          <SettingsModal
-            field={settingsField.field}
-            label={settingsField.label}
-            currentMonth={currentMonth}
-            onClose={() => setSettingsField(null)}
-            onSave={async () => {
-              const res = await api.get(`/charges?month=${currentMonth}`);
-              const apartmentsRes = await api.get('/apartments');
-              const apartmentsMap = {};
-              apartmentsRes.data.forEach(apt => { apartmentsMap[apt.number] = apt.id; });
-              const updatedCharges = res.data.map(charge => ({
-                ...charge,
-                ap_id: apartmentsMap[charge.ap_number] || null
-              }));
-              setCharges(updatedCharges);
-            }}
           />
         )}
         {showExpensesModal && (

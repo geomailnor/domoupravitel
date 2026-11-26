@@ -135,14 +135,9 @@ async function createTables() {
       ON CONFLICT (name) DO NOTHING;
     `);
 
-    // По подразбиране 1 и 2 етаж не плащат асансьор
-    await pool.query(`
-      UPDATE apartments 
-      SET default_pays_elevator = FALSE 
-      WHERE floor IN (1, 2) AND default_pays_elevator = TRUE;
-    `);
-
-    console.log('✅ Всички таблици и индекси са налични');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('✅ Всички таблици и индекси са налични');
+    }
   } catch (error) {
     console.error('❌ Грешка при създаване на таблиците:', error.message);
     throw error;

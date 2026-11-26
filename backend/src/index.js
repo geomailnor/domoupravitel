@@ -40,7 +40,9 @@ const PORT = process.env.PORT || 10000;
 
 async function start() {
   try {
-    console.log('🚀 Стартирам сървъра...');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🚀 Стартирам сървъра...');
+    }
 
     // Създаваме таблиците (ако не съществуват)
     await createTables();
@@ -50,8 +52,10 @@ async function start() {
 
     // Слушаме на порт
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`✅ Сървърът слуша на порт ${PORT}`);
-      console.log(`   Тествай: http://localhost:${PORT}/api/health`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`✅ Сървърът слуша на порт ${PORT}`);
+        console.log(`   Тествай: http://localhost:${PORT}/api/health`);
+      }
     });
   } catch (error) {
     console.error('❌ Грешка при стартиране:', error.message);

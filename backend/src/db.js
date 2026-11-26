@@ -19,9 +19,10 @@ const pool = new Pool({
 
 // Лог при първо свързване
 pool.on('connect', () => {
-  console.log('✅ Свързан към базата');
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('✅ Свързан към базата');
+  }
 });
-
 // Лог при грешка
 pool.on('error', (err) => {
   console.error('❌ Грешка в базата:', err.message);
