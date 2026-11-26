@@ -29,6 +29,8 @@ export default function AdminDashboard() {
   const [selectedCharge, setSelectedCharge] = useState(null);
   const [startMonth, setStartMonth] = useState('');
   const [rates, setRates] = useState({ elevator_fee_rate: 1.10, elevator_power_rate: 0.85, });
+  // Цени за периода януари-април 2026
+  const oldRates = { elevator_fee_rate: 1.13, elevator_power_rate: 0.82, };
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7));
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -334,7 +336,7 @@ export default function AdminDashboard() {
         ) : (
 
           <div className="table-wrapper">
-            <table className="apartments-table">
+            <table className={`apartments-table ${currentMonth < '2026-05' ? 'is-11-cols' : ''}`}>
               <thead>
                 <tr>
                   <th>Ет.</th>
@@ -343,10 +345,10 @@ export default function AdminDashboard() {
                   <th>Бр.<br />жив.</th>
                   <th>Асанс.<br />такса</th>
                   <th>Асанс.<br />ток</th>
-                  <th>Общ<br />ток</th>
+                  <th>{currentMonth < '2026-05' ? 'Общ ток Хонорар' : 'Общ ток'}</th>
                   <th>Фонд<br />Р.О.</th>
-                  <th>Дом.<br />сис.</th>
-                  <th>Хоно-<br />рар</th>
+                  {currentMonth >= '2026-05' && <th>Дом.<br />сис.</th>}
+                  {currentMonth >= '2026-05' && <th>Хоно-<br />рар</th>}
                   <th>Всичко</th>
                   <th>Още</th>
                   <th>Бележки</th>
@@ -373,37 +375,10 @@ export default function AdminDashboard() {
                       <EditableCell
                         value={charge.residents_count}
                         onSave={(val) => handleInlineSave(charge.charge_id, 'residents_count', val)}
-                        // disabled={charge.is_vacant || isPastMonth}
                         disabled={charge.is_vacant}
                         align="center"
                       />
                     </td>
-
-                    {/* <td className="text-right">
-                      {isPastMonth ? (
-                        <span>{Number(charge.elevator_fee).toFixed(2)}</span>
-                      ) : (
-                        <EditableCell
-                          value={Number(charge.elevator_fee).toFixed(2)}
-                          onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_fee', val)}
-                          isNumeric={true}
-                          align="right"
-                        />
-                      )}
-                    </td>
-
-                    <td className="text-right">
-                      {isPastMonth ? (
-                        <span>{Number(charge.elevator_power).toFixed(2)}</span>
-                      ) : (
-                        <EditableCell
-                          value={Number(charge.elevator_power).toFixed(2)}
-                          onSave={(val) => handleInlineSave(charge.charge_id, 'elevator_power', val)}
-                          isNumeric={true}
-                          align="right"
-                        />
-                      )}
-                    </td> */}
 
                     <td className="text-right">
                       <EditableCell
@@ -412,10 +387,10 @@ export default function AdminDashboard() {
                         isNumeric={true}
                         align="right"
                         suggestions={[
-                          rates.elevator_fee_rate.toFixed(2),
-                          (rates.elevator_fee_rate * 2).toFixed(2),
-                          (rates.elevator_fee_rate * 3).toFixed(2),
-                          (rates.elevator_fee_rate * 4).toFixed(2)
+                          (currentMonth < '2026-05' ? oldRates.elevator_fee_rate : rates.elevator_fee_rate).toFixed(2),
+                          ((currentMonth < '2026-05' ? oldRates.elevator_fee_rate : rates.elevator_fee_rate) * 2).toFixed(2),
+                          ((currentMonth < '2026-05' ? oldRates.elevator_fee_rate : rates.elevator_fee_rate) * 3).toFixed(2),
+                          ((currentMonth < '2026-05' ? oldRates.elevator_fee_rate : rates.elevator_fee_rate) * 4).toFixed(2)
                         ]}
                       />
                     </td>
@@ -427,14 +402,15 @@ export default function AdminDashboard() {
                         isNumeric={true}
                         align="right"
                         suggestions={[
-                          rates.elevator_power_rate.toFixed(2),
-                          (rates.elevator_power_rate * 2).toFixed(2),
-                          (rates.elevator_power_rate * 3).toFixed(2),
-                          (rates.elevator_power_rate * 4).toFixed(2)
+                          (currentMonth < '2026-05' ? oldRates.elevator_power_rate : rates.elevator_power_rate).toFixed(2),
+                          ((currentMonth < '2026-05' ? oldRates.elevator_power_rate : rates.elevator_power_rate) * 2).toFixed(2),
+                          ((currentMonth < '2026-05' ? oldRates.elevator_power_rate : rates.elevator_power_rate) * 3).toFixed(2),
+                          ((currentMonth < '2026-05' ? oldRates.elevator_power_rate : rates.elevator_power_rate) * 4).toFixed(2)
                         ]}
                       />
                     </td>
 
+                    {/* Общ ток (за януари-април е обединен с хонорар) */}
                     <td className="text-right">
                       <EditableCell
                         value={Number(charge.general_power).toFixed(2)}
@@ -442,6 +418,17 @@ export default function AdminDashboard() {
                         isNumeric={true}
                         align="right"
                         requireDoubleClick={true}
+                        suggestions={
+                          currentMonth < '2026-05'
+                            ? [
+                              '3.00',
+                              (0.65 * 1 + 3.00).toFixed(2),
+                              (0.65 * 2 + 3.00).toFixed(2),
+                              (0.65 * 3 + 3.00).toFixed(2),
+                              (0.65 * 4 + 3.00).toFixed(2),
+                            ]
+                            : null
+                        }
                       />
                     </td>
 
@@ -453,27 +440,31 @@ export default function AdminDashboard() {
                         align="right"
                       />
                     </td>
-                    <td className="text-right">
-                      <EditableCell
-                        value={Number(charge.intercom).toFixed(2)}
-                        onSave={(val) => handleInlineSave(charge.charge_id, 'intercom', val)}
-                        isNumeric={true}
-                        align="right"
-                      />
-                    </td>
-                    <td className="text-right">
-                      <EditableCell
-                        value={Number(charge.manager_fee).toFixed(2)}
-                        onSave={(val) => handleInlineSave(charge.charge_id, 'manager_fee', val)}
-                        isNumeric={true}
-                        align="right"
-                      />
-                    </td>
 
-                    {/* 1. Всичко */}
+                    {/* Дом. сис. и Хонорар - показваме ги само след май 2026 */}
+                    {currentMonth >= '2026-05' && (
+                      <td className="text-right">
+                        <EditableCell
+                          value={Number(charge.intercom).toFixed(2)}
+                          onSave={(val) => handleInlineSave(charge.charge_id, 'intercom', val)}
+                          isNumeric={true}
+                          align="right"
+                        />
+                      </td>
+                    )}
+                    {currentMonth >= '2026-05' && (
+                      <td className="text-right">
+                        <EditableCell
+                          value={Number(charge.manager_fee).toFixed(2)}
+                          onSave={(val) => handleInlineSave(charge.charge_id, 'manager_fee', val)}
+                          isNumeric={true}
+                          align="right"
+                        />
+                      </td>
+                    )}
+
                     <td className="text-right font-bold">{Number(charge.total_amount).toFixed(2)}</td>
 
-                    {/* 2. Още (бутон Подр.) */}
                     <td className="text-center">
                       <button
                         className={`details-btn ${unpaidOthers.includes(charge.ap_number) ? 'has-debt' : ''}`}
@@ -485,7 +476,6 @@ export default function AdminDashboard() {
                       </button>
                     </td>
 
-                    {/* 3. Бележки (вместо Доп. такси) */}
                     <td className="notes-cell" title={charge.notes || ''}>
                       {charge.notes || '—'}
                     </td>

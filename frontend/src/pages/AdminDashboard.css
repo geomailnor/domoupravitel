@@ -256,6 +256,76 @@
   padding-right: 22px;
 }
 
+/* Специални ширини за таблицата с 11 колони (януари-април) */
+.apartments-table.is-11-cols {
+  width: 100%;
+  table-layout: fixed;
+  min-width: 1080px;
+}
+
+/* Колона 1: Ет. */
+.apartments-table.is-11-cols th:nth-child(1) {
+  width: 4%;
+}
+
+/* Колона 2: Ап.№ */
+.apartments-table.is-11-cols th:nth-child(2) {
+  width: 4%;
+}
+
+/* Колона 3: Собственик */
+.apartments-table.is-11-cols th:nth-child(3) {
+  width: 20%;
+}
+
+/* Колона 4: Бр. жив. */
+.apartments-table.is-11-cols th:nth-child(4) {
+  width: 8%;
+}
+
+/* Колона 5: Асанс. такса */
+.apartments-table.is-11-cols th:nth-child(5) {
+  width: 8%;
+}
+
+/* Колона 6: Асанс. ток */
+.apartments-table.is-11-cols th:nth-child(6) {
+  width: 8%;
+}
+
+/* Колона 7: Общ ток и Хонорар */
+.apartments-table.is-11-cols th:nth-child(7) {
+  width: 8%;
+}
+
+/* Колона 8: Фонд Р.О. */
+.apartments-table.is-11-cols th:nth-child(8) {
+  width: 8%;
+}
+
+/* Колона 9: Всичко */
+.apartments-table.is-11-cols th:nth-child(9) {
+  width: 8%;
+}
+
+.apartments-table.is-11-cols td:nth-child(9) {
+  padding-right: 26px;
+}
+
+/* Колона 10: Още */
+.apartments-table.is-11-cols th:nth-child(10) {
+  width: 10%;
+}
+
+.apartments-table.is-11-cols td:nth-child(10) {
+  padding-right: 0;
+}
+
+/* Колона 11: Бележки */
+.apartments-table.is-11-cols th:nth-child(11) {
+  width: 14%;
+}
+
 /* Бутон "Бързо въвеждане" */
 .bulk-btn {
   padding: 0.6rem;
