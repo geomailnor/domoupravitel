@@ -57,6 +57,23 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
   if (startMonth && month < startMonth) {
     return res.json([]); // Връщаме празен масив, без да генерираме
   }
+
+  // НОВО: Проверка дали месецът е повече от 3 месеца напред
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  let maxYear = currentYear;
+  let maxMonth = currentMonth + 3;
+  if (maxMonth > 12) {
+    maxMonth -= 12;
+    maxYear += 1;
+  }
+  const maxMonthStr = `${maxYear}-${String(maxMonth).padStart(2, '0')}`;
+
+  if (month > maxMonthStr) {
+    return res.json([]); // Не генерираме такси за твърде далечно бъдеще
+  }
+
   try {
     // 1. Вземаме текущите настройки (цени)
     const paramsRes = await pool.query('SELECT name, value FROM block_params WHERE name LIKE \'%_rate\'');
