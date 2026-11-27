@@ -35,7 +35,7 @@
 /* Таблица с плащания */
 .resident-payments-table {
   width: 100%;
-  min-width: 750px;
+  min-width: 1080px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
@@ -169,6 +169,59 @@
 /* Сума (2-ра колона) – дясно подравняване */
 .resident-dashboard .other-table td:nth-child(2) {
   padding-right: 66px;
+}
+
+/* Стилове за таблицата със стари месеци (януари-април) */
+.old-months-table th:nth-child(1) {
+  width: 15%;
+}
+
+.old-months-table th:nth-child(2) {
+  width: 12%;
+}
+
+.old-months-table td:nth-child(2) {
+  padding-right: 46px;
+}
+
+.old-months-table th:nth-child(3) {
+  width: 12%;
+}
+
+.old-months-table td:nth-child(3) {
+  padding-right: 52px;
+}
+
+.old-months-table th:nth-child(4) {
+  width: 18%;
+}
+
+.old-months-table td:nth-child(4) {
+  padding-right: 86px;
+}
+
+.old-months-table th:nth-child(5) {
+  width: 15%;
+}
+
+.old-months-table td:nth-child(5) {
+  padding-right: 66px;
+}
+
+.old-months-table th:nth-child(6) {
+  width: 14%;
+}
+
+.old-months-table td:nth-child(6) {
+  padding-right: 60px;
+}
+
+.old-months-table th:nth-child(7) {
+  width: 14%;
+}
+
+.old-months-table td:nth-child(7) {
+  text-align: center;
 }
 
 @media (max-width: 918px) {

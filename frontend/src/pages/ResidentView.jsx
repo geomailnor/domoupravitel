@@ -59,7 +59,9 @@ export default function ResidentView() {
 
     return { unpaidCount, unpaidDue, otherCount, otherDue, totalDue };
   }, [history]);
-
+  // Разделяне на месеците на стари (преди май 2026) и нови (от май 2026)
+  const oldMonthly = history.monthly.filter(m => m.month < '2026-05');
+  const newMonthly = history.monthly.filter(m => m.month >= '2026-05');
   const handleLogout = () => {
     logout();
     toast.success('Излязохте успешно');
@@ -137,55 +139,79 @@ export default function ResidentView() {
               {history.monthly.length === 0 ? (
                 <p className="no-payments">Няма записани месечни такси</p>
               ) : (
-                <div className="table-wrapper">
-                  <table className="resident-payments-table">
-                    <thead>
-                      <tr>
-                        <th>Месец</th>
-                        <th>Асанс.<br />такса</th>
-                        <th>Асанс.<br />ток</th>
-                        <th>Общ<br />ток</th>
-                        <th>Фонд<br />Р.О.</th>
-                        <th>Дом.<br />сис.</th>
-                        <th>Хоно-<br />рар</th>
-                        <th>Всич-<br />ко</th>
-                        <th>Ста-<br />тус</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {history.monthly
-                        .filter(m => {
-                          const now = new Date();
-                          const currentYear = now.getFullYear();
-                          const currentMonthNum = now.getMonth() + 1;
-                          let endYear = currentYear;
-                          let endMonthNum = currentMonthNum + 3;
-                          if (endMonthNum > 12) {
-                            endMonthNum -= 12;
-                            endYear += 1;
-                          }
-                          const endMonth = `${endYear}-${String(endMonthNum).padStart(2, '0')}`;
-                          return m.month <= endMonth;
-                        })
-                        .sort((a, b) => a.month.localeCompare(b.month))
-                        .map((m) => (
-                          <tr key={m.id}>
-                            <td>{monthLabel(m.month)}</td>
-                            <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
-                            <td className="text-right">{m.elevator_power.toFixed(2)}</td>
-                            <td className="text-right">{m.general_power.toFixed(2)}</td>
-                            <td className="text-right">{m.fund_ro.toFixed(2)}</td>
-                            <td className="text-right">{m.intercom.toFixed(2)}</td>
-                            <td className="text-right">{m.manager_fee.toFixed(2)}</td>
-                            <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
-                            <td className={`status-${m.status}`}>
-                              {m.status === 'paid' ? 'Плат.' : 'Непл.'}
-                            </td>
+                <>
+                  {/* ТАБЛИЦА 1: Стари месеци (януари - април 2026) */}
+                  {oldMonthly.length > 0 && (
+                    <div className="table-wrapper">
+                      <table className="resident-payments-table old-months-table">
+                        <thead>
+                          <tr>
+                            <th>Месец</th>
+                            <th>Асанс.<br />такса</th>
+                            <th>Асанс.<br />ток</th>
+                            <th>Общ ток<br />Хонорар</th>
+                            <th>Фонд<br />Р.О.</th>
+                            <th>Всич-<br />ко</th>
+                            <th>Ста-<br />тус</th>
                           </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
+                        </thead>
+                        <tbody>
+                          {oldMonthly.map((m) => (
+                            <tr key={m.id}>
+                              <td>{monthLabel(m.month)}</td>
+                              <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
+                              <td className="text-right">{m.elevator_power.toFixed(2)}</td>
+                              <td className="text-right">{m.general_power.toFixed(2)}</td>
+                              <td className="text-right">{m.fund_ro.toFixed(2)}</td>
+                              <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
+                              <td className={`status-${m.status}`}>
+                                {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* ТАБЛИЦА 2: Нови месеци (май 2026 - ...) */}
+                  {newMonthly.length > 0 && (
+                    <div className="table-wrapper" style={{ marginTop: oldMonthly.length > 0 ? '2rem' : '0' }}>
+                      <table className="resident-payments-table">
+                        <thead>
+                          <tr>
+                            <th>Месец</th>
+                            <th>Асанс.<br />такса</th>
+                            <th>Асанс.<br />ток</th>
+                            <th>Общ<br />ток</th>
+                            <th>Фонд<br />Р.О.</th>
+                            <th>Дом.<br />сис.</th>
+                            <th>Хоно-<br />рар</th>
+                            <th>Всич-<br />ко</th>
+                            <th>Ста-<br />тус</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {newMonthly.map((m) => (
+                            <tr key={m.id}>
+                              <td>{monthLabel(m.month)}</td>
+                              <td className="text-right">{m.elevator_fee.toFixed(2)}</td>
+                              <td className="text-right">{m.elevator_power.toFixed(2)}</td>
+                              <td className="text-right">{m.general_power.toFixed(2)}</td>
+                              <td className="text-right">{m.fund_ro.toFixed(2)}</td>
+                              <td className="text-right">{m.intercom.toFixed(2)}</td>
+                              <td className="text-right">{m.manager_fee.toFixed(2)}</td>
+                              <td className="text-right font-bold">{m.total_amount.toFixed(2)}</td>
+                              <td className={`status-${m.status}`}>
+                                {m.status === 'paid' ? 'Плат.' : 'Непл.'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

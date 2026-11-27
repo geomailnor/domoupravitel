@@ -34,8 +34,6 @@ export function fillMissingMonths(monthlyData, startMonth) {
         intercom: 0,
         manager_fee: 0,
         total_amount: 0,
-        status: 'unpaid',
-        is_empty: true,
       });
     }
     month++;

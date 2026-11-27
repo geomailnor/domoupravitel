@@ -31,7 +31,12 @@ export default function AdminDashboard() {
   const [rates, setRates] = useState({ elevator_fee_rate: 1.10, elevator_power_rate: 0.85, });
   // Цени за периода януари-април 2026
   const oldRates = { elevator_fee_rate: 1.13, elevator_power_rate: 0.82, };
-  const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  });
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);

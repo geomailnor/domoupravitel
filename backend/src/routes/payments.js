@@ -71,7 +71,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
       paramIndex++;
     }
     if (type) {
-      const allowedTypes = ['monthly', 'elevator', 'water', 'cleaning', 'door', 'intercom', 'electricity', 'other'];
+      const allowedTypes = ['other'];
       if (!allowedTypes.includes(type)) {
         return res.status(400).json({
           error: `Невалиден вид. Позволени: ${allowedTypes.join(', ')}`
@@ -229,7 +229,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
   }
 
   // 6. Валидация на type
-  const allowedTypes = ['monthly', 'elevator', 'water', 'cleaning', 'door', 'intercom', 'electricity', 'other'];
+  const allowedTypes = ['other'];
   if (!allowedTypes.includes(type)) {
     return res.status(400).json({
       error: `Невалиден вид. Позволени: ${allowedTypes.join(', ')}`
@@ -405,7 +405,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     }
 
     if (type !== undefined) {
-      const allowedTypes = ['monthly', 'elevator', 'water', 'cleaning', 'door', 'intercom', 'electricity', 'other'];
+      const allowedTypes = ['other'];
       if (!allowedTypes.includes(type)) {
         return res.status(400).json({
           error: `Невалиден type. Позволени: ${allowedTypes.join(', ')}`
@@ -531,7 +531,7 @@ router.post('/bulk', requireAuth, requireAdmin, async (req, res) => {
       }
     }
 
-    const allowedTypes = ['monthly', 'elevator', 'water', 'cleaning', 'door', 'intercom', 'electricity', 'other'];
+    const allowedTypes = ['other'];
     if (!allowedTypes.includes(p.type)) {
       return res.status(400).json({ error: `Невалиден вид за ап. ${aptNum}` });
     }

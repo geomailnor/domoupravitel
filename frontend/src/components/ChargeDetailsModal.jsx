@@ -30,7 +30,12 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
   const [deleteOtherConfirm, setDeleteOtherConfirm] = useState(null);
   const [printReceipt, setPrintReceipt] = useState(false);
   const [newOther, setNewOther] = useState({
-    month: new Date().toISOString().slice(0, 7),
+    month: (() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      return `${year}-${month}`;
+    })(),
     amount: '',
     description: '',
   });
@@ -63,7 +68,16 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
 
       toast.success('Разходът е добавен');
       setShowAddOther(false);
-      setNewOther({ month: new Date().toISOString().slice(0, 7), amount: '', description: '' });
+      setNewOther({
+        month: (() => {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
+        })(),
+        amount: '',
+        description: ''
+      });
 
       // Презареждаме историята
       const res = await api.get(`/charges/history/${apartmentData.id}`);
@@ -72,7 +86,12 @@ export default function ChargeDetailsModal({ apartment, currentMonth, onClose, o
       toast.error(err.response?.data?.error || 'Грешка при добавяне');
       // Изчистваме полетата и връщаме фокуса към месеца
       setNewOther({
-        month: new Date().toISOString().slice(0, 7),
+        month: (() => {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
+        })(),
         amount: '',
         description: '',
       });

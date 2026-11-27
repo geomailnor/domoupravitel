@@ -38,7 +38,6 @@ export default function ConfirmModal({
         <div className="confirm-icon">
           {confirmColor === 'danger' ? '⚠️' : confirmColor === 'success' ? '✓' : '❓'}
         </div>
-        ...
 
         <h3 className="confirm-title">{title}</h3>
 

@@ -3,7 +3,6 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import createTables from './database.js';
-import seed from './seed.js';
 import authRoutes from './routes/auth.js';
 import apartmentsRoutes from './routes/apartments.js';
 import paymentsRoutes from './routes/payments.js';
@@ -46,9 +45,6 @@ async function start() {
 
     // Създаваме таблиците (ако не съществуват)
     await createTables();
-
-    // Seed (ако базата е празна)
-    await seed();
 
     // Слушаме на порт
     app.listen(PORT, '0.0.0.0', () => {

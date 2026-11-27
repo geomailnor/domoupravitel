@@ -26,7 +26,12 @@ export default function BulkPaymentModal({ currentMonth, onClose, onUpdate }) {
 
   // Данни за втория таб (други разходи)
   const [otherData, setOtherData] = useState({
-    month: getCurrentMonth(),
+    month: (() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      return `${year}-${month}`;
+    })(),
     amount: '',
     description: '',
     status: 'unpaid',
@@ -168,7 +173,12 @@ export default function BulkPaymentModal({ currentMonth, onClose, onUpdate }) {
       toast.error(err.response?.data?.error || 'Грешка при запазване');
       // Изчистваме полетата и връщаме фокуса към месеца
       setOtherData({
-        month: getCurrentMonth(),
+        month: (() => {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
+        })(),
         amount: '',
         description: '',
         status: 'unpaid',
