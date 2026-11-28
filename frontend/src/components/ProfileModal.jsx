@@ -398,8 +398,12 @@ export default function ProfileModal({ onClose }) {
                         .filter(apt => {
                           if (!searchPasswords.trim()) return true;
                           const term = searchPasswords.toLowerCase().trim();
-                          return String(apt.number).includes(term) ||
-                            (apt.owner_name || '').toLowerCase().includes(term);
+                          // Ако е само число – търси точно съвпадение на номера
+                          if (/^\d+$/.test(term)) {
+                            return apt.number === parseInt(term, 10);
+                          }
+                          // Иначе – търси по име
+                          return (apt.owner_name || '').toLowerCase().includes(term);
                         })
                         .map(apt => (
                           <tr key={apt.id}>
