@@ -488,27 +488,53 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="totals-row">
-                  <td colSpan="4" className="totals-label">Общо (за плащане):</td>
-                  <td className="text-right font-bold">{calculateTotals().elevator_fee.toFixed(2)}</td>
-                  <td className="text-right font-bold">{calculateTotals().elevator_power.toFixed(2)}</td>
-                  <td className="text-right font-bold">{calculateTotals().general_power.toFixed(2)}</td>
-                  <td className="text-right font-bold">{calculateTotals().fund_ro.toFixed(2)}</td>
-                  <td className="text-right font-bold">{calculateTotals().intercom.toFixed(2)}</td>
-                  <td className="text-right font-bold">{calculateTotals().manager_fee.toFixed(2)}</td>
-                  <td className="text-right font-bold">{calculateTotals().total_amount.toFixed(2)}</td>
-                  <td></td> {/* Още */}
-                  <td></td> {/* Бележки */}
-                </tr>
-
-                <tr className="totals-row paid-row">
-                  <td colSpan="10" className="paid-label">Реално платено:</td>
-                  <td className="text-right font-bold paid-amount">
-                    {calculatePaidTotals().total_amount.toFixed(2)}
-                  </td>
-                  <td></td>
-                  <td></td>
-                </tr>
+                {currentMonth < '2026-05' ? (
+                  <>
+                    {/* TFOOT ЗА 11 КОЛОНИ (януари-април) */}
+                    <tr className="totals-row">
+                      <td colSpan="4" className="totals-label">Общо (за плащане):</td>
+                      <td className="text-right font-bold">{calculateTotals().elevator_fee.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().elevator_power.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().general_power.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().fund_ro.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().total_amount.toFixed(2)}</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr className="totals-row paid-row">
+                      <td colSpan="8" className="paid-label">Реално платено:</td>
+                      <td className="text-right font-bold paid-amount">
+                        {calculatePaidTotals().total_amount.toFixed(2)}
+                      </td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </>
+                ) : (
+                  <>
+                    {/* TFOOT ЗА 13 КОЛОНИ (май-декември) */}
+                    <tr className="totals-row">
+                      <td colSpan="4" className="totals-label">Общо (за плащане):</td>
+                      <td className="text-right font-bold">{calculateTotals().elevator_fee.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().elevator_power.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().general_power.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().fund_ro.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().intercom.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().manager_fee.toFixed(2)}</td>
+                      <td className="text-right font-bold">{calculateTotals().total_amount.toFixed(2)}</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr className="totals-row paid-row">
+                      <td colSpan="10" className="paid-label">Реално платено:</td>
+                      <td className="text-right font-bold paid-amount">
+                        {calculatePaidTotals().total_amount.toFixed(2)}
+                      </td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </>
+                )}
               </tfoot>
             </table>
           </div>

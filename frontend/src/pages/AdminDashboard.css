@@ -658,6 +658,70 @@
   font-weight: bold;
 }
 
+/* =========================================
+   TFOOT СЕЛЕКТОРИ ЗА 13-КОЛОННАТА ТАБЛИЦА
+   ========================================= */
+
+/* 2-ра клетка (Асанс. такса) */
+.apartments-table tfoot tr td:nth-child(2) {
+  padding-left: 0;
+  padding-right: 18px;
+}
+
+/* Числото в реда "Реално платено" */
+.apartments-table tfoot tr.paid-row td:nth-child(2) {
+  padding-left: 0;
+  padding-right: 20px;
+}
+
+/* 3-та клетка (Асанс. ток) */
+.apartments-table tfoot tr td:nth-child(3) {
+  padding-left: 0;
+  padding-right: 18px;
+}
+
+/* 4-та клетка (Общ ток) */
+.apartments-table tfoot tr td:nth-child(4) {
+  padding-left: 0;
+  padding-right: 30px;
+}
+
+/* 5-та клетка (Фонд Р.О.) */
+.apartments-table tfoot tr td:nth-child(5) {
+  padding-left: 0;
+  padding-right: 30px;
+}
+
+/* 6-та клетка (Дом. сис.) */
+.apartments-table tfoot tr td:nth-child(6) {
+  padding-left: 0;
+  padding-right: 30px;
+}
+
+/* 7-ма клетка (Хонорар) */
+.apartments-table tfoot tr td:nth-child(7) {
+  padding-left: 0 !important;
+  padding-right: 30px !important;
+}
+
+/* 8-ма клетка (Всичко) */
+.apartments-table tfoot tr td:nth-child(8) {
+  padding-left: 0 !important;
+  padding-right: 21px !important;
+}
+
+/* (Общо за плащане) в 11-колонната таблица */
+/* Това е 6-та клетка в първия ред на tfoot */
+.apartments-table.is-11-cols tfoot tr.totals-row td:nth-child(6) {
+  padding-right: 25px;
+
+}
+
+/* Числото "0.00" (Реално платено) в 11-колонната таблица */
+.apartments-table.is-11-cols tfoot tr.paid-row td:nth-child(2) {
+  padding-right: 24px;
+}
+
 .apartments-table .revenue-label {
   text-align: right;
   font-weight: bold;
@@ -841,6 +905,37 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Корекция за tfoot при междинна ширина (под 1250px) */
+@media (max-width: 1220px) {
+  .apartments-table tfoot tr td:nth-child(2) {
+    padding-right: 13px;
+  }
+
+  .apartments-table tfoot tr td:nth-child(3) {
+    padding-right: 14px;
+  }
+
+  .apartments-table tfoot tr td:nth-child(4) {
+    padding-right: 24px;
+  }
+
+  .apartments-table tfoot tr td:nth-child(5) {
+    padding-right: 24px;
+  }
+
+  .apartments-table tfoot tr td:nth-child(6) {
+    padding-right: 24px;
+  }
+
+  .apartments-table tfoot tr td:nth-child(7) {
+    padding-right: 24px !important;
+  }
+
+  .apartments-table tfoot tr td:nth-child(8) {
+    padding-right: 20px !important;
   }
 }
 
